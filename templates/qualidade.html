@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Qualidade / Health — JARVIS{% endblock %}
+{% block content %}
+<div class="edu-wrap" style="max-width:900px;margin:0 auto;padding:20px">
+  <h1>🩺 Health Check</h1>
+  <p class="muted">Painel interno de qualidade. Não expõe secrets.</p>
+  <div id="health-overall" style="font-size:1.4rem;margin:12px 0"></div>
+  <div id="health-list"></div>
+  <button type="button" class="btn" id="health-refresh" style="margin-top:12px">Atualizar</button>
+</div>
+<script>
+async function load(){
+  const overall = document.getElementById('health-overall');
+  const list = document.getElementById('health-list');
+  try{
+    const r = await fetch('/api/cyber/phase12/health');
+    const d = await r.json();
+    const color = d.overall==='ONLINE'?'#22c55e':(d.overall==='WARNING'?'#f59e0b':'#ef4444');
+    overall.innerHTML = `<span style="color:${color};font-weight:700">${d.overall}</span> · ${d.online||0} ok · ${d.warning||0} aviso · ${d.error||0} erro`;
+    list.innerHTML = (d.checks||[]).map(c=>{
+      const col = c.status==='ONLINE'?'#22c55e':(c.status==='WARNING'?'#f59e0b':'#ef4444');
+      return `<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06)"><span style="color:${col}">● ${c.status}</span> <strong>${c.name}</strong> <span class="muted small">${c.detail||''}</span></div>`;
+    }).join('');
+  }catch(e){
+    overall.textContent = 'ERROR — não foi possível consultar o health';
+  }
+}
+document.getElementById('health-refresh').onclick = load;
+load();
+</script>
+{% endblock %}

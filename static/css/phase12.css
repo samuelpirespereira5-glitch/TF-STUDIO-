@@ -1,0 +1,20 @@
+/* Phase 12 */
+.algo-bars{display:flex;align-items:flex-end;gap:6px;height:140px;justify-content:center;background:#0d1117;border-radius:10px;padding:12px}
+.algo-bar{min-width:28px;background:linear-gradient(180deg,#3b82f6,#1d4ed8);border-radius:4px 4px 0 0;display:flex;align-items:flex-end;justify-content:center;color:#fff;font-size:11px;padding-bottom:4px}
+#edu-xp-badge{background:rgba(234,179,8,.15);border:1px solid rgba(234,179,8,.4);color:#fbbf24;padding:6px 12px;border-radius:999px;font-size:.85rem}
+.chip{display:inline-block;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.08);font-size:.8rem;margin-right:4px}
+.edu-out{background:#0d1117;color:#e6edf3;padding:12px;border-radius:8px;overflow:auto;max-height:280px;font-size:13px;white-space:pre-wrap}
+.edu-curso-card:hover{outline:1px solid rgba(59,130,246,.5)}
+@media(max-width:700px){
+  .edu-split{grid-template-columns:1fr!important}
+  .edu-tabs-scroll{gap:4px}
+  .edu-tab{font-size:.85rem;padding:8px 10px}
+  .video-embed-wrap{max-width:100%}
+  .code-area{font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){
+  .algo-bar,.progress-bar>div,.video-spinner{transition:none!important;animation:none!important}
+}
+.edu-tab:focus-visible,.btn:focus-visible,button:focus-visible,a:focus-visible{
+  outline:2px solid #3b82f6;outline-offset:2px
+}

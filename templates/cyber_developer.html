@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Modo Desenvolvedor · JARVIS Cyber Lab{% endblock %}
+{% block content %}
+<div class="cyber-page-head">
+  <div>
+    <div class="muted small">ACESSO RESTRITO — RBAC</div>
+    <h1>⚙️ Modo Desenvolvedor</h1>
+    <p class="muted">Painel protegido por permissão real no backend (<code>developer</code>). SSRF Guard e allowlist permanecem ativos.</p>
+  </div>
+  <a class="btn" href="{{ url_for('cyber_dashboard_page') }}">📊 Dashboard</a>
+</div>
+
+<div id="dev-root" class="card tool">
+  <p class="muted">Carregando status…</p>
+</div>
+
+<script>
+(async function(){
+  const esc = s => String(s??"").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const root = document.getElementById("dev-root");
+  try {
+    const res = await fetch("/api/cyber/developer");
+    const data = await res.json();
+    if (!data.enabled) {
+      root.innerHTML = `<h2>🔒 Acesso negado</h2><p>${esc(data.message||"Operação bloqueada pela política de segurança")}</p><p class="muted">Role: ${esc(data.role)}</p>`;
+      return;
+    }
+    root.innerHTML = `
+      <h2>Developer Security Dashboard</h2>
+      <p>Role: <strong>${esc(data.role)}</strong> · Ferramentas registradas: <strong>${esc(data.tools_count)}</strong></p>
+      <div class="table-wrap" style="overflow:auto">
+        <table class="table"><thead><tr><th>Área</th><th>Status</th><th>Detalhe</th></tr></thead><tbody id="dev-security"></tbody></table>
+      </div>
+      <h3>Access Audit</h3><div id="access-audit" class="result" style="max-height:320px;overflow:auto">Carregando…</div>
+      <h3>Crypto Center</h3><div id="crypto-info" class="result">Carregando…</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0">
+        <input id="crypto-value" class="search" placeholder="Texto para hash">
+        <select id="crypto-algo" class="u2-select"><option>sha256</option><option>sha512</option><option>sha1</option><option>md5</option></select>
+        <button class="btn" id="hash-btn">Hash</button><button class="btn" id="b64-btn">Base64</button><button class="btn" id="token-btn">Token seguro</button><button class="btn" id="uuid-btn">UUID</button><input id="file-hash" type="file" style="max-width:240px">
+      </div><pre id="crypto-out" class="result" style="white-space:pre-wrap"></pre>
+      <h3>⚡ JARVIS Performance Center</h3><div id="perf-center" class="result">Carregando métricas reais desta instância…</div>
+      <h3>Erros de plugins</h3>
+      <pre class="result" style="white-space:pre-wrap;font-size:0.85em">${esc(JSON.stringify(data.plugin_errors||[], null, 2))}</pre>
+      <h3>Limites (tool_limits)</h3>
+      <pre class="result" style="white-space:pre-wrap;font-size:0.8em;max-height:320px;overflow:auto">${esc(JSON.stringify(data.limits||{}, null, 2))}</pre>
+      <h3>Ferramentas</h3>
+      <div class="table-wrap" style="overflow:auto;max-height:400px">
+        <table class="table"><thead><tr><th>ID</th><th>Nome</th><th>Categoria</th><th>Cap</th></tr></thead>
+        <tbody>
+          ${(data.tools||[]).map(t=>`<tr><td><code>${esc(t.id)}</code></td><td>${esc(t.name)}</td><td>${esc(t.category)}</td><td>${esc(t.capability||t.cap||"")}</td></tr>`).join("")}
+        </tbody></table>
+      </div>`;
+      const perf = await fetch('/api/jarvis/experience6/performance').then(r=>r.json());
+      document.getElementById('perf-center').innerHTML=`<b>Status:</b> ${esc(perf.status)} · <b>Média:</b> ${esc(perf.average_ms)} ms · <b>Lentos:</b> ${esc(perf.slow)} · <b>Críticos:</b> ${esc(perf.critical)}<div style="margin-top:8px">${(perf.recent||[]).slice(0,20).map(x=>`<div style="padding:5px;border-bottom:1px solid rgba(255,255,255,.06)"><code>${esc(x.method)}</code> ${esc(x.path)} · ${esc(x.ms)} ms · HTTP ${esc(x.status)}</div>`).join('')||'Sem amostras ainda.'}</div>`;
+      const sec = await fetch('/api/cyber/core2/security').then(r=>r.json());
+      document.getElementById('dev-security').innerHTML=(sec.controls||[]).map(x=>`<tr><td>${esc(x.control)}</td><td>${esc(x.status)}</td><td>${esc(x.evidence)}</td></tr>`).join('');
+      const audit = await fetch('/api/cyber/core2/access-audit?limit=80').then(r=>r.json());
+      document.getElementById('access-audit').innerHTML=(audit.entries||[]).map(x=>`<div style="padding:8px;border-bottom:1px solid rgba(255,255,255,.08)"><b>${esc(x.event)}</b> · ${esc(x.result)}<div class="muted">${esc(x.time)} · ${esc(x.user)} · ${esc(x.method)} · ${esc(x.ip)}</div></div>`).join('') || 'Nenhum evento disponível.';
+      const crypto = await fetch('/api/cyber/core2/crypto').then(r=>r.json());
+      document.getElementById('crypto-info').textContent=JSON.stringify(crypto,null,2);
+      async function cryptoRun(operation){const r=await fetch('/api/cyber/core2/crypto',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':'{{ csrf_token }}'},body:JSON.stringify({operation,value:document.getElementById('crypto-value').value,algorithm:document.getElementById('crypto-algo').value})});const d=await r.json();document.getElementById('crypto-out').textContent=JSON.stringify(d,null,2)}
+      document.getElementById('hash-btn').onclick=()=>cryptoRun('hash');
+      document.getElementById('b64-btn').onclick=()=>cryptoRun('base64_encode');
+      document.getElementById('file-hash').onchange=async e=>{const f=e.target.files[0];if(!f)return;const fd=new FormData();fd.append('file',f);fd.append('algorithm',document.getElementById('crypto-algo').value);const r=await fetch('/api/cyber/core2/file-hash',{method:'POST',headers:{'X-CSRF-Token':'{{ csrf_token }}'},body:fd});document.getElementById('crypto-out').textContent=JSON.stringify(await r.json(),null,2)};
+      document.getElementById('token-btn').onclick=()=>cryptoRun('secure_token');
+      document.getElementById('uuid-btn').onclick=()=>cryptoRun('uuid');
+  } catch(e) {
+    root.innerHTML = `<p class="muted">Falha: ${esc(e.message||e)}</p>`;
+  }
+})();
+</script>
+{% endblock %}

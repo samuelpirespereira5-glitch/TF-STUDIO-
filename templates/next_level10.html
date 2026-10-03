@@ -1,0 +1,322 @@
+{% extends "base.html" %}
+{% block title %}Arena & Mentoria — JARVIS{% endblock %}
+{% block content %}
+<style>
+.nl10{max-width:1100px;margin:0 auto;padding:16px 20px}
+.nl10 h1{font-size:1.6rem;margin:0 0 4px}
+.nl10 .muted{opacity:.7;font-size:.9rem}
+.nl10 .tabs{display:flex;flex-wrap:wrap;gap:6px;margin:16px 0}
+.nl10 .tab{padding:8px 14px;border-radius:999px;border:1px solid rgba(0,229,255,.25);background:rgba(0,20,40,.4);cursor:pointer;font-size:.85rem}
+.nl10 .tab.active{background:rgba(0,229,255,.2);border-color:#00e5ff;color:#00e5ff}
+.nl10 .panel{display:none;padding:16px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(5,12,24,.6)}
+.nl10 .panel.active{display:block}
+.nl10 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.nl10 .card{padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.25)}
+.nl10 .card h3{margin:0 0 6px;font-size:1rem}
+.nl10 button,.btn{padding:8px 14px;border-radius:8px;border:none;background:#00e5ff;color:#001018;font-weight:600;cursor:pointer;margin:2px 0}
+.nl10 button.ghost{background:transparent;border:1px solid rgba(0,229,255,.4);color:#00e5ff}
+.nl10 input,textarea,select{width:100%;padding:8px;margin:4px 0 10px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:#0a1520;color:#e0f7fa;box-sizing:border-box}
+.nl10 pre.out{background:#050a12;padding:10px;border-radius:8px;max-height:260px;overflow:auto;font-size:12px;white-space:pre-wrap}
+.nl10 .badge{display:inline-block;padding:2px 8px;border-radius:999px;background:rgba(0,229,255,.15);font-size:11px;margin-right:4px}
+.nl10 .seal-ouro{color:#ffd700}.seal-prata{color:#c0c0c0}.seal-bronze{color:#cd7f32}
+</style>
+<div class="nl10">
+  <h1>🏆 Arena & Mentoria</h1>
+  <p class="muted">Features avançadas do Claude: marketplace, torneios, code review IA, clãs, certificados verificáveis e mais.</p>
+
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-p="jogos">🎮 Jogos</div>
+    <div class="tab" data-p="prog">💻 Programação</div>
+    <div class="tab" data-p="gami">🏆 Gamificação</div>
+    <div class="tab" data-p="cert">📜 Certificados</div>
+    <div class="tab" data-p="estudos">📚 Estudos</div>
+    <div class="tab" data-p="comu">🌐 Comunidade</div>
+    <div class="tab" data-p="infra">⚙️ Qualidade</div>
+  </div>
+
+  <!-- JOGOS -->
+  <div class="panel active" id="p-jogos">
+    <h2>Jogos</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>🛒 Marketplace</h3>
+        <p class="muted">Venda/troque jogos com XP.</p>
+        <input id="mkt-game" placeholder="game_id">
+        <input id="mkt-title" placeholder="Título">
+        <input id="mkt-price" type="number" placeholder="Preço XP" value="50">
+        <button onclick="mktList()">Listar</button>
+        <button class="ghost" onclick="mktLoad()">Ver anúncios</button>
+        <pre class="out" id="mkt-out"></pre>
+      </div>
+      <div class="card">
+        <h3>🏆 Modo Torneio</h3>
+        <p class="muted">Chaveamento automático.</p>
+        <input id="tn-name" placeholder="Nome do torneio">
+        <input id="tn-game" placeholder="game_id">
+        <button onclick="tnCreate()">Criar</button>
+        <button class="ghost" onclick="tnList()">Listar</button>
+        <pre class="out" id="tn-out"></pre>
+      </div>
+      <div class="card">
+        <h3>📹 Sistema de Replay</h3>
+        <p class="muted">Gravar e reassistir partida.</p>
+        <input id="rp-game" placeholder="game_id">
+        <button onclick="rpSave()">Salvar replay demo</button>
+        <button class="ghost" onclick="rpList()">Meus replays</button>
+        <pre class="out" id="rp-out"></pre>
+      </div>
+      <div class="card">
+        <h3>⚛️ Templates de Física</h3>
+        <p class="muted">Plataforma, top-down, corrida, puzzle.</p>
+        <button onclick="physList()">Carregar templates</button>
+        <pre class="out" id="phys-out"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROGRAMAÇÃO -->
+  <div class="panel" id="p-prog">
+    <h2>Programação</h2>
+    <div class="grid">
+      <div class="card" style="grid-column:1/-1">
+        <h3>🤖 Code Review por IA</h3>
+        <textarea id="cr-code" rows="6" placeholder="Cole seu código aqui..."></textarea>
+        <button onclick="codeReview()">Gerar review (prompt IA)</button>
+        <pre class="out" id="cr-out"></pre>
+      </div>
+      <div class="card">
+        <h3>⚡ Desafios de Performance</h3>
+        <button onclick="perfList()">Listar desafios</button>
+        <pre class="out" id="perf-out"></pre>
+      </div>
+      <div class="card">
+        <h3>👥 Pair Programming com IA</h3>
+        <textarea id="pp-code" rows="4" placeholder="Código atual"></textarea>
+        <input id="pp-goal" placeholder="Objetivo (ex: implementar busca binária)">
+        <button onclick="pairProg()">Próximo passo (sem spoiler)</button>
+        <pre class="out" id="pp-out"></pre>
+      </div>
+      <div class="card">
+        <h3>🔗 Snippet → Debugger</h3>
+        <input id="sn-id" placeholder="snippet_id">
+        <textarea id="sn-code" rows="3" placeholder="código opcional"></textarea>
+        <button onclick="snDbg()">Abrir no debugger</button>
+        <pre class="out" id="sn-out"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAMIFICAÇÃO -->
+  <div class="panel" id="p-gami">
+    <h2>Gamificação</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>⚔️ Clãs / Times</h3>
+        <input id="clan-name" placeholder="Nome do clã">
+        <input id="clan-tag" placeholder="TAG" maxlength="6">
+        <button onclick="clanCreate()">Criar clã</button>
+        <button class="ghost" onclick="clanRank()">Ranking</button>
+        <pre class="out" id="clan-out"></pre>
+      </div>
+      <div class="card">
+        <h3>🥚 Conquistas Secretas</h3>
+        <p class="muted">Easter eggs que só aparecem quando descobertas.</p>
+        <button onclick="secretsLoad()">Ver (ocultas)</button>
+        <pre class="out" id="sec-out"></pre>
+      </div>
+      <div class="card">
+        <h3>🏪 Loja Temporária Rotativa</h3>
+        <p class="muted">Itens especiais da semana.</p>
+        <button onclick="shopLoad()">Ver loja da semana</button>
+        <pre class="out" id="shop-out"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- CERTIFICADOS -->
+  <div class="panel" id="p-cert">
+    <h2>Certificados</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>✅ Verificável por empresa</h3>
+        <input id="cert-name" placeholder="Seu nome">
+        <input id="cert-track" placeholder="Trilha (ex: Python Avançado)">
+        <input id="cert-score" type="number" placeholder="Nota 0-100" value="85">
+        <button onclick="certIssue()">Emitir certificado</button>
+        <pre class="out" id="cert-out"></pre>
+      </div>
+      <div class="card">
+        <h3>🥇 Selos bronze/prata/ouro</h3>
+        <p class="muted">Conforme desempenho, não só conclusão.</p>
+        <p>≥90 ouro · ≥75 prata · ≥60 bronze</p>
+        <button class="ghost" onclick="certList()">Meus certificados</button>
+        <pre class="out" id="cert-list-out"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ESTUDOS -->
+  <div class="panel" id="p-estudos">
+    <h2>Estudos</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>🔍 Busca unificada</h3>
+        <input id="search-q" placeholder="PDFs, vídeos, exercícios, fórum...">
+        <button onclick="uniSearch()">Buscar</button>
+        <pre class="out" id="search-out"></pre>
+      </div>
+      <div class="card">
+        <h3>📥 Modo offline</h3>
+        <input id="off-track" placeholder="ID da trilha">
+        <button onclick="offPack()">Gerar pacote offline</button>
+        <pre class="out" id="off-out"></pre>
+      </div>
+      <div class="card">
+        <h3>📧 Resumo semanal</h3>
+        <input id="week-topics" placeholder="Tópicos aprendidos (vírgula)">
+        <button onclick="weekSum()">Gerar resumo</button>
+        <pre class="out" id="week-out"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMUNIDADE -->
+  <div class="panel" id="p-comu">
+    <h2>Comunidade</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>🎓 Sistema de mentoria</h3>
+        <input id="mentor-topic" placeholder="Tópico em que precisa de ajuda">
+        <button onclick="mentorReq()">Pedir mentor</button>
+        <button class="ghost" onclick="mentorList()">Pedidos abertos</button>
+        <pre class="out" id="mentor-out"></pre>
+      </div>
+      <div class="card">
+        <h3>📰 Feed de atividades</h3>
+        <input id="feed-text" placeholder='Ex: Completei a trilha X'>
+        <button onclick="feedPost()">Publicar</button>
+        <button class="ghost" onclick="feedLoad()">Ver feed</button>
+        <pre class="out" id="feed-out"></pre>
+      </div>
+      <div class="card">
+        <h3>🏅 Badges de contribuição</h3>
+        <p class="muted">Quem mais ajuda no fórum ganha destaque.</p>
+        <button onclick="helpRecord()">Registrar ajuda (+1)</button>
+        <button class="ghost" onclick="helpStatus()">Meu status</button>
+        <pre class="out" id="help-out"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- INFRA -->
+  <div class="panel" id="p-infra">
+    <h2>Qualidade / Infra</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>🟢 Página de status</h3>
+        <button onclick="statusLoad()">Checar /status</button>
+        <pre class="out" id="status-out"></pre>
+      </div>
+      <div class="card">
+        <h3>📋 Log de erros</h3>
+        <button onclick="errLog()">Ver erros recentes</button>
+        <pre class="out" id="err-out"></pre>
+      </div>
+      <div class="card">
+        <h3>🧪 Smoke tests (CI)</h3>
+        <button onclick="smokeRun()">Rodar testes</button>
+        <pre class="out" id="smoke-out"></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const tabs = document.querySelectorAll('.nl10 .tab');
+tabs.forEach(t => t.addEventListener('click', () => {
+  tabs.forEach(x => x.classList.remove('active'));
+  t.classList.add('active');
+  document.querySelectorAll('.nl10 .panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('p-' + t.dataset.p).classList.add('active');
+}));
+
+async function j(url, opts) {
+  const r = await fetch(url, opts);
+  return r.json();
+}
+function show(id, data) {
+  document.getElementById(id).textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+}
+
+// Jogos
+async function mktList() {
+  const body = {game_id: document.getElementById('mkt-game').value, title: document.getElementById('mkt-title').value, price_xp: +document.getElementById('mkt-price').value};
+  show('mkt-out', await j('/api/nl10/marketplace', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)}));
+}
+async function mktLoad() { show('mkt-out', await j('/api/nl10/marketplace')); }
+async function tnCreate() {
+  const body = {name: document.getElementById('tn-name').value, game_id: document.getElementById('tn-game').value};
+  show('tn-out', await j('/api/nl10/tournament', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)}));
+}
+async function tnList() { show('tn-out', await j('/api/nl10/tournament')); }
+async function rpSave() {
+  const frames = [{t:0,key:'right'},{t:10,key:'jump'},{t:20,key:'left'}];
+  show('rp-out', await j('/api/nl10/replay', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({game_id: document.getElementById('rp-game').value || 'demo', frames})}));
+}
+async function rpList() { show('rp-out', await j('/api/nl10/replay')); }
+async function physList() { show('phys-out', await j('/api/nl10/physics')); }
+
+// Prog
+async function codeReview() {
+  show('cr-out', await j('/api/nl10/code-review', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({code: document.getElementById('cr-code').value})}));
+}
+async function perfList() { show('perf-out', await j('/api/nl10/perf-challenges')); }
+async function pairProg() {
+  show('pp-out', await j('/api/nl10/pair-programming', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({code: document.getElementById('pp-code').value, goal: document.getElementById('pp-goal').value})}));
+}
+async function snDbg() {
+  show('sn-out', await j('/api/nl10/snippet-debugger', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({snippet_id: document.getElementById('sn-id').value, code: document.getElementById('sn-code').value})}));
+}
+
+// Gami
+async function clanCreate() {
+  show('clan-out', await j('/api/nl10/clan', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name: document.getElementById('clan-name').value, tag: document.getElementById('clan-tag').value})}));
+}
+async function clanRank() { show('clan-out', await j('/api/nl10/clan')); }
+async function secretsLoad() { show('sec-out', await j('/api/nl10/secrets')); }
+async function shopLoad() { show('shop-out', await j('/api/nl10/rotating-shop')); }
+
+// Cert
+async function certIssue() {
+  show('cert-out', await j('/api/nl10/cert/issue', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({user_name: document.getElementById('cert-name').value, track: document.getElementById('cert-track').value, score: +document.getElementById('cert-score').value})}));
+}
+async function certList() { show('cert-list-out', await j('/api/nl10/cert/mine')); }
+
+// Estudos
+async function uniSearch() { show('search-out', await j('/api/nl10/search?q=' + encodeURIComponent(document.getElementById('search-q').value))); }
+async function offPack() {
+  show('off-out', await j('/api/nl10/offline-pack', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({track_id: document.getElementById('off-track').value, items: ['aula1', 'ex1']})}));
+}
+async function weekSum() {
+  const topics = document.getElementById('week-topics').value.split(',').map(s => s.trim()).filter(Boolean);
+  show('week-out', await j('/api/nl10/weekly-summary', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({learned: topics})}));
+}
+
+// Comu
+async function mentorReq() {
+  show('mentor-out', await j('/api/nl10/mentor', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({topic: document.getElementById('mentor-topic').value})}));
+}
+async function mentorList() { show('mentor-out', await j('/api/nl10/mentor')); }
+async function feedPost() {
+  show('feed-out', await j('/api/nl10/feed', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({text: document.getElementById('feed-text').value})}));
+}
+async function feedLoad() { show('feed-out', await j('/api/nl10/feed')); }
+async function helpRecord() { show('help-out', await j('/api/nl10/contribution', {method:'POST'})); }
+async function helpStatus() { show('help-out', await j('/api/nl10/contribution')); }
+
+// Infra
+async function statusLoad() { show('status-out', await j('/api/nl10/status')); }
+async function errLog() { show('err-out', await j('/api/nl10/errors')); }
+async function smokeRun() { show('smoke-out', await j('/api/nl10/smoke-tests', {method:'POST'})); }
+</script>
+{% endblock %}

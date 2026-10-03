@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Rankings — JARVIS{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ static_v('css/community-social.css') }}">{% endblock %}
+{% block content %}
+<div class="social-shell">
+<header class="social-hero"><div><div class="eyebrow">RANKING CENTER</div><h1>🏆 Rankings</h1><p>Compare progresso por jogos, temporada e participação da comunidade.</p></div></header>
+<div class="rank-tabs"><button class="active" data-rank="global">🌐 Global</button><button data-rank="games">🎮 Jogos</button><button data-rank="community">💬 Comunidade</button><button data-rank="season">⚡ Temporada</button></div>
+<section class="social-card"><div class="section-head"><div><h2 id="rankTitle">Ranking global</h2><p id="rankSubtitle" class="muted">Pontuação agregada de atividade e progresso.</p></div><button id="refreshRank" class="btn ghost">↻ Atualizar</button></div><div id="rankingTable" class="ranking-table"></div></section>
+<section class="social-grid three"><div class="social-card"><h3>📈 Como sobe</h3><p class="muted">Jogar, completar desafios e participar da comunidade geram atividade.</p></div><div class="social-card"><h3>🎖 Conquistas</h3><p class="muted">Badges e níveis aparecem no perfil sem conceder privilégios administrativos.</p></div><div class="social-card"><h3>⚖️ Desempate</h3><p class="muted">Em empate, o sistema considera XP e participação para manter resultados estáveis.</p></div></section>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ static_v('js/community-rankings.js') }}"></script>{% endblock %}

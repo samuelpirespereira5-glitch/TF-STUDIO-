@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block title %}TryHackMe Lab · Tristan Thorne{% endblock %}
+{% block content %}
+<h1>🕵 TryHackMe Lab <span class="muted small">— área privada do desenvolvedor</span></h1>
+<p class="muted small">Espaço pessoal e expansível para labs, ferramentas, comandos, cheatsheets, desafios e
+  anotações de estudo em cybersecurity. Sem limite de categorias ou itens. Nenhum conteúdo proprietário da
+  plataforma TryHackMe é usado aqui — o nome só identifica esta área de treinamento/laboratório pessoal.</p>
+
+<div class="grid" id="thm-summary">
+  <div class="card"><h3>Itens</h3><div class="result" id="thm-sum-total">—</div></div>
+  <div class="card"><h3>Favoritos</h3><div class="result" id="thm-sum-fav">—</div></div>
+  <div class="card"><h3>Categorias em uso</h3><div class="result" id="thm-sum-cats">—</div></div>
+</div>
+
+<input type="text" id="thm-filter" placeholder="🔍 Buscar por título, descrição, tag ou conteúdo..." class="tool-filter">
+
+<div class="tabs" id="thm-cat-tabs"></div>
+<label class="checkbox small"><input type="checkbox" id="thm-only-fav"> ⭐ Só favoritos</label>
+
+<h2 class="tools-category">➕ Novo item</h2>
+<div class="card tool">
+  <div class="inline">
+    <input type="text" id="thm-new-title" placeholder="Título (ex: LFI cheatsheet)">
+    <input type="text" id="thm-new-category" placeholder="Categoria (ex: Web Security)" list="thm-cats-list">
+    <datalist id="thm-cats-list"></datalist>
+    <select id="thm-new-kind">
+      <option value="tool">Ferramenta</option>
+      <option value="lab">Lab</option>
+      <option value="cheatsheet">Cheatsheet</option>
+      <option value="command">Comando</option>
+      <option value="challenge">Desafio/CTF</option>
+      <option value="note">Anotação</option>
+    </select>
+  </div>
+  <input type="text" id="thm-new-desc" placeholder="Descrição curta (opcional)">
+  <textarea id="thm-new-content" rows="4" placeholder="Conteúdo: comandos, passos, payloads, notas..."></textarea>
+  <div class="inline">
+    <input type="text" id="thm-new-tags" placeholder="tags separadas por vírgula">
+    <input type="text" id="thm-new-url" placeholder="link (opcional)">
+    <button class="btn" onclick="THM.addItem()">Salvar</button>
+  </div>
+  <div class="result" id="thm-add-msg"></div>
+</div>
+
+<h2 class="tools-category">📚 Itens</h2>
+<div class="grid tools-grid" id="thm-grid"></div>
+
+<h2 class="tools-category">🗂 Histórico de acesso</h2>
+<div class="card tool">
+  <div class="inline">
+    <button class="btn" onclick="THM.loadHistory()">Atualizar</button>
+    <button class="btn" onclick="THM.clearHistory()">Limpar histórico</button>
+  </div>
+  <table class="table" id="thm-history-table">
+    <thead><tr><th>Item</th><th>Quando</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const THM = (() => {
+  let state = { category: "", onlyFav: false, q: "" };
+
+  async function loadCategories() {
+    const res = await fetch("/api/thm/categories");
+    const { categories } = await res.json();
+    const tabs = document.getElementById("thm-cat-tabs");
+    tabs.innerHTML = '<button class="tab-btn active" data-cat="">Todas</button>' +
+      categories.map(c => `<button class="tab-btn" data-cat="${c}">${c}</button>`).join("");
+    tabs.querySelectorAll(".tab-btn").forEach(btn => btn.addEventListener("click", () => {
+      tabs.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      state.category = btn.dataset.cat;
+      loadItems();
+    }));
+    document.getElementById("thm-cats-list").innerHTML =
+      categories.map(c => `<option value="${c}">`).join("");
+  }
+
+  async function loadItems() {
+    const grid = document.getElementById("thm-grid");
+    grid.innerHTML = '<p class="muted small">Carregando...</p>';
+    const params = new URLSearchParams();
+    if (state.category) params.set("category", state.category);
+    if (state.onlyFav) params.set("favorites", "1");
+    if (state.q) params.set("q", state.q);
+    const res = await fetch("/api/thm/items?" + params.toString());
+    const data = await res.json();
+    document.getElementById("thm-sum-total").textContent = data.stats.total;
+    document.getElementById("thm-sum-fav").textContent = data.stats.favorites;
+    document.getElementById("thm-sum-cats").textContent = Object.keys(data.stats.by_category).length;
+    grid.innerHTML = "";
+    if (!data.items.length) {
+      grid.innerHTML = '<p class="muted small">Nenhum item ainda. Adicione o primeiro acima.</p>';
+      return;
+    }
+    for (const it of data.items) {
+      const card = document.createElement("div");
+      card.className = "card tool";
+      card.innerHTML = `
+        <h3>${it.favorite ? "⭐ " : ""}${escapeHtml(it.title)}</h3>
+        <div class="tool-chips">
+          <span class="tool-chip">${escapeHtml(it.category)}</span>
+          <span class="tool-chip">${escapeHtml(it.kind)}</span>
+          ${(it.tags || []).map(t => `<span class="tool-chip">#${escapeHtml(t)}</span>`).join("")}
+        </div>
+        <p class="muted small">${escapeHtml(it.description || "")}</p>
+        <pre style="white-space:pre-wrap;font-size:12px">${escapeHtml(it.content || "")}</pre>
+        ${it.url ? `<div><a href="${it.url}" target="_blank" rel="noopener">🔗 link</a></div>` : ""}
+        <textarea placeholder="anotações..." rows="2" onchange="THM.saveNote('${it.id}', this.value)">${escapeHtml(it.notes || "")}</textarea>
+        <div class="inline">
+          <button class="btn" onclick="THM.toggleFav('${it.id}')">${it.favorite ? "Remover favorito" : "★ Favoritar"}</button>
+          <button class="btn" onclick="THM.view('${it.id}')">Abrir (registra histórico)</button>
+          <button class="btn" onclick="THM.remove('${it.id}')">Excluir</button>
+        </div>
+        <div class="muted small">visto ${it.views || 0}x</div>`;
+      grid.appendChild(card);
+    }
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+  }
+
+  async function addItem() {
+    const body = {
+      title: document.getElementById("thm-new-title").value,
+      category: document.getElementById("thm-new-category").value,
+      kind: document.getElementById("thm-new-kind").value,
+      description: document.getElementById("thm-new-desc").value,
+      content: document.getElementById("thm-new-content").value,
+      tags: document.getElementById("thm-new-tags").value.split(",").map(t => t.trim()).filter(Boolean),
+      url: document.getElementById("thm-new-url").value,
+    };
+    const res = await fetch("/api/thm/items", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const data = await res.json();
+    const msg = document.getElementById("thm-add-msg");
+    if (data.error) { msg.textContent = "Erro: " + data.error; return; }
+    msg.textContent = "Salvo!";
+    ["title", "category", "desc", "content", "tags", "url"].forEach(f => document.getElementById("thm-new-" + f).value = "");
+    await loadCategories();
+    await loadItems();
+  }
+
+  async function toggleFav(id) { await fetch(`/api/thm/items/${id}/favorite`, { method: "POST" }); loadItems(); }
+  async function remove(id) { if (confirm("Excluir este item?")) { await fetch(`/api/thm/items/${id}`, { method: "DELETE" }); loadItems(); } }
+  async function view(id) { await fetch(`/api/thm/items/${id}`); loadItems(); loadHistory(); }
+  async function saveNote(id, notes) { await fetch(`/api/thm/items/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ notes }) }); }
+
+  async function loadHistory() {
+    const res = await fetch("/api/thm/history");
+    const { history } = await res.json();
+    const tbody = document.querySelector("#thm-history-table tbody");
+    tbody.innerHTML = history.map(h => `<tr><td>${escapeHtml(h.title)}</td><td>${new Date(h.ts * 1000).toLocaleString()}</td></tr>`).join("");
+  }
+  async function clearHistory() { if (confirm("Limpar todo o histórico de acesso?")) { await fetch("/api/thm/history", { method: "DELETE" }); loadHistory(); } }
+
+  document.getElementById("thm-filter").addEventListener("input", (e) => { state.q = e.target.value; loadItems(); });
+  document.getElementById("thm-only-fav").addEventListener("change", (e) => { state.onlyFav = e.target.checked; loadItems(); });
+
+  loadCategories().then(loadItems);
+  loadHistory();
+
+  return { addItem, toggleFav, remove, view, saveNote, loadHistory, clearHistory };
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: tristan-thorne-kali
+    runtime: docker
+    dockerfilePath: ./Dockerfile.kali
+    dockerContext: .
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: MASTER_PASSWORD
+        sync: false
+      - key: MASTER_PASSWORD_HASH
+        sync: false
+      - key: FLASK_ENV
+        value: production
+      - key: PRODUCTION
+        value: "1"

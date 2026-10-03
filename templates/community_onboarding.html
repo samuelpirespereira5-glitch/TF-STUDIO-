@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Primeiro acesso — JARVIS{% endblock %}
+{% block content %}
+<div class="community-shell onboarding-shell">
+  <section class="community-hero">
+    <div>
+      <div class="eyebrow">JARVIS FIRST ACCESS</div>
+      <h1>Crie sua conta JARVIS e seu personagem</h1>
+      <p>Essa etapa aparece uma única vez. Depois disso, sua sessão continua ativa sem pedir a senha a cada tela.</p>
+    </div>
+    <div class="hero-orb">🤖</div>
+  </section>
+  <form id="onboardingForm" class="community-grid two">
+    <section class="community-card">
+      <h2>👤 Sua conta</h2>
+      <label>Nome de exibição<input id="displayName" required maxlength="60" placeholder="Como você quer ser chamado?"></label>
+      <label>Nome de usuário<input id="username" required minlength="3" maxlength="24" placeholder="ex: l7dev"></label>
+      <label>Bio<textarea id="bio" maxlength="300" placeholder="Fale um pouco sobre você, seus projetos ou interesses..."></textarea></label>
+      <label>Avatar
+        <select id="avatar"><option>🤖</option><option>🧑‍💻</option><option>🦾</option><option>🧠</option><option>🛰️</option><option>🐉</option><option>⚡</option></select>
+      </label>
+      <label>Interesses <input id="interests" placeholder="Python, jogos, cyber, IA"></label>
+    </section>
+    <section class="community-card character-builder">
+      <h2>🎮 Seu personagem</h2>
+      <p class="muted">Ele será seu avatar dentro do ecossistema, sem alterar suas permissões administrativas.</p>
+      <div class="character-preview"><div id="charAvatar">🤖</div><strong id="charNamePreview">Seu personagem</strong><span id="charTitlePreview">Recruta JARVIS</span><small id="charMetaPreview">Programação · JARVIS Academy</small><em id="charMottoPreview">Crie sua identidade</em></div>
+      <label>Nome do personagem<input id="charName" required maxlength="40" placeholder="Ex: L7 Shadow"></label>
+      <label>Classe<select id="charClass"><option>Explorer</option><option>Builder</option><option>Cyber Guardian</option><option>Game Creator</option><option>AI Engineer</option><option>Code Master</option></select></label>
+      <label>Título<select id="charTitle"><option>Recruta JARVIS</option><option>Construtor</option><option>Guardião</option><option>Inventor</option><option>Mentor</option></select></label>
+      <label>Estilo<select id="charAccent"><option value="cyan">Cyan</option><option value="violet">Violet</option><option value="green">Green</option><option value="orange">Orange</option></select></label>
+      <label>Moldura<select id="charFrame"><option value="standard">Standard</option><option value="hex">Hex</option><option value="hud">HUD</option><option value="core">Core</option><option value="diamond">Diamond</option></select></label>
+      <label>Origem<select id="charOrigin"><option>JARVIS Academy</option><option>Cyber City</option><option>Game Forge</option><option>Neural Lab</option><option>Independente</option></select></label>
+      <label>Especialidade<select id="charSpecialty"><option>Programação</option><option>Cyber Defense</option><option>IA</option><option>Games</option><option>Design</option><option>Conteúdo</option></select></label>
+      <label>Companheiro<input id="charCompanion" maxlength="30" placeholder="Ex: JARVIS Drone"></label>
+      <label>Habilidade principal<input id="charAbility" maxlength="40" placeholder="Ex: Debug Supremo"></label>
+      <label>Frase do personagem<input id="charMotto" maxlength="80" placeholder="Ex: Criar. Testar. Evoluir."></label>
+      <label>Cor do nome<select id="charNameColor"><option value="cyan">Cyan</option><option value="white">Branco</option><option value="violet">Violeta</option><option value="green">Verde</option><option value="gold">Dourado</option></select></label>
+    </section>
+    <section class="community-card" style="grid-column:1/-1">
+      <div class="onboarding-steps"><span class="done">1 Conta</span><span class="done">2 Personagem</span><span>3 Comunidade / Clã</span></div>
+      <div id="onboardingError" class="form-error hidden"></div>
+      <button class="btn primary" type="submit">🚀 Entrar no JARVIS</button>
+    </section>
+  </form>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const avatar = $('avatar'), charName = $('charName'), charTitle = $('charTitle');
+  function preview(){ $('charAvatar').textContent = avatar.value; $('charNamePreview').textContent = charName.value || 'Seu personagem'; $('charTitlePreview').textContent = charTitle.value; const sp=$('charSpecialty')?.value||'Programação'; const org=$('charOrigin')?.value||'JARVIS Academy'; $('charMetaPreview').textContent=sp+' · '+org; $('charMottoPreview').textContent=$('charMotto')?.value||'Crie sua identidade'; }
+  [avatar,charName,charTitle,$('charSpecialty'),$('charOrigin'),$('charMotto')].filter(Boolean).forEach(el => {el.addEventListener('input', preview);el.addEventListener('change', preview)}); preview();
+  fetch('/api/community/onboarding').then(r=>r.json()).then(d=>{
+    const p=d.profile||{}; $('displayName').value=p.display_name||''; $('username').value=p.username||''; $('bio').value=p.bio||''; $('avatar').value=p.avatar||'🤖'; $('interests').value=(p.interests||[]).join(', ');
+    const c=p.character||{}; $('charName').value=c.name||''; $('charClass').value=c.class||'Explorer'; $('charTitle').value=c.title||'Recruta JARVIS'; $('charAccent').value=c.accent||'cyan'; $('charFrame').value=c.frame||'standard'; $('charOrigin').value=c.origin||'JARVIS Academy'; $('charSpecialty').value=c.specialty||'Programação'; $('charCompanion').value=c.companion||''; $('charAbility').value=c.ability||''; $('charMotto').value=c.motto||''; $('charNameColor').value=c.name_color||'cyan'; preview();
+  }).catch(()=>{});
+  $('onboardingForm').addEventListener('submit', async e => {
+    e.preventDefault(); const err=$('onboardingError'); err.classList.add('hidden');
+    const body={display_name:$('displayName').value,username:$('username').value,bio:$('bio').value,avatar:$('avatar').value,
+      interests:$('interests').value.split(',').map(x=>x.trim()).filter(Boolean),
+      character:{name:$('charName').value,class:$('charClass').value,title:$('charTitle').value,accent:$('charAccent').value,frame:$('charFrame').value,origin:$('charOrigin').value,specialty:$('charSpecialty').value,companion:$('charCompanion').value,ability:$('charAbility').value,motto:$('charMotto').value,name_color:$('charNameColor').value}};
+    try { const r=await fetch('/api/community/onboarding',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}); const d=await r.json(); if(!r.ok||!d.ok) throw new Error(d.error||'Não foi possível salvar.'); location.href={{ next_url|tojson }}; }
+    catch(ex){ err.textContent=ex.message; err.classList.remove('hidden'); }
+  });
+})();
+</script>
+{% endblock %}

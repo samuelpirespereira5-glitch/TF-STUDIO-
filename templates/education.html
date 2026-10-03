@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+{% block title %}JARVIS Educação — Programação{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/phase10.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/phase11.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/phase12.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/phase13.css') }}">
+{% endblock %}
+{% block content %}
+<div class="edu-wrap" id="edu-root">
+  <header class="edu-hero">
+    <div>
+      <p class="edu-kicker">Fase 13.0</p>
+      <h1>📚 JARVIS Educação</h1>
+      <p class="muted">Aprenda → Assista → Pratique → Execute → Corrija → Desafios → Projetos → Jogos · Ctrl+K busca</p>
+    </div>
+    <div class="edu-hero-actions">
+      <button type="button" class="btn primary" id="btn-zero">COMEÇAR DO ZERO</button>
+      <input type="search" id="edu-search" placeholder="Buscar aulas, vídeos, desafios…" aria-label="Busca educacional">
+      <button type="button" class="btn" id="edu-search-btn">Buscar</button>
+    </div>
+  </header>
+
+  <nav class="edu-tabs edu-tabs-scroll" role="tablist" id="edu-menu">
+    <button type="button" class="edu-tab active" data-tab="overview">🏠 Início</button>
+    <button type="button" class="edu-tab" data-tab="cursos">📖 Cursos</button>
+    <button type="button" class="edu-tab" data-tab="videos">▶️ Playlists / Vídeos</button>
+    <button type="button" class="edu-tab" data-tab="tracks">🎓 Trilhas</button>
+    <button type="button" class="edu-tab" data-tab="lessons">📝 Aulas</button>
+    <button type="button" class="edu-tab" data-tab="desafios">🎯 Desafios / Exercícios</button>
+    <button type="button" class="edu-tab" data-tab="lab">🧪 Laboratórios</button>
+    <button type="button" class="edu-tab" data-tab="projetos">🛠️ Projetos</button>
+    <button type="button" class="edu-tab" data-tab="gamelab">🎮 Game Lab</button>
+    <button type="button" class="edu-tab" data-tab="progresso">📊 Meu progresso</button>
+    <button type="button" class="edu-tab" data-tab="conquistas">🏆 Conquistas</button>
+    <button type="button" class="edu-tab" data-tab="biblioteca">📚 Biblioteca</button>
+    <button type="button" class="edu-tab" data-tab="mentor">🤖 JARVIS Professor</button>
+    <button type="button" class="edu-tab" data-tab="zero">📘 Começar do zero</button>
+  </nav>
+
+  <!-- INÍCIO -->
+  <section class="edu-panel active" id="tab-overview">
+    <div class="edu-grid stats" id="edu-stats"></div>
+    <div class="edu-home-grid">
+      <div class="card">
+        <h2>Continue aprendendo</h2>
+        <div id="edu-continue" class="edu-chip-row"></div>
+      </div>
+      <div class="card">
+        <h2>Desafio do dia</h2>
+        <div id="edu-daily"></div>
+      </div>
+      <div class="card">
+        <h2>Minha trilha</h2>
+        <div id="edu-my-track" class="edu-chip-row"></div>
+        <button type="button" class="btn" data-goto="zero">Abrir trilha do zero</button>
+      </div>
+      <div class="card">
+        <h2>Vídeos</h2>
+        <div id="edu-home-videos" class="edu-chip-row"></div>
+        <button type="button" class="btn ghost" data-goto="videos">Ver todos</button>
+      </div>
+      <div class="card">
+        <h2>Game Lab</h2>
+        <p class="muted small">Aprenda jogando e modificando o código.</p>
+        <a class="btn" href="/game-lab">Abrir Game Lab</a>
+      </div>
+      <div class="card">
+        <h2>Projetos recentes</h2>
+        <div id="edu-recent-projects" class="muted small">Salvos localmente quando você criar.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DO ZERO -->
+  <section class="edu-panel" id="tab-zero">
+    <div class="card">
+      <h2>Modo Nunca Programei</h2>
+      <p class="muted">Trilha extremamente simples, passo a passo. Você já programou?</p>
+      <div class="edu-toolbar" id="zero-level">
+        <button type="button" class="btn" data-level="nunca">Nunca</button>
+        <button type="button" class="btn ghost" data-level="pouco">Um pouco</button>
+        <button type="button" class="btn ghost" data-level="ja">Já programo</button>
+      </div>
+    </div>
+    <div class="edu-split" id="zero-workspace">
+      <aside class="card edu-list" id="zero-list"></aside>
+      <article class="card edu-lesson" id="zero-view">
+        <p class="muted">Escolha uma aula à esquerda ou clique em COMEÇAR DO ZERO.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- VÍDEOS -->
+  
+  <!-- CURSOS (organizados por playlist/módulo) -->
+  <section class="edu-panel" id="tab-cursos">
+    <div class="card">
+      <h2>📖 Cursos oficiais (Curso em Vídeo / Gustavo Guanabara)</h2>
+      <p class="muted">Conteúdo oficial via embeds do YouTube. Crédito: <strong>Curso em Vídeo</strong> — Gustavo Guanabara.</p>
+      <div id="edu-cursos-grid" class="edu-grid"></div>
+    </div>
+    <div class="card" id="curso-detail" hidden>
+      <div class="edu-toolbar">
+        <h2 id="curso-detail-title"></h2>
+        <button type="button" class="btn ghost" id="curso-detail-close">Voltar aos cursos</button>
+      </div>
+      <p id="curso-detail-desc" class="muted"></p>
+      <div class="progress-bar"><div id="curso-detail-progress" style="width:0%"></div></div>
+      <p class="muted small" id="curso-detail-meta"></p>
+      <h3>Playlists / Módulos</h3>
+      <div id="curso-playlists" class="edu-list"></div>
+      <div class="edu-toolbar" style="margin-top:12px">
+        <button type="button" class="btn primary" id="curso-continue">Continuar estudando</button>
+        <button type="button" class="btn ghost" id="curso-ask-jarvis">Perguntar ao JARVIS Professor</button>
+      </div>
+    </div>
+  </section>
+<section class="edu-panel" id="tab-videos">
+    <div class="card">
+      <h2>Cursos e Vídeos — Curso em Vídeo</h2>
+      <p class="muted small">Conteúdo público oficial de Gustavo Guanabara. Player YouTube. Não baixamos vídeos.</p>
+      <div id="continue-studying" class="continue-card" aria-live="polite"></div>
+      <div class="edu-toolbar">
+        <button type="button" class="btn ghost" data-vlang="">Todos</button>
+        <button type="button" class="btn ghost" data-vlang="python">Python</button>
+        <button type="button" class="btn ghost" data-vlang="html">HTML</button>
+        <button type="button" class="btn ghost" data-vlang="css">CSS</button>
+        <button type="button" class="btn ghost" data-vlang="javascript">JavaScript</button>
+        <button type="button" class="btn ghost" data-vlang="algoritmos">Algoritmos</button>
+        <button type="button" class="btn ghost" data-vlang="git">Git</button>
+        <button type="button" class="btn ghost" data-vlang="php">PHP</button>
+        <button type="button" class="btn ghost" data-vlang="java">Java</button>
+        <button type="button" class="btn ghost" data-vlang="mysql">MySQL</button>
+      </div>
+      <div id="edu-videos-grid" class="edu-grid"></div>
+    </div>
+    <div class="card" id="video-player-card" hidden>
+      <div class="edu-toolbar">
+        <strong id="video-title"></strong>
+        <button type="button" class="btn ghost" id="video-close">Fechar</button>
+      </div>
+      <p id="video-status-label" class="muted small" aria-live="polite"></p>
+      <div class="video-embed-wrap" id="video-embed-wrap">
+        <div id="video-loading" class="video-state" hidden>
+          <div class="video-spinner"></div>
+          <p>Carregando vídeo…</p>
+        </div>
+        <div id="video-error" class="video-state" hidden>
+          <p>Não foi possível carregar o vídeo.</p>
+          <p class="muted small">O embed pode estar bloqueado, a rede falhou ou o YouTube está indisponível neste ambiente.</p>
+          <div class="edu-toolbar">
+            <button type="button" class="btn" id="video-retry">Tentar novamente</button>
+            <a class="btn primary" id="video-error-yt" href="#" target="_blank" rel="noopener">Abrir no YouTube</a>
+          </div>
+        </div>
+        <iframe id="video-iframe" width="100%" height="360" frameborder="0" allowfullscreen
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          referrerpolicy="strict-origin-when-cross-origin" title="Vídeo do curso"></iframe>
+      </div>
+      <p id="video-desc" class="muted"></p>
+      <div id="video-learn" class="edu-chip-row"></div>
+      <div class="video-nav-bar edu-toolbar">
+        <button type="button" class="btn ghost" id="video-prev">← Anterior</button>
+        <button type="button" class="btn ghost" id="video-list">Lista de aulas</button>
+        <button type="button" class="btn primary" id="video-next">Próxima aula →</button>
+        <a class="btn" id="video-yt" href="#" target="_blank" rel="noopener">Abrir no YouTube</a>
+        <button type="button" class="btn" id="video-done">Marcar concluída</button>
+        <button type="button" class="btn ghost" id="video-exercise">Exercício</button>
+        <button type="button" class="btn ghost" id="video-lab">Laboratório</button>
+        <button type="button" class="btn ghost" id="video-ask">Perguntar ao JARVIS</button>
+      </div>
+      <p id="video-next-hint" class="muted small"></p>
+      <div class="progress-bar"><div id="video-progress" style="width:0%"></div></div>
+    </div>
+  </section>
+
+  <!-- TRILHAS / AULAS (reuso phase10) -->
+  <section class="edu-panel" id="tab-tracks">
+    <div class="card"><h2>Trilhas de programação</h2><div id="edu-tracks-grid" class="edu-path"></div></div>
+  </section>
+
+  <section class="edu-panel" id="tab-lessons">
+    <div class="edu-split">
+      <aside class="card edu-list" id="edu-lesson-list"></aside>
+      <article class="card edu-lesson" id="edu-lesson-view">
+        <p class="muted">Selecione uma aula à esquerda.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- DESAFIOS -->
+  <section class="edu-panel" id="tab-desafios">
+    <div class="edu-split">
+      <aside class="card edu-list" id="ch-list"></aside>
+      <article class="card" id="ch-view">
+        <p class="muted">Escolha um desafio.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- LABORATÓRIO -->
+  <section class="edu-panel" id="tab-lab">
+    <div class="card">
+      <h2>Laboratório de código</h2>
+      <p class="muted small">Execução no navegador (HTML/CSS/JS). Python: simulação educativa no cliente quando possível. Código do usuário nunca roda com privilégios do servidor.</p>
+      <div class="edu-toolbar">
+        <button type="button" class="btn" data-lab-lang="html">HTML</button>
+        <button type="button" class="btn ghost" data-lab-lang="css">CSS</button>
+        <button type="button" class="btn ghost" data-lab-lang="js">JavaScript</button>
+        <button type="button" class="btn ghost" data-lab-lang="python">Python</button>
+      </div>
+      <div class="lab-ide">
+        <textarea id="lab-code" rows="14" spellcheck="false" class="code-area" placeholder="// código aqui"></textarea>
+        <div class="edu-toolbar">
+          <button type="button" class="btn primary" id="lab-run">Executar</button>
+          <button type="button" class="btn ghost" id="lab-clear">Limpar</button>
+          <button type="button" class="btn ghost" id="lab-save">Salvar local</button>
+        </div>
+        <pre id="lab-out" class="edu-out"></pre>
+        <iframe id="lab-preview" sandbox="allow-scripts" title="Preview" style="width:100%;height:220px;border:1px solid #333;border-radius:8px;background:#fff"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJETOS -->
+  <section class="edu-panel" id="tab-projetos">
+    <div class="card">
+      <h2>Criar projeto</h2>
+      <div id="proj-templates" class="edu-grid"></div>
+    </div>
+    <div class="card">
+      <h2>Meus projetos (local)</h2>
+      <div id="proj-mine" class="edu-chip-row"></div>
+    </div>
+  </section>
+
+  <!-- GAME LAB link -->
+  <section class="edu-panel" id="tab-gamelab">
+    <div class="card">
+      <h2>JARVIS Game Lab</h2>
+      <p>Jogue, veja o código, modifique e crie sua versão.</p>
+      <a class="btn primary" href="/game-lab">Abrir Game Lab</a>
+      <a class="btn ghost" href="/programming">Universo de Programação</a>
+    </div>
+  </section>
+
+  <!-- PROGRESSO / CONQUISTAS -->
+  <section class="edu-panel" id="tab-progresso">
+    <div class="card" id="edu-progress-panel"></div>
+    <div class="card">
+      <h2>Meu progresso</h2>
+      <div id="prog-bars"></div>
+      <ul id="prog-list" class="muted"></ul>
+    </div>
+  </section>
+
+  <section class="edu-panel" id="tab-conquistas">
+    <div class="card">
+      <h2>Conquistas</h2>
+      <div id="ach-grid" class="edu-grid"></div>
+    </div>
+  </section>
+
+  <!-- BIBLIOTECA -->
+  <section class="edu-panel" id="tab-biblioteca">
+    <div class="card">
+      <h2>Biblioteca / Glossário</h2>
+      <input type="search" id="lib-q" placeholder="O que é loop? O que é variável?" style="width:100%;margin-bottom:12px">
+      <div id="lib-results"></div>
+    </div>
+  </section>
+
+  <!-- PROFESSOR -->
+  
+  <section class="edu-panel" id="tab-debuglab">
+    <div class="edu-split">
+      <aside class="card edu-list" id="debug-list"></aside>
+      <article class="card" id="debug-view"><h2>🐛 Debug Lab</h2><p class="muted">Códigos quebrados: encontre o erro, corrija e teste.</p></article>
+    </div>
+  </section>
+  <section class="edu-panel" id="tab-algolab">
+    <div class="edu-split">
+      <aside class="card edu-list" id="algo-list"></aside>
+      <article class="card" id="algo-view"><h2>⚙️ Algorithm Lab</h2><p class="muted">Visualize algoritmos.</p></article>
+    </div>
+  </section>
+  <section class="edu-panel" id="tab-apilab">
+    <div class="edu-split">
+      <aside class="card edu-list" id="api-list"></aside>
+      <article class="card" id="api-view"><h2>🔌 API Lab</h2><p class="muted">REQUEST → SERVER → RESPONSE</p></article>
+    </div>
+  </section>
+  <section class="edu-panel" id="tab-dblab">
+    <div class="card">
+      <h2>🗄️ Database Lab</h2>
+      <div id="db-schema" class="edu-chip-row"></div>
+      <div class="edu-toolbar" id="db-examples"></div>
+      <textarea id="db-sql" class="code-area" rows="4" placeholder="SELECT * FROM alunos;"></textarea>
+      <button type="button" class="btn primary" id="db-run">Executar</button>
+      <pre id="db-out" class="edu-out"></pre>
+    </div>
+  </section>
+  <section class="edu-panel" id="tab-notas">
+    <div class="card">
+      <h2>📝 Notas de estudo</h2>
+      <input id="note-title" placeholder="Título" style="width:100%;margin:6px 0;padding:8px">
+      <textarea id="note-body" class="code-area" rows="4" placeholder="Nota, pergunta, trecho, código…"></textarea>
+      <button type="button" class="btn primary" id="note-save">Salvar nota</button>
+      <div id="notes-list" style="margin-top:12px"></div>
+    </div>
+  </section>
+
+  <section class="edu-panel" id="tab-mentor">
+    <div id="professor-prompts" class="edu-toolbar" style="margin-bottom:10px"></div>
+    <div class="card">
+      <h2>🤖 JARVIS Professor</h2>
+      <p class="muted small">Explica de forma simples. Use os botões ou o chat principal com contexto AULA.</p>
+      <div class="edu-toolbar" id="prof-btns"></div>
+      <label>Pergunta<textarea id="mentor-q" rows="2" placeholder="O que é uma variável?"></textarea></label>
+      <label>Seu código / tentativa<textarea id="mentor-attempt" rows="4" placeholder="Cole código se quiser ajuda"></textarea></label>
+      <button type="button" class="btn primary" id="mentor-go">Pedir explicação</button>
+      <pre id="mentor-out" class="edu-out"></pre>
+    </div>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/phase10.js') }}"></script>
+<script src="{{ url_for('static', filename='js/phase11.js') }}"></script>
+<script src="{{ url_for('static', filename='js/phase12.js') }}"></script>
+<script src="{{ url_for('static', filename='js/phase13.js') }}"></script>
+{% endblock %}

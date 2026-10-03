@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JARVIS Ecosystem</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ecosystem8.css') }}">
+</head>
+<body>
+<div class="eco-shell">
+<header class="eco-header">
+  <div><div class="eyebrow">JARVIS ECOSYSTEM 8.0</div><h1>Workspace de criação</h1><p>Projetos, aprendizado, testes, ideias, workflows e portfólio em um só lugar.</p></div>
+  <div class="header-actions"><button data-action="new-workspace">+ Workspace</button><button class="ghost" data-action="command">Ctrl/⌘ K</button></div>
+  <p class="muted"><a href="/cyber/phase9">Fase 9.0 — Labs + Educação + Jogos</a></p>
+</header>
+<nav class="eco-tabs" aria-label="Módulos">
+  <button class="active" data-tab="home">Visão geral</button><button data-tab="workspace">Workspace</button><button data-tab="planner">Planner</button><button data-tab="design">Design</button><button data-tab="flows">Workflows</button><button data-tab="ai">AI Lab</button><button data-tab="quality">Qualidade</button><button data-tab="learning">Aprendizado</button><button data-tab="community">Turmas</button>
+</nav>
+<main>
+<section id="tab-home" class="tab active"><div id="overview" class="grid"></div></section>
+<section id="tab-workspace" class="tab"><div class="section-head"><div><h2>JARVIS Workspace</h2><p>O projeto é a unidade central. Snapshots e tarefas ficam ligados a ele.</p></div><select id="workspaceSelect"></select></div><div id="workspaceView" class="grid"></div></section>
+<section id="tab-planner" class="tab"><div class="panel"><h2>Project Planner</h2><p>Descreva o que quer criar. O JARVIS transforma a ideia em requisitos, arquitetura, tarefas, testes e lançamento.</p><textarea id="planPrompt" placeholder="Ex.: quero criar um jogo de corrida educativo"></textarea><div class="row"><button data-action="plan">Gerar plano</button><button class="ghost" data-action="idea">Guardar como ideia</button></div><pre id="planOutput"></pre></div></section>
+<section id="tab-design" class="tab"><div class="grid two"><div class="panel"><h2>Visual Wireframe</h2><div class="palette"><button data-add="text">Texto</button><button data-add="button">Botão</button><button data-add="card">Card</button><button data-add="image">Imagem</button><button data-add="input">Input</button><button data-add="menu">Menu</button></div><div id="wireframe" class="wireframe" tabindex="0"><span class="empty">Adicione componentes ao canvas</span></div><button data-action="save-design">Salvar wireframe</button></div><div class="panel"><h2>Design System</h2><label>Nome <input id="themeName" value="Meu Design System"></label><label>Cor principal <input id="themeColor" type="color" value="#00e5ff"></label><label>Raio <input id="themeRadius" type="range" min="0" max="24" value="12"></label><div id="themePreview" class="theme-preview">Preview de componentes</div><button data-action="save-theme">Salvar tema</button></div></div></section>
+<section id="tab-flows" class="tab"><div class="grid two"><div class="panel"><h2>Workflow Visualizer</h2><p>Monte fluxos de aplicação, API e dados.</p><div id="flowNodes" class="flow"></div><div class="row"><button data-flow="client">CLIENT</button><button data-flow="request">REQUEST</button><button data-flow="service">SERVICE</button><button data-flow="database">DATABASE</button><button data-flow="response">RESPONSE</button></div><button data-action="save-flow">Salvar fluxo</button></div><div class="panel"><h2>Simulador de fluxo</h2><div id="flowSim" class="flow-sim"></div><p class="muted">A simulação é local e educacional; não envia requisições reais.</p></div></div></section>
+<section id="tab-ai" class="tab"><div class="grid two"><div class="panel"><h2>Prompt Lab</h2><textarea id="promptA" placeholder="Prompt A"></textarea><textarea id="promptB" placeholder="Prompt B"></textarea><button data-action="ai-experiment">Registrar experimento</button><pre id="aiOutput"></pre></div><div class="panel"><h2>Agent Builder</h2><input id="agentName" placeholder="Nome do agente"><textarea id="agentGoal" placeholder="Objetivo"></textarea><div class="checks"><label><input type="checkbox" value="lessons" checked>Aulas</label><label><input type="checkbox" value="projects">Projetos</label><label><input type="checkbox" value="game_lab">Game Lab</label><label><input type="checkbox" value="code_analysis">Análise de código</label><label><input type="checkbox" value="administration">Administração</label></div><button data-action="agent-policy">Validar permissões no backend</button><pre id="agentOutput"></pre></div></div></section>
+<section id="tab-quality" class="tab"><div class="grid two"><div class="panel"><h2>Test Case Builder</h2><input id="testTitle" placeholder="Nome do teste"><input id="testInput" placeholder="Entrada"><input id="testExpected" placeholder="Esperado"><input id="testActual" placeholder="Resultado"><button data-action="save-test">Executar comparação</button><div id="testOutput"></div></div><div class="panel"><h2>Project Quality Report</h2><button data-action="quality">Analisar workspace</button><pre id="qualityOutput"></pre><button class="ghost" data-action="docs">Gerar documentação</button><pre id="docsOutput"></pre></div></div></section>
+<section id="tab-learning" class="tab"><div id="learningPanel" class="grid"></div></section>
+<section id="tab-community" class="tab"><div class="grid two"><div class="panel"><h2>Classroom Mode</h2><input id="className" placeholder="Nome da turma"><button data-action="create-class">Criar turma</button><hr><input id="joinCode" placeholder="Código da turma"><button data-action="join-class">Entrar</button><div id="classList"></div></div><div class="panel"><h2>Mentor Mode</h2><p>O JARVIS conduz por perguntas, pistas e experimentos antes de mostrar uma solução consolidada.</p><button data-action="mentor">Próximo passo</button><div id="mentorOutput" class="mentor"></div></div></div></section>
+</main>
+<div id="commandModal" class="modal hidden"><div class="modal-card"><button class="close" data-action="close-command">×</button><h2>Command Center</h2><input id="commandInput" autofocus placeholder="abrir Python, continuar projeto, Game Lab..."><div id="commandResults"></div></div></div>
+<div id="toast" class="toast"></div>
+<script src="{{ url_for('static', filename='js/ecosystem8.js') }}"></script>
+</div></body></html>

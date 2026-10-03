@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Políticas de Segurança · JARVIS Cyber Lab{% endblock %}
+{% block content %}
+<h1>🛡️ Políticas de Segurança</h1>
+<p class="muted">
+  Limites atuais, permissões, allowlist, rate limits, timeouts e ferramentas disponíveis por nível de usuário.
+  Todas as ferramentas do Cyber Lab operam apenas em ambientes próprios, CTFs ou sistemas explicitamente autorizados.
+</p>
+
+<div class="stats-row" id="pol-stats">
+  <div class="stat-card"><div class="stat-value" id="pol-role">—</div><div class="stat-label">Seu papel (RBAC)</div></div>
+  <div class="stat-card"><div class="stat-value" id="pol-tools">—</div><div class="stat-label">Ferramentas com limite</div></div>
+  <div class="stat-card"><div class="stat-value" id="pol-cats">—</div><div class="stat-label">Categorias</div></div>
+  <div class="stat-card"><div class="stat-value" id="pol-mult">—</div><div class="stat-label">Multiplicador de rate</div></div>
+</div>
+
+<div class="card tool">
+  <h2>Mensagens de política</h2>
+  <ul id="pol-messages" class="muted"></ul>
+  <p class="small muted">Exemplos: “Alvo não autorizado”, “Limite de requisições atingido”, “Entrada inválida”, “Operação bloqueada pela política de segurança”.</p>
+</div>
+
+<div class="card tool">
+  <h2>Notas operacionais</h2>
+  <ul id="pol-notes"></ul>
+</div>
+
+<div class="card tool">
+  <h2>Central de Ferramentas — categorias</h2>
+  <div id="pol-categories" class="grid tools-grid"></div>
+</div>
+
+<div class="card tool">
+  <h2>Limites por ferramenta</h2>
+  <div class="table-wrap" style="overflow-x:auto">
+    <table class="table" id="pol-table">
+      <thead>
+        <tr>
+          <th>Ferramenta</th>
+          <th>Ativa</th>
+          <th>Alvo autorizado</th>
+          <th>Rate/min</th>
+          <th>Timeout (s)</th>
+          <th>Max tamanho</th>
+          <th>Descrição</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card tool">
+  <h2>RBAC — capacidades por papel</h2>
+  <pre class="result" id="pol-rbac" style="white-space:pre-wrap;font-size:0.9em"></pre>
+</div>
+
+<script>
+(async function(){
+  const esc = s => String(s??"").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  try {
+    const res = await fetch("/api/cyber/policies");
+    const data = await res.json();
+    const pol = data.policy || {};
+    const tools = pol.tools || {};
+    document.getElementById("pol-role").textContent = data.role || "—";
+    document.getElementById("pol-tools").textContent = Object.keys(tools).length;
+    document.getElementById("pol-cats").textContent = (data.categories||[]).length;
+    document.getElementById("pol-mult").textContent = (pol.role_multipliers||{})[data.role] ?? "1";
+
+    const msgs = pol.messages || data.messages || {};
+    document.getElementById("pol-messages").innerHTML = Object.entries(msgs)
+      .map(([k,v]) => `<li><strong>${esc(k)}</strong>: ${esc(v)}</li>`).join("") || "<li>Sem mensagens</li>";
+
+    document.getElementById("pol-notes").innerHTML = (data.notes||[])
+      .map(n => `<li>${esc(n)}</li>`).join("") || "<li>—</li>";
+
+    const cats = data.categories || [];
+    document.getElementById("pol-categories").innerHTML = cats.map(c => `
+      <article class="card tool cyber-tool-card">
+        <h3>${esc(c.icon)} ${esc(c.name)}</h3>
+        <p class="muted small">${esc(c.description)}</p>
+        <p class="small"><strong>Tools:</strong> ${(c.tool_ids||[]).map(esc).join(", ")}</p>
+      </article>
+    `).join("") || "<p class='muted'>Nenhuma categoria</p>";
+
+    const tbody = document.querySelector("#pol-table tbody");
+    tbody.innerHTML = Object.entries(tools).map(([id, t]) => `
+      <tr>
+        <td><code>${esc(id)}</code></td>
+        <td>${t.active ? "✅" : "—"}</td>
+        <td>${t.requires_authorized_target ? "Sim" : "Não"}</td>
+        <td>${esc(t.rate_per_min)}</td>
+        <td>${esc(t.timeout_sec)}</td>
+        <td>${t.max_file_bytes ? esc(t.max_file_bytes) : "—"}</td>
+        <td class="small">${esc(t.description||"")}</td>
+      </tr>
+    `).join("");
+
+    document.getElementById("pol-rbac").textContent = JSON.stringify(pol.role_multipliers || {}, null, 2);
+  } catch (e) {
+    document.getElementById("pol-notes").innerHTML = `<li class="muted">Não foi possível carregar as políticas: ${esc(e.message||e)}</li>`;
+  }
+})();
+</script>
+{% endblock %}

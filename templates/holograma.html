@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% block title %}Holograma 3D · Tristan Thorne{% endblock %}
+{% block content %}
+<h1>🛰 Holograma 3D</h1>
+<p class="muted">Descreva algo — um mapa, um objeto, uma rede de conexões — e materializa em holograma na tela. Ou traga um <strong>lugar real</strong> direto do OpenStreetMap, com relevo, mapa e <strong>prédios extrudados de verdade</strong>, 100% grátis e sem nenhuma chave de API. Dica: você também pode pedir isso direto pro Jarvis (ex: "crie um holograma de..." ou "coloca a Torre Eiffel no holograma real").</p>
+
+<div class="grid tools-grid">
+  <div class="card tool tool-hologram holo-page" data-holo-widget id="holo-widget-page">
+
+    <h3>✨ Holograma procedural</h3>
+    <p class="muted small">Digite qualquer coisa — a IA decide se é um mapa, um objeto 3D ou uma rede de conexões (ou escolha na mão).</p>
+    <div class="holo-controls">
+      <input type="text" data-holo="input" placeholder="Ex: mapa do Buriti do Slope, uma molécula de DNA, o planeta Saturno, um átomo, um coração, um cristal, uma rede neural...">
+      <select data-holo="type">
+        <option value="auto">🔎 Detectar automaticamente</option>
+        <option value="mapa">🗺 Mapa / terreno</option>
+        <option value="objeto">🧊 Objeto 3D</option>
+        <option value="rede">🕸 Rede / conexões</option>
+      </select>
+      <button class="btn primary" type="button" data-holo="open">✨ Projetar holograma</button>
+    </div>
+    <div class="holo-presets">
+      <button class="btn small" type="button" data-holo-example="planeta Saturno">🪐 Saturno</button>
+      <button class="btn small" type="button" data-holo-example="molécula de DNA">🧬 DNA</button>
+      <button class="btn small" type="button" data-holo-example="rede neural">🕸 Rede neural</button>
+      <button class="btn small" type="button" data-holo-example="cristal">💎 Cristal</button>
+      <button class="btn small" type="button" data-holo-example="átomo">⚛ Átomo</button>
+      <button class="btn small" type="button" data-holo-example="montanhas e vales">🗻 Terreno</button>
+      <button class="btn small" type="button" data-holo-example="skyline de uma cidade futurista">🏙 Cidade</button>
+    </div>
+
+    <h3 style="margin-top:18px;">🧪 Escolher tipo de holograma</h3>
+    <p class="muted small">Cada ícone materializa um objeto 3D procedural diferente — sem imagem, tudo geometria real.</p>
+    <div class="holo-kind-grid" data-holo="kind-grid">
+      <button class="holo-kind-btn" type="button" data-holo-kind="dna"><span>🧬</span>DNA</button>
+      <button class="holo-kind-btn" type="button" data-holo-kind="molecula"><span>⚗️</span>Molécula</button>
+      <button class="holo-kind-btn" type="button" data-holo-kind="atomo"><span>⚛️</span>Átomo</button>
+      <button class="holo-kind-btn" type="button" data-holo-kind="planeta"><span>🪐</span>Planeta</button>
+      <button class="holo-kind-btn" type="button" data-holo-kind="sistema-solar"><span>☀️</span>Sist. Solar</button>
+      <button class="holo-kind-btn" type="button" data-holo-kind="globo"><span>🌍</span>Globo</button>
+      <button class="holo-kind-btn" type="button" data-holo-kind="cerebro"><span>🧠</span>Cérebro</button>
+      <button class="holo-kind-btn" type="button" data-holo-kind="rede-neural"><span>🕸️</span>Rede neural</button>
+      <button class="holo-kind-btn" type="button" data-holo-kind="particulas"><span>✨</span>Partículas</button>
+      <button class="holo-kind-btn" type="button" data-holo-kind="portal"><span>🌀</span>Portal</button>
+      <button class="holo-kind-btn" type="button" data-holo-kind="esfera-holo"><span>🔮</span>Esfera</button>
+      <button class="holo-kind-btn" type="button" data-holo-kind="cristal"><span>💎</span>Cristal</button>
+      <button class="holo-kind-btn" type="button" data-holo-kind="coracao"><span>❤️</span>Coração</button>
+      <button class="holo-kind-btn" type="button" data-holo-kind="grafico"><span>📊</span>Gráfico 3D</button>
+      <button class="holo-kind-btn" type="button" data-holo-kind="poliedro"><span>🔷</span>Geométrico</button>
+    </div>
+
+    <div class="holo-panel" data-holo="panel">
+      <h3>🎛️ Controles</h3>
+      <div class="holo-panel-groups">
+        <div class="holo-panel-group">
+          <h4>Animação</h4>
+          <div class="holo-control-row">
+            <label for="holo-ctl-speed">Velocidade</label>
+            <input type="range" id="holo-ctl-speed" data-holo-ctl="speed" min="0" max="3" step="0.1" value="1">
+            <span class="holo-control-val" data-holo-val="speed">1.0x</span>
+          </div>
+          <div class="holo-control-row">
+            <label for="holo-ctl-autorotate">Girar sozinho</label>
+            <input type="checkbox" id="holo-ctl-autorotate" data-holo-ctl="autorotate" checked>
+          </div>
+        </div>
+        <div class="holo-panel-group">
+          <h4>Visual</h4>
+          <div class="holo-control-row">
+            <label for="holo-ctl-scale">Escala</label>
+            <input type="range" id="holo-ctl-scale" data-holo-ctl="scale" min="0.4" max="2.2" step="0.1" value="1">
+            <span class="holo-control-val" data-holo-val="scale">1.0x</span>
+          </div>
+          <div class="holo-control-row">
+            <label for="holo-ctl-particles">Partículas</label>
+            <input type="range" id="holo-ctl-particles" data-holo-ctl="particles" min="0" max="3" step="0.25" value="1">
+            <span class="holo-control-val" data-holo-val="particles">1.0x</span>
+          </div>
+          <div class="holo-control-row">
+            <label for="holo-ctl-ambient">Poeira ambiente</label>
+            <input type="checkbox" id="holo-ctl-ambient" data-holo-ctl="ambient" checked>
+          </div>
+          <div class="holo-control-row">
+            <label for="holo-ctl-grid">Grid/chão</label>
+            <input type="checkbox" id="holo-ctl-grid" data-holo-ctl="grid" checked>
+          </div>
+        </div>
+        <div class="holo-panel-group">
+          <h4>Cores</h4>
+          <div class="holo-control-row">
+            <label for="holo-ctl-color1">Cor principal</label>
+            <input type="color" id="holo-ctl-color1" data-holo-ctl="color1" value="#00e5ff">
+          </div>
+          <div class="holo-control-row">
+            <label for="holo-ctl-color2">Cor secundária</label>
+            <input type="color" id="holo-ctl-color2" data-holo-ctl="color2" value="#b026ff">
+          </div>
+          <div class="holo-control-row">
+            <button class="btn small" type="button" data-holo="reset-colors">↺ Cores padrão</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="holo-controls holo-controls-real">
+      <input type="text" data-holo="real-input" placeholder="🌍 Lugar real: ex. Torre Eiffel, Cristo Redentor, Times Square...">
+      <button class="btn primary" type="button" data-holo="real-open">🗺 Trazer lugar real (OpenStreetMap)</button>
+    </div>
+    <div class="holo-presets">
+      <button class="btn small" type="button" data-holo-real-example="Torre Eiffel, Paris">🗼 Torre Eiffel</button>
+      <button class="btn small" type="button" data-holo-real-example="Cristo Redentor, Rio de Janeiro">✝ Cristo Redentor</button>
+      <button class="btn small" type="button" data-holo-real-example="Times Square, Nova York">🌆 Times Square</button>
+      <button class="btn small" type="button" data-holo-real-example="Coliseu, Roma">🏛 Coliseu</button>
+      <button class="btn small" type="button" data-holo-real-example="Burj Khalifa, Dubai">🏙 Burj Khalifa</button>
+    </div>
+    <p class="muted small">Os botões acima usam coordenadas, relevo, mapa e <strong>prédios reais</strong> (contorno e altura) do OpenStreetMap — sem nenhum serviço pago de tiles 3D. Também dá pra pedir direto pro Jarvis.</p>
+
+    <div class="holo-upload-row">
+      <input type="file" accept="image/*" data-holo="photo-input">
+      <button class="btn primary" type="button" data-holo="photo-open">📷 Criar holograma a partir de uma foto</button>
+    </div>
+    <p class="muted small">Manda qualquer foto — a IA descreve o que vê, e o holograma materializa um relevo 3D real construído a partir dos próprios pixels da imagem, com a foto projetada como textura holográfica por cima.</p>
+
+    <div class="result" data-holo="result"></div>
+    <div class="holo-stage" data-holo="stage" style="display:none;">
+      <canvas data-holo="canvas"></canvas>
+      <div class="holo-label" data-holo="label"></div>
+      <div class="holo-hint">arraste para girar · scroll para zoom · ele também reage ao mouse na tela</div>
+      <button class="btn small holo-close" type="button" data-holo="close">✕</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ static_v('js/hologram.js') }}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var root = document.getElementById("holo-widget-page");
+  if (!root) return;
+
+  root.querySelectorAll("[data-holo-example]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var input = root.querySelector('[data-holo="input"]');
+      var openBtn = root.querySelector('[data-holo="open"]');
+      if (input) input.value = btn.getAttribute("data-holo-example");
+      if (openBtn) openBtn.click();
+    });
+  });
+
+  root.querySelectorAll("[data-holo-real-example]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var input = root.querySelector('[data-holo="real-input"]');
+      var openBtn = root.querySelector('[data-holo="real-open"]');
+      if (input) input.value = btn.getAttribute("data-holo-real-example");
+      if (openBtn) openBtn.click();
+    });
+  });
+
+  // ---------- Seletor de tipo de holograma (painel "Holographic 3D Studio") ----------
+  var kindButtons = root.querySelectorAll("[data-holo-kind]");
+  kindButtons.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var widget = root.__holoWidget;
+      if (!widget || !widget.setObjectKind) return;
+      kindButtons.forEach(function (b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      widget.setObjectKind(btn.getAttribute("data-holo-kind"));
+    });
+  });
+
+  // ---------- Painel de controles (animação / visual / cores) ----------
+  function ctl(name) { return root.querySelector('[data-holo-ctl="' + name + '"]'); }
+  function val(name) { return root.querySelector('[data-holo-val="' + name + '"]'); }
+
+  var speedEl = ctl("speed");
+  if (speedEl) speedEl.addEventListener("input", function () {
+    var widget = root.__holoWidget;
+    if (widget && widget.setSpeed) widget.setSpeed(speedEl.value);
+    var v = val("speed"); if (v) v.textContent = Number(speedEl.value).toFixed(1) + "x";
+  });
+
+  var autoEl = ctl("autorotate");
+  if (autoEl) autoEl.addEventListener("change", function () {
+    var widget = root.__holoWidget;
+    if (widget && widget.setAutoRotate) widget.setAutoRotate(autoEl.checked);
+  });
+
+  var scaleEl = ctl("scale");
+  if (scaleEl) scaleEl.addEventListener("input", function () {
+    var widget = root.__holoWidget;
+    if (widget && widget.setScale) widget.setScale(scaleEl.value);
+    var v = val("scale"); if (v) v.textContent = Number(scaleEl.value).toFixed(1) + "x";
+  });
+
+  var particlesEl = ctl("particles");
+  if (particlesEl) particlesEl.addEventListener("change", function () {
+    var widget = root.__holoWidget;
+    if (widget && widget.setParticleDensity) widget.setParticleDensity(particlesEl.value);
+    var v = val("particles"); if (v) v.textContent = Number(particlesEl.value).toFixed(2) + "x";
+  });
+
+  var ambientEl = ctl("ambient");
+  if (ambientEl) ambientEl.addEventListener("change", function () {
+    var widget = root.__holoWidget;
+    if (widget && widget.toggleAmbient) widget.toggleAmbient(ambientEl.checked);
+  });
+
+  var gridEl = ctl("grid");
+  if (gridEl) gridEl.addEventListener("change", function () {
+    var widget = root.__holoWidget;
+    if (widget && widget.toggleGrid) widget.toggleGrid(gridEl.checked);
+  });
+
+  function applyColors() {
+    var widget = root.__holoWidget;
+    var c1 = ctl("color1"), c2 = ctl("color2");
+    if (widget && widget.setColors) widget.setColors(c1 ? c1.value : null, c2 ? c2.value : null);
+  }
+  var color1El = ctl("color1");
+  if (color1El) color1El.addEventListener("input", applyColors);
+  var color2El = ctl("color2");
+  if (color2El) color2El.addEventListener("input", applyColors);
+
+  var resetColorsBtn = root.querySelector('[data-holo="reset-colors"]');
+  if (resetColorsBtn) resetColorsBtn.addEventListener("click", function () {
+    var widget = root.__holoWidget;
+    if (color1El) color1El.value = "#00e5ff";
+    if (color2El) color2El.value = "#b026ff";
+    if (widget && widget.setColors) widget.setColors(null, null);
+  });
+});
+</script>
+{% endblock %}

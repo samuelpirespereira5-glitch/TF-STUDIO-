@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title %}Cyber Dashboard · JARVIS{% endblock %}
+{% block content %}
+<div class="cyber-page-head">
+  <div>
+    <div class="muted small">JARVIS SECURITY PLATFORM</div>
+    <h1>📊 Cyber Dashboard</h1>
+    <p class="muted">Scans, severidade, recomendações, atividades recentes, XP e status dos serviços — dados reais do Evidence Center e da Central de Ferramentas.</p>
+  </div>
+  <div class="inline" style="gap:8px;flex-wrap:wrap">
+    <a class="btn" href="{{ url_for('cyber_lab') }}">🛡 Cyber Lab</a>
+    <a class="btn" href="{{ url_for('cyber_hub_page') }}">🧭 Hub</a>
+    <a class="btn" href="{{ url_for('cyber_security_policies_page') }}">📋 Políticas</a>
+    <button class="btn primary" type="button" onclick="exportReport('md')">📄 Exportar relatório</button>
+  </div>
+</div>
+
+<div class="stats-row" id="dash-stats">
+  <div class="stat-card"><div class="stat-value" id="d-scans">—</div><div class="stat-label">Scans</div></div>
+  <div class="stat-card"><div class="stat-value" id="d-tools">—</div><div class="stat-label">Ferramentas</div></div>
+  <div class="stat-card"><div class="stat-value" id="d-crit">—</div><div class="stat-label">Critical</div></div>
+  <div class="stat-card"><div class="stat-value" id="d-high">—</div><div class="stat-label">High</div></div>
+  <div class="stat-card"><div class="stat-value" id="d-med">—</div><div class="stat-label">Medium</div></div>
+  <div class="stat-card"><div class="stat-value" id="d-level">—</div><div class="stat-label">Nível XP</div></div>
+</div>
+
+<div class="grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px">
+  <div class="card tool">
+    <h2>Vulnerabilidades por severidade</h2>
+    <canvas id="sev-chart" width="400" height="200" style="max-width:100%"></canvas>
+    <div id="sev-bars" style="margin-top:12px"></div>
+  </div>
+  <div class="card tool">
+    <h2>Status dos serviços</h2>
+    <ul id="svc-status"></ul>
+  </div>
+  <div class="card tool">
+    <h2>Gamificação</h2>
+    <div id="gam-box">—</div>
+    <h3 class="muted small" style="margin-top:12px">Ranking local</h3>
+    <ol id="leaderboard"></ol>
+  </div>
+</div>
+
+<div class="card tool" style="margin-top:16px">
+  <h2>Recomendações e plano de correção</h2>
+  <div id="recs"></div>
+</div>
+
+<div class="card tool">
+  <h2>Atividades recentes</h2>
+  <div class="table-wrap" style="overflow-x:auto">
+    <table class="table" id="act-table">
+      <thead><tr><th>Quando</th><th>Ferramenta</th><th>Alvo</th><th>Findings</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card tool">
+  <h2>Ferramentas por categoria</h2>
+  <div id="cat-tools" class="grid tools-grid"></div>
+</div>
+
+<script>
+(async function(){
+  const esc = s => String(s??"").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function bars(sev){
+    const order = ["critical","high","medium","low","info"];
+    const colors = {critical:"#ff4d6d",high:"#ff8c42",medium:"#ffd166",low:"#7CFFB2",info:"#00e5ff"};
+    const max = Math.max(1, ...order.map(k => sev[k]||0));
+    return order.map(k => {
+      const v = sev[k]||0;
+      const pct = Math.round(100*v/max);
+      return `<div style="margin:6px 0"><span style="display:inline-block;width:80px">${esc(k)}</span>
+        <span style="display:inline-block;height:10px;width:${pct}%;background:${colors[k]};border-radius:4px;vertical-align:middle"></span>
+        <strong style="margin-left:8px">${v}</strong></div>`;
+    }).join("");
+  }
+  function drawChart(sev){
+    const c = document.getElementById("sev-chart");
+    if (!c || !c.getContext) return;
+    const ctx = c.getContext("2d");
+    const order = ["critical","high","medium","low","info"];
+    const colors = ["#ff4d6d","#ff8c42","#ffd166","#7CFFB2","#00e5ff"];
+    const vals = order.map(k => sev[k]||0);
+    const max = Math.max(1, ...vals);
+    const w = c.width, h = c.height, pad = 30, bw = (w - pad*2) / vals.length * 0.6;
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle = "#8b9bb4";
+    ctx.font = "12px sans-serif";
+    vals.forEach((v,i) => {
+      const x = pad + i * ((w-pad*2)/vals.length) + 10;
+      const bh = (h - pad*2) * (v/max);
+      ctx.fillStyle = colors[i];
+      ctx.fillRect(x, h - pad - bh, bw, bh);
+      ctx.fillStyle = "#c5d0e6";
+      ctx.fillText(order[i].slice(0,4), x, h - 10);
+      ctx.fillText(String(v), x, h - pad - bh - 4);
+    });
+  }
+  try {
+    const res = await fetch("/api/cyber/dashboard");
+    const data = await res.json();
+    const sum = data.summary || {};
+    const sev = data.severity || {};
+    document.getElementById("d-scans").textContent = sum.scans ?? data.total_scans ?? "—";
+    document.getElementById("d-tools").textContent = sum.tools_registered ?? "—";
+    document.getElementById("d-crit").textContent = sum.open_critical ?? sev.critical ?? 0;
+    document.getElementById("d-high").textContent = sum.open_high ?? sev.high ?? 0;
+    document.getElementById("d-med").textContent = sum.open_medium ?? sev.medium ?? 0;
+    const gam = data.gamification || {};
+    document.getElementById("d-level").textContent = gam.level ?? "—";
+    document.getElementById("sev-bars").innerHTML = bars(sev);
+    drawChart(sev);
+    const svc = data.services_status || {};
+    document.getElementById("svc-status").innerHTML = Object.entries(svc).map(([k,v]) =>
+      `<li><strong>${esc(k)}</strong>: <span class="badge">${esc(v)}</span></li>`).join("") || "<li class='muted'>Sem dados</li>";
+    document.getElementById("gam-box").innerHTML = `
+      <p>Nível <strong>${esc(gam.level)}</strong> · XP <strong>${esc(gam.xp)}</strong>
+      (${esc(gam.xp_into_level)}/${esc(gam.xp_per_level)})</p>
+      <p class="muted small">Desafios concluídos: ${esc(gam.completed_count)}</p>
+      <div>${(gam.achievements||[]).filter(a=>a.unlocked).map(a=>`<span title="${esc(a.description)}">${esc(a.icon)} ${esc(a.name)}</span>`).join(" · ")||"<span class='muted'>Nenhuma conquista ainda</span>"}</div>`;
+    document.getElementById("leaderboard").innerHTML = (data.leaderboard||[]).map(r =>
+      `<li>#${esc(r.rank)} ${esc(r.user_id)} — ${esc(r.xp)} XP (nv ${esc(r.level)})</li>`).join("") || "<li class='muted'>Ranking vazio</li>";
+    document.getElementById("recs").innerHTML = (data.recommendations||[]).slice(0,20).map(r =>
+      `<div class="card" style="margin:8px 0;padding:10px">
+        <span class="badge">${esc(r.severity)}</span> <strong>${esc(r.title)}</strong>
+        <p class="muted small">${esc(r.detail)}</p>
+        <p class="small">🛠️ ${esc(r.remediation)}</p>
+      </div>`).join("") || "<p class='muted'>Nenhuma recomendação crítica no momento. Rode scans em alvos autorizados.</p>";
+    const tb = document.querySelector("#act-table tbody");
+    tb.innerHTML = (data.activities||[]).map(a =>
+      `<tr><td>${esc(a.at)}</td><td>${esc(a.tool)}</td><td>${esc(a.target)}</td><td>${esc(a.findings)}</td></tr>`
+    ).join("") || `<tr><td colspan="4" class="muted">Sem atividades — execute ferramentas no Cyber Lab.</td></tr>`;
+    document.getElementById("cat-tools").innerHTML = (data.categories||[]).map(c =>
+      `<article class="card tool"><h3>${esc(c.icon)} ${esc(c.name)}</h3><p class="muted small">${esc(c.description)}</p>
+       <p class="small">${(c.tool_ids||[]).map(esc).join(", ")}</p></article>`
+    ).join("");
+  } catch(e) {
+    document.getElementById("recs").innerHTML = `<p class="muted">Falha ao carregar dashboard: ${esc(e.message||e)}</p>`;
+  }
+  window.exportReport = async function(fmt){
+    try {
+      const r = await fetch("/api/cyber/report/export?format="+(fmt||"md"));
+      const j = await r.json();
+      const blob = new Blob([j.text || JSON.stringify(j,null,2)], {type: "text/plain;charset=utf-8"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = j.filename || "jarvis-cyber-report.md";
+      a.click();
+    } catch(e) { alert("Falha ao exportar: "+e); }
+  };
+})();
+</script>
+{% endblock %}

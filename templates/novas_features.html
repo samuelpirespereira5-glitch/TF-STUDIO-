@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% block title %}Novas Funcionalidades · JARVIS{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/novas_features.css') }}">
+{% endblock %}
+{% block content %}
+<div class="nf-wrap">
+  <header class="nf-hero">
+    <div>
+      <p class="nf-kicker">Expansão</p>
+      <h1>✨ Novas funcionalidades</h1>
+      <p class="muted">Templates, ranking, flashcards, quiz, progresso e mais — tudo integrado ao JARVIS.</p>
+    </div>
+  </header>
+
+  <nav class="nf-tabs" id="nf-tabs">
+    <button data-tab="games" class="active">🎮 Jogos</button>
+    <button data-tab="prog">💻 Programação</button>
+    <button data-tab="study">📚 Estudos</button>
+    <button data-tab="sites">🌐 Sites</button>
+    <button data-tab="sprite">🎨 Sprites</button>
+    <button data-tab="profile">👤 Perfil</button>
+  </nav>
+
+  <!-- JOGOS -->
+  <section class="nf-panel active" id="panel-games">
+    <div class="nf-grid">
+      <div class="card">
+        <h2>📦 Templates prontos</h2>
+        <p class="muted small">Comece sem zero. Clique para usar no Criador de Jogos.</p>
+        <div id="tpl-list" class="nf-list"></div>
+      </div>
+      <div class="card">
+        <h2>🖼️ Loja de assets</h2>
+        <p class="muted small">Personagens, cenários e sons — arraste ou copie o ID.</p>
+        <div class="nf-filters">
+          <button data-cat="" class="chip active">Todos</button>
+          <button data-cat="personagens" class="chip">Personagens</button>
+          <button data-cat="cenários" class="chip">Cenários</button>
+          <button data-cat="itens" class="chip">Itens</button>
+          <button data-cat="sons" class="chip">Sons</button>
+        </div>
+        <div id="asset-list" class="nf-assets"></div>
+      </div>
+      <div class="card">
+        <h2>🏆 Ranking global</h2>
+        <p class="muted small">Melhores pontuações entre jogos criados pelos usuários.</p>
+        <div id="rank-list" class="nf-list"></div>
+      </div>
+      <div class="card">
+        <h2>🔊 Sons pré-carregados</h2>
+        <div id="sound-list" class="nf-list"></div>
+      </div>
+      <div class="card full">
+        <h2>🔗 Compartilhar jogo (link público)</h2>
+        <p class="muted small">Cole o ID do jogo salvo e gere um link para qualquer pessoa testar.</p>
+        <div class="nf-row">
+          <input type="text" id="share-game-id" placeholder="ID do jogo">
+          <button class="btn primary" id="btn-share">Gerar link</button>
+        </div>
+        <div id="share-result" class="muted small" style="margin-top:8px"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROGRAMAÇÃO -->
+  <section class="nf-panel" id="panel-prog">
+    <div class="nf-grid">
+      <div class="card">
+        <h2>🛤️ Projetos guiados</h2>
+        <p class="muted small">Com checkpoints e código inicial.</p>
+        <div id="guided-list" class="nf-list"></div>
+      </div>
+      <div class="card">
+        <h2>📅 Desafio da semana</h2>
+        <div id="daily-challenge" class="nf-daily"></div>
+      </div>
+      <div class="card full" id="guided-detail" style="display:none">
+        <h2 id="gd-title"></h2>
+        <p class="muted" id="gd-meta"></p>
+        <ol id="gd-checks"></ol>
+        <pre id="gd-starter" class="nf-code"></pre>
+        <a class="btn primary" href="/programming7">Abrir no editor</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ESTUDOS -->
+  <section class="nf-panel" id="panel-study">
+    <div class="nf-grid">
+      <div class="card">
+        <h2>🃏 Flashcards</h2>
+        <div class="nf-row">
+          <input type="text" id="deck-name" placeholder="Nome do deck">
+          <button class="btn primary" id="btn-new-deck">Criar deck</button>
+        </div>
+        <div id="deck-list" class="nf-list" style="margin-top:12px"></div>
+        <div id="flash-study" style="display:none;margin-top:16px">
+          <div class="nf-card-front" id="fc-front"></div>
+          <div class="nf-card-back muted" id="fc-back" style="display:none"></div>
+          <div class="nf-row" style="margin-top:10px">
+            <button class="btn" id="fc-reveal">Revelar</button>
+            <button class="btn" data-q="1">Difícil</button>
+            <button class="btn" data-q="3">Ok</button>
+            <button class="btn primary" data-q="5">Fácil</button>
+          </div>
+        </div>
+        <div id="add-card-form" style="display:none;margin-top:12px">
+          <input type="text" id="card-front" placeholder="Frente">
+          <input type="text" id="card-back" placeholder="Verso">
+          <button class="btn primary" id="btn-add-card">Adicionar card</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2>🧠 Resumo / Mapa mental</h2>
+        <textarea id="summary-text" rows="4" placeholder="Cole um texto aqui..."></textarea>
+        <button class="btn primary" id="btn-summary">Gerar resumo</button>
+        <div id="summary-out" class="nf-summary"></div>
+      </div>
+      <div class="card">
+        <h2>❓ Quiz automático</h2>
+        <div class="nf-row">
+          <input type="text" id="quiz-topic" placeholder="Assunto (ex: Python)">
+          <button class="btn primary" id="btn-quiz">Gerar quiz</button>
+        </div>
+        <div id="quiz-out" class="nf-quiz"></div>
+      </div>
+      <div class="card">
+        <h2>📆 Calendário de estudos</h2>
+        <div class="nf-row">
+          <input type="text" id="ev-title" placeholder="Título">
+          <input type="date" id="ev-date">
+          <input type="time" id="ev-time" value="09:00">
+          <button class="btn primary" id="btn-add-ev">Agendar</button>
+        </div>
+        <div id="ev-list" class="nf-list" style="margin-top:12px"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SITES -->
+  <section class="nf-panel" id="panel-sites">
+    <div class="nf-grid">
+      <div class="card full">
+        <h2>📄 Templates de layout</h2>
+        <p class="muted small">Portfólio, loja, blog, landing page e docs.</p>
+        <div id="site-tpl-list" class="nf-list"></div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- SPRITES -->
+  <section class="nf-panel" id="panel-sprite">
+    <div class="nf-grid">
+      <div class="card full">
+        <h2>🎨 Editor de Sprites (pixel art)</h2>
+        <p class="muted small">Desenhe sprites 8×8, 16×16 ou 32×32 no navegador e salve para usar nos jogos.</p>
+        <a class="btn primary" href="/sprite-editor">Abrir editor de sprites →</a>
+        <div id="sprite-list-mini" class="nf-list" style="margin-top:14px"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PERFIL -->
+  <section class="nf-panel" id="panel-profile">
+    <div class="nf-grid">
+      <div class="card">
+        <h2>📊 Meu progresso</h2>
+        <div id="progress-panel" class="nf-progress"></div>
+      </div>
+      <div class="card">
+        <h2>⭐ Favoritos</h2>
+        <div id="fav-list" class="nf-list"></div>
+      </div>
+      <div class="card full">
+        <h2>🏅 Conquistas</h2>
+        <div id="ach-list" class="nf-ach"></div>
+      </div>
+    </div>
+  </section>
+</div>
+<script src="{{ url_for('static', filename='js/novas_features.js') }}"></script>
+{% endblock %}

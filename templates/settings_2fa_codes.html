@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}2FA ativado · Tristan Thorne{% endblock %}
+{% block content %}
+<h1>✅ 2FA ativado</h1>
+<div class="card" style="border-color: var(--accent2); box-shadow: 0 0 26px rgba(176, 38, 255, 0.15);">
+  <h2>🔑 Guarde estes códigos de recuperação</h2>
+  <p class="muted"><strong>Eles só aparecem aqui, uma única vez.</strong> Guarde em um lugar seguro (gerenciador de
+  senhas, papel trancado). Cada código serve para um login, caso você perca acesso ao app autenticador. Depois de
+  usados, deixam de funcionar.</p>
+  <div class="security-mini-grid" style="margin-top:10px;grid-template-columns:repeat(2,1fr)">
+    {% for c in codes %}
+    <div style="font-family:monospace;font-size:15px;padding:6px 10px"><b>{{ c }}</b></div>
+    {% endfor %}
+  </div>
+</div>
+<a href="{{ url_for('settings') }}" class="btn primary">Voltar às Configurações</a>
+{% endblock %}

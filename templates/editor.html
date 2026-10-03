@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Editor · {{ site.name }}{% endblock %}
+{% block content %}
+<h1>✏ {{ site.name }}</h1>
+<div class="tabs">
+  {% if challenge %}
+  <button class="tab-btn active" data-tab="desafio">🎯 Desafio</button>
+  <button class="tab-btn" data-tab="code">{{ "</>" }} Código</button>
+  {% else %}
+  <button class="tab-btn active" data-tab="ai">🤖 Editar com IA</button>
+  <button class="tab-btn" data-tab="code">{{ "</>" }} Código</button>
+  {% endif %}
+  <button class="tab-btn" data-tab="debug">🐞 Depurar</button>
+  {% if not challenge %}<button class="tab-btn" data-tab="images">🖼 Imagens</button>{% endif %}
+  <button class="tab-btn" data-tab="preview">👁 Pré-visualizar</button>
+  {% if not challenge %}
+  <button class="tab-btn" data-tab="translate">🌍 Traduzir</button>
+  <button class="tab-btn" data-tab="publish">☁ Publicar</button>
+  {% endif %}
+</div>
+
+{% if challenge %}
+<div class="tab-panel" data-panel="desafio">
+  <div class="card">
+    <p class="muted small"><span class="badge">{{ challenge.difficulty }}</span> <span class="badge">⭐ {{ challenge.xp }} XP</span></p>
+    <h3>{{ challenge.summary }}</h3>
+    <p><strong>🎯 Objetivo:</strong> {{ challenge.objective }}</p>
+    <p><strong>🐞 Problema:</strong> {{ challenge.mission }}</p>
+    <details style="margin-top:10px">
+      <summary class="btn small" style="display:inline-block; cursor:pointer">💡 Ver dicas</summary>
+      <ul>
+        {% for h in challenge.hints %}<li>{{ h }}</li>{% endfor %}
+      </ul>
+    </details>
+    <div id="desafio-status" class="tool-chip" style="display:inline-block;margin-top:10px">{% if site.challenge_status == "concluido" %}✅ CONCLUÍDO{% else %}🟡 AINDA NÃO VALIDADO{% endif %}</div>
+    <div class="inline" style="margin-top:14px">
+      <button class="btn primary" id="desafio-validar-btn">🔎 Verificar se está correto</button>
+      <button class="btn" id="desafio-retest-btn" type="button">🔄 Verificar novamente</button>
+    </div>
+    <div id="desafio-resultado" style="margin-top:14px"></div>
+    {% if challenge.explanation %}
+    <details style="margin-top:14px">
+      <summary class="btn small" style="display:inline-block; cursor:pointer">📖 Explicação do erro</summary>
+      <p class="muted" style="margin-top:8px">{{ challenge.explanation }}</p>
+    </details>
+    {% endif %}
+    {% if challenge.expected_solution %}
+    <details style="margin-top:10px">
+      <summary class="btn small ghost" style="display:inline-block; cursor:pointer">🙈 Ver solução esperada (spoiler)</summary>
+      <p class="muted" style="margin-top:8px">{{ challenge.expected_solution }}</p>
+    </details>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<div class="tab-panel {{ 'hidden' if challenge else '' }}" data-panel="ai">
+  <div class="card">
+    <label>O que você quer mudar?</label>
+    <textarea id="ai-instruction" rows="5" placeholder="Ex: troque o fundo para preto, deixe os botões vermelhos, adicione uma seção de produtos..."></textarea>
+    <p class="muted small">Exemplos: "deixe o site mais moderno" · "aumente o tamanho do título" · "melhore o menu no celular"</p>
+    <button class="btn primary" id="ai-edit-btn">🤖 Aplicar alteração com IA</button>
+    <div id="ai-edit-status" class="muted" style="margin-top:10px"></div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <label>Deixe a IA melhorar sozinha</label>
+    <p class="muted small">Sem escrever nada: a IA analisa o site e corrige bugs, responsividade, acessibilidade e acabamento visual por conta própria.</p>
+    <button class="btn" id="ai-improve-btn">✨ Melhorar automaticamente</button>
+    <div id="ai-improve-status" class="muted" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<div class="tab-panel hidden" data-panel="code">
+  <form method="post" action="{{ url_for('editor_save', slug=site.slug) }}">
+    <textarea name="html" id="code-editor" spellcheck="false">{{ html }}</textarea>
+    <button type="submit" class="btn primary" style="margin-top:10px">💾 Salvar alterações</button>
+  </form>
+</div>
+
+<div class="tab-panel hidden" data-panel="preview">
+  <iframe id="preview-frame" src="{{ url_for('preview_site', slug=site.slug) }}" class="preview-frame"></iframe>
+</div>
+
+<div class="tab-panel hidden" data-panel="debug">
+  <div class="card">
+    <p class="muted small">Analisa o arquivo de verdade em busca de problemas reais: imagens quebradas, ids duplicados, tags HTML não fechadas e JavaScript com chaves/parênteses desbalanceados.</p>
+    <button class="btn primary" id="debug-scan-btn">🔍 Analisar arquivo</button>
+    <div id="debug-results" style="margin-top:14px"></div>
+    <button class="btn" id="debug-fix-btn" style="margin-top:10px; display:none">🛠 Corrigir automaticamente</button>
+    <div id="debug-status" class="muted" style="margin-top:10px"></div>
+  </div>
+</div>
+
+{% if not challenge %}
+<div class="tab-panel hidden" data-panel="images">
+  <div class="card">
+    <label>Adicionar uma imagem a este site</label>
+    <input type="file" id="image-upload-input" accept=".png,.jpg,.jpeg,.gif,.webp,.svg">
+    <div id="image-upload-status" class="muted small" style="margin-top:8px"></div>
+    <p class="muted small" style="margin-top:10px">Depois de enviar, copie o caminho (ex: <code>assets/foto.jpg</code>) e use no campo "Editar com IA" ou direto no código — ex: "coloque a imagem assets/foto.jpg na seção de galeria".</p>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <label>Imagens já usadas neste site</label>
+    <div id="image-gallery" class="image-gallery"></div>
+  </div>
+</div>
+
+<div class="tab-panel hidden" data-panel="translate">
+  <div class="card">
+    <label>Traduzir este site para:</label>
+    <select id="translate-country">
+      {% for c in countries %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+    </select>
+    <button class="btn primary" id="translate-btn" style="margin-top:10px">🌍 Traduzir (cria uma cópia)</button>
+    <div id="translate-status" class="muted" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<div class="tab-panel hidden" data-panel="publish">
+  <div class="card">
+    <p>Publica (ou atualiza) este site no Netlify usando o Netlify CLI configurado no servidor.</p>
+    <button class="btn primary" id="publish-btn">☁ Publicar no Netlify</button>
+    <div id="publish-status" class="muted" style="margin-top:10px"></div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.SITE_SLUG = {{ site.slug|tojson }};
+  window.IS_CHALLENGE = {{ (challenge is not none)|tojson }};
+</script>
+<script src="{{ static_v('js/editor.js') }}"></script>
+{% endblock %}

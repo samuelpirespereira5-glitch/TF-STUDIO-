@@ -1,0 +1,25 @@
+.se-wrap{max-width:960px;margin:0 auto;padding:16px 20px 48px}
+.se-hero{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.se-kicker{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;opacity:.7;margin:0 0 4px}
+.se-hero h1{margin:0 0 6px;font-size:1.5rem}
+.se-grid{display:grid;grid-template-columns:1fr 280px;gap:14px}
+@media(max-width:720px){.se-grid{grid-template-columns:1fr}}
+.se-grid .card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px}
+.se-toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.se-toolbar select,.se-toolbar input[type=color]{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.12);color:inherit;padding:6px;border-radius:6px}
+.se-canvas-wrap{display:flex;justify-content:center;background:#0a0e17;border-radius:8px;padding:12px}
+#se-canvas{image-rendering:pixelated;cursor:crosshair;border:1px solid rgba(255,255,255,.1);background:
+  repeating-conic-gradient(#1a1f2e 0% 25%,#12161f 0% 50%) 0 0/16px 16px}
+.se-preview-row{display:flex;align-items:center;gap:12px;margin-top:12px}
+#se-preview,#se-preview2{image-rendering:pixelated;border:1px solid rgba(255,255,255,.15);background:#111}
+.se-save-row{display:flex;gap:8px;margin-top:12px}
+.se-save-row input{flex:1;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.12);color:inherit;padding:8px 10px;border-radius:8px}
+.btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:inherit;padding:8px 14px;border-radius:8px;cursor:pointer}
+.btn.primary{background:linear-gradient(135deg,#3b82f6,#6366f1);border-color:transparent;color:#fff}
+.se-list{display:flex;flex-direction:column;gap:6px;max-height:240px;overflow:auto}
+.se-list .item{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(0,0,0,.25);border-radius:8px;cursor:pointer;font-size:.88rem}
+.se-list .item:hover{background:rgba(59,130,246,.15)}
+.se-palette{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.se-palette button{width:28px;height:28px;border-radius:6px;border:2px solid transparent;cursor:pointer;padding:0}
+.se-palette button.active{border-color:#fff}
+.muted{opacity:.7}.small{font-size:.85rem}

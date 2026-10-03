@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% block title %}Security Center · Tristan Thorne{% endblock %}
+{% block content %}
+<h1>🛡 Security Center + Cyber Lab</h1>
+<p class="muted">Central de segurança para sites criados/gerenciados pelo Tristan Thorne. Scanners externos só podem ser usados em alvos autorizados; este centro não declara execução que não ocorreu.</p>
+
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-value" id="sc-sites">—</div><div class="stat-label">Sites analisados</div></div>
+  <div class="stat-card"><div class="stat-value" id="sc-scans">—</div><div class="stat-label">Scans</div></div>
+  <div class="stat-card"><div class="stat-value" id="sc-vulns">—</div><div class="stat-label">Vulnerabilidades abertas</div></div>
+  <div class="stat-card"><div class="stat-value" id="sc-fixed">—</div><div class="stat-label">Corrigidas</div></div>
+  <div class="stat-card"><div class="stat-value" id="sc-critical">—</div><div class="stat-label">Riscos críticos</div></div>
+  <div class="stat-card"><div class="stat-value" id="sc-review">—</div><div class="stat-label">Necessitam revisão</div></div>
+</div>
+
+<div class="card tool">
+  <h2>🧱 Postura de segurança — Fase 3</h2>
+  <div class="stats-row" id="p3-stats" style="margin:10px 0">
+    <div class="stat-card"><div class="stat-value" id="p3-score">—</div><div class="stat-label">Postura</div></div>
+    <div class="stat-card"><div class="stat-value" id="p3-mfa">—</div><div class="stat-label">MFA</div></div>
+    <div class="stat-card"><div class="stat-value" id="p3-sessions">—</div><div class="stat-label">Sessões</div></div>
+    <div class="stat-card"><div class="stat-value" id="p3-events">—</div><div class="stat-label">Eventos</div></div>
+  </div>
+  <div id="p3-checks" class="grid"></div>
+  <div id="p3-recs" class="muted small" style="margin-top:10px"></div>
+</div>
+
+<div class="card tool">
+  <h2>🖥 Sessões ativas</h2>
+  <p class="muted small">Somente metadados de sessão. IDs reais e cookies nunca são exibidos.</p>
+  <div style="overflow:auto"><table class="table"><thead><tr><th>Atual</th><th>Usuário</th><th>Papel</th><th>Criada</th><th>Última atividade</th><th>Rede</th><th>Ação</th></tr></thead>
+  <tbody id="p3-sessions-table"></tbody></table></div>
+</div>
+
+<div class="card tool">
+  <h2>🚨 Eventos recentes</h2>
+  <div id="p3-events-list" class="muted small">Carregando...</div>
+</div>
+
+<div class="card tool">
+  <h2>🔍 Verificar segurança</h2>
+  <div class="inline">
+    <select id="sc-site">
+      {% for site in sites %}<option value="{{ site.slug }}">{{ site.name }}</option>{% endfor %}
+    </select>
+    <select id="sc-mode">
+      <option value="quick">QUICK SCAN</option>
+      <option value="full" selected>FULL SCAN</option>
+      <option value="hardening">HARDENING</option>
+      <option value="deep">DEEP ANALYSIS</option>
+      <option value="rescan">RESCAN</option>
+    </select>
+    <button class="btn primary" onclick="scanSite()">🔍 Verificar segurança</button>
+    <button class="btn" onclick="document.getElementById('sc-mode').value='rescan';scanSite()">🔄 Verificar novamente</button>
+    <button class="btn" onclick="exportReport()">📄 Exportar relatório</button>
+  </div>
+  <div id="sc-meta" class="muted small" style="margin-top:10px"></div>
+</div>
+
+<div class="card tool">
+  <h2>Security Score</h2>
+  <div id="sc-score" class="result">—</div>
+  <div id="sc-comparison" class="muted small"></div>
+</div>
+
+<div class="card tool">
+  <h2>Resultados</h2>
+  <div style="overflow:auto">
+    <table class="table">
+      <thead><tr><th>Severidade</th><th>Status</th><th>Vulnerabilidade</th><th>Arquivo/Rota</th><th>Evidência</th><th>Impacto</th><th>Correção</th><th>Ação</th></tr></thead>
+      <tbody id="sc-results"><tr><td colspan="8" class="muted">Execute um scan.</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card tool">
+  <h2>📊 Comparação</h2>
+  <div id="sc-diff" class="muted">SC anterior → SC atual</div>
+</div>
+
+<div class="card tool">
+  <h2>📜 Histórico de scans</h2>
+  <div id="sc-history" class="muted">Carregando...</div>
+</div>
+
+<div class="card tool" id="sc-learning" style="display:none">
+  <h2>📚 Aprender</h2>
+  <div id="sc-learning-content"></div>
+</div>
+
+<div class="card tool">
+  <h2>🧰 Ferramentas</h2>
+  <p class="muted small">Status baseado em detecção real no servidor. Uma ferramenta ausente nunca é apresentada como instalada.</p>
+  <div class="grid" id="sc-tools"></div>
+</div>
+
+<script>
+let currentSlug="", currentData=null;
+const esc=v=>String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+const sev=s=>({critical:"🔴 Crítico",high:"🟠 Alto",medium:"🟡 Médio",low:"🔵 Baixo",info:"🟢 Informativo"}[s]||s);
+const stat=f=>f.status==="needs_review"?"NECESSITA REVISÃO":f.status==="possible"?"POSSÍVEL":"CONFIRMADO";
+
+function renderScan(d){
+ currentData=d; currentSlug=d.slug;
+ document.getElementById("sc-score").innerHTML=`<strong>${esc(d.score)}/100</strong> · ${esc(d.risk)} · ${esc(d.mode||"full")}`;
+ document.getElementById("sc-meta").textContent=`${esc(d.files_scanned)} arquivo(s) · ${esc(d.note)}`;
+ const rows=(d.findings||[]).map(f=>`<tr><td>${sev(f.severity)}</td><td>${esc(stat(f))}</td><td><button class="btn small" onclick="learnFinding('${esc(f.id)}')">${esc(f.title)}</button></td><td><code>${esc(f.where)}</code></td><td><code>${esc(f.evidence)}</code></td><td>${esc(f.impact)}</td><td>${esc(f.fix)}</td><td><button class="btn small" onclick="rescanSite()">🔄 Testar novamente</button>${f.autofix?` <button class="btn small" onclick="applyFix('${esc(f.id)}')">Aplicar correção</button>`:` <span class="muted small">Manual</span>`}</td></tr>`).join("");
+ document.getElementById("sc-results").innerHTML=rows||`<tr><td colspan="8">Nenhum achado.</td></tr>`;
+ const c=d.comparison;
+ if(c){
+   document.getElementById("sc-comparison").textContent=`Anterior ${c.before_score} → atual ${c.after_score}`;
+   document.getElementById("sc-diff").innerHTML=`<strong>Corrigidos:</strong> ${c.resolved.length} · <strong>Continuam:</strong> ${c.persistent.length} · <strong>Apareceram:</strong> ${c.new.length}`;
+ } else { document.getElementById("sc-comparison").textContent="Primeiro scan."; document.getElementById("sc-diff").textContent="Sem scan anterior para comparar."; }
+}
+async function scanSite(){
+ const slug=document.getElementById("sc-site").value;if(!slug)return;
+ try{const r=await fetch(`/api/security-center/site/${encodeURIComponent(slug)}/scan`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({mode:document.getElementById("sc-mode").value})});const d=await r.json();if(!r.ok)throw Error(d.error||"Falha");renderScan(d);await loadDashboard();}
+ catch(e){document.getElementById("sc-meta").textContent="Erro: "+e.message;}
+}
+async function applyFix(id){
+ if(!confirm("Antes da alteração será criado um backup. Aplicar a correção?"))return;
+ try{const r=await fetch(`/api/security-center/site/${encodeURIComponent(currentSlug)}/fix`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({finding_id:id,confirm:true})});const d=await r.json();if(!r.ok)throw Error(d.error||"Falha");document.getElementById("sc-meta").textContent=`${d.message} Backup criado antes da alteração. Verificação: ${d.verification?.status||"concluída"}`; if(d.rescan) renderScan(d.rescan); await loadDashboard();}
+ catch(e){alert(e.message);}
+}
+async function learnFinding(id){
+ try{const r=await fetch(`/api/security-center/site/${encodeURIComponent(currentSlug)}/finding/${encodeURIComponent(id)}`);const d=await r.json();if(!r.ok)throw Error(d.error||"Falha");const f=d.finding||{},l=d.learn||{};
+ const html=`<h3>${esc(f.concept||f.title)}</h3><p><strong>O que é:</strong> ${esc(l.simple||f.simple_explanation)}</p><p><strong>Por que importa:</strong> ${esc(l.why||f.why)}</p><p><strong>Evidência:</strong> <code>${esc(f.evidence)}</code></p><p><strong>Impacto:</strong> ${esc(f.possible_impact||f.impact)}</p><p><strong>Como corrigir:</strong> ${esc(f.correction||f.fix)}</p><p><strong>Exemplo:</strong> <code>${esc(f.example_fix||"N/A")}</code></p><p><strong>Status:</strong> ${esc(stat(f))}</p>`;document.getElementById("sc-learning-content").innerHTML=html;document.getElementById("sc-learning").style.display="block";document.getElementById("sc-learning").scrollIntoView({behavior:"smooth",block:"start"});}catch(e){alert(e.message);}
+}
+
+async function exportReport(){
+ if(!currentSlug)return;
+ const r=await fetch(`/api/security-center/site/${encodeURIComponent(currentSlug)}/report`);const d=await r.json();
+ if(!r.ok){alert(d.error||"Nenhum relatório disponível.");return;}
+ const blob=new Blob([d.report],{type:"text/markdown"}),url=URL.createObjectURL(blob),a=document.createElement("a");
+ a.href=url;a.download=(currentSlug||"security-report")+"-security-report.md";a.click();URL.revokeObjectURL(url);
+}
+async function loadDashboard(){
+ const r=await fetch("/api/security-center/dashboard");const d=await r.json();if(!r.ok)return;
+ document.getElementById("sc-sites").textContent=d.sites_analyzed||0;
+ document.getElementById("sc-scans").textContent=d.scans||0;
+ document.getElementById("sc-vulns").textContent=d.vulnerabilities||0;
+ document.getElementById("sc-fixed").textContent=d.corrected||0;
+ document.getElementById("sc-critical").textContent=d.critical||0;
+ document.getElementById("sc-review").textContent=d.pending_reviews||0;
+ document.getElementById("sc-history").innerHTML=(d.history||[]).map(x=>`<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08)"><strong>${esc(x.name)}</strong> · ${esc(x.score)}/100 · ${esc(x.risk)} · ${esc(x.mode)} · ${esc(x.ts)}</div>`).join("")||"Nenhum scan.";
+}
+async function loadTools(){
+ const r=await fetch("/api/jarvis/tool/tools_status",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({params:{}})});const d=await r.json();if(!r.ok)return;
+ const rows=(d.raw&&d.raw.tools)||d.tools||[],cat={};rows.forEach(t=>(cat[t.category]??=[]).push(t));
+ document.getElementById("sc-tools").innerHTML=Object.entries(cat).map(([k,arr])=>`<div class="card"><h3>${esc(k)}</h3>${arr.map(t=>`<p><strong>${t.status==="installed"?"🟢":t.status==="config_required"?"🟡":"🔴"} ${esc(t.label)}</strong><br><span class="muted small">${esc(t.status==="installed"?t.version||"instalada":t.status==="config_required"?"configuração necessária":"não instalada")}</span></p>`).join("")}</div>`).join("");
+}
+async function loadPhase3(){
+  const esc3=v=>String(v??"").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  try{
+    const [p,s,e]=await Promise.all([
+      fetch("/api/security/phase3/posture").then(r=>r.json()),
+      fetch("/api/security/phase3/sessions").then(r=>r.json()),
+      fetch("/api/security/phase3/events?limit=30").then(r=>r.json())
+    ]);
+    document.getElementById("p3-score").textContent=(p.score??"—")+"/100";
+    document.getElementById("p3-mfa").textContent=p.mfa_enabled?"ATIVO":"REVISAR";
+    document.getElementById("p3-sessions").textContent=s.count??0;
+    document.getElementById("p3-events").textContent=(e.events||[]).length;
+    document.getElementById("p3-checks").innerHTML=(p.checks||[]).map(x=>{
+      const icon=x.status==="pass"?"🟢":x.status==="review"?"🟡":x.status==="available"?"🔵":"🔴";
+      return `<div class="card" style="margin:6px 0;padding:10px"><strong>${icon} ${esc3(x.name)}</strong><div class="muted small">${esc3(x.detail)}</div></div>`;
+    }).join("");
+    document.getElementById("p3-recs").innerHTML=(p.recommendations||[]).map(x=>`<div>• ${esc3(x)}</div>`).join("");
+    document.getElementById("p3-sessions-table").innerHTML=(s.sessions||[]).map(x=>`<tr>
+      <td>${x.current?"🟢 atual":"—"}</td><td>${esc3(x.uid)}</td><td>${esc3(x.role)}</td>
+      <td>${esc3(x.created)}</td><td>${x.last_seen_ts?new Date(x.last_seen_ts*1000).toLocaleString():"—"}</td>
+      <td>${esc3(x.ip_prefix||"não armazenado")}</td>
+      <td>${x.current?"—":`<button class="btn small" onclick="revokeP3Session('${esc3(x.id)}')">Encerrar</button>`}</td></tr>`).join("")||`<tr><td colspan="7">Nenhuma sessão.</td></tr>`;
+    document.getElementById("p3-events-list").innerHTML=(e.events||[]).map(x=>`<div style="padding:7px 0;border-bottom:1px solid rgba(255,255,255,.08)">
+      <strong>${x.ok?"🟢":"🔴"} ${esc3(x.action)}</strong> · ${esc3(x.time)} ${x.target?" · "+esc3(x.target):""}
+    </div>`).join("")||"Nenhum evento.";
+  }catch(err){document.getElementById("p3-recs").textContent="Falha ao carregar Fase 3: "+err.message;}
+}
+async function revokeP3Session(id){
+  if(!confirm("Encerrar esta sessão?"))return;
+  const r=await fetch("/api/security/phase3/sessions/"+encodeURIComponent(id)+"/revoke",{method:"POST",headers:{"X-CSRF-Token":"{{ csrf_token }}","Content-Type":"application/json"}});
+  const d=await r.json(); if(!r.ok){alert(d.error||"Falha");return;} loadPhase3();
+}
+loadDashboard();loadTools();loadPhase3();
+</script>
+{% endblock %}

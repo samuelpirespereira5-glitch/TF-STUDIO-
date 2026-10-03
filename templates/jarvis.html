@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+{% block title %}Jarvis · Tristan Thorne{% endblock %}
+{% block content %}
+<div class="jarvis-page">
+<div class="jarvis-hero">
+  <div>
+    <div class="jarvis-eyebrow">TRISTAN THORNE · AI COMMAND CENTER</div>
+    <h1>🧠 Jarvis</h1>
+    <p class="muted">Assistente, laboratório e centro de comando em um só lugar. O histórico continua salvo localmente no seu navegador.</p>
+  </div>
+  <div class="jarvis-live"><span class="live-dot"></span><span>ONLINE</span><small>IA + ferramentas</small></div>
+</div>
+
+<div class="jarvis-overview-grid">
+  <div class="jarvis-overview-card"><span>⚡</span><b>{{ jarvis_stats.jarvis_tools }}</b><small>ferramentas disponíveis</small></div>
+  <div class="jarvis-overview-card"><span>🐉</span><b>{{ jarvis_stats.kali_integrated }}</b><small>ferramentas Kali integradas</small></div>
+  <div class="jarvis-overview-card"><span>🎯</span><b>{{ jarvis_stats.cyber_challenges }}</b><small>desafios Cyber Lab</small></div>
+  <div class="jarvis-overview-card"><span>🌐</span><b>{{ jarvis_stats.sites }}</b><small>sites no projeto</small></div>
+  <div class="jarvis-overview-card"><span>🛡</span><b>{{ jarvis_stats.security_tools }}</b><small>ferramentas de segurança</small></div>
+</div>
+
+<div class="jarvis-capabilities card">
+  <div class="jarvis-cap-head"><div><strong>O que posso fazer</strong><span>Atalhos para recursos já existentes</span></div><span class="jarvis-secure-badge">🔐 {{ jarvis_role|upper }} · acesso {{ 'protegido' if auth_state.ready else 'sem credencial' }}</span></div>
+  <div class="jarvis-cap-grid">
+    <button type="button" class="jarvis-cap" data-quick="Analisar meu código e explicar os problemas"><b>🧑‍💻</b><span>Código</span><small>Analisar, explicar e corrigir</small></button>
+    <button type="button" class="jarvis-cap" data-quick="Quero estudar segurança em um laboratório seguro"><b>🛡</b><span>Cyber</span><small>Segurança e defesa</small></button>
+    <button type="button" class="jarvis-cap" data-quick="Me ajude a criar um site profissional"><b>✨</b><span>Sites</span><small>Criar e editar projetos</small></button>
+    <button type="button" class="jarvis-cap" data-quick="Me ensine programação passo a passo"><b>📚</b><span>Estudos</span><small>Programação e lógica</small></button>
+    <button type="button" class="jarvis-cap" data-quick="Mostre ferramentas de segurança disponíveis no laboratório"><b>🐉</b><span>Kali</span><small>Catálogo e ferramentas integradas</small></button>
+    <button type="button" class="jarvis-cap" data-quick="Crie um holograma de uma cidade real"><b>🛰</b><span>Holograma</span><small>3D, gestos e voz</small></button>
+    <button type="button" class="jarvis-cap" data-quick="Faça uma auditoria defensiva do meu site: headers, TLS, DNS, portas, dependências e segredos"><b>🔐</b><span>Security Audit</span><small>Diagnóstico defensivo completo</small></button>
+    <button type="button" class="jarvis-cap" data-quick="Mostre as ferramentas Blue Team disponíveis"><b>🧩</b><span>Blue Team</span><small>Detecção, hardening e resposta</small></button>
+    <button type="button" class="jarvis-cap" data-quick="Abra o terminal Kali e mostre os comandos permitidos"><b>⌨</b><span>Kali Terminal</span><small>Ferramentas em escopo autorizado</small></button>
+    <button type="button" class="jarvis-cap" data-quick="Faça uma auditoria de segurança de uma API e mostre autenticação, autorização, validação e rate limit"><b>🔌</b><span>API Security</span><small>Auth · autorização · validação</small></button>
+    <button type="button" class="jarvis-cap" data-quick="Analise um Dockerfile e procure problemas de hardening"><b>📦</b><span>Containers</span><small>Docker · Kubernetes · supply chain</small></button>
+    <button type="button" class="jarvis-cap" data-quick="Analise um workflow de GitHub Actions procurando permissões excessivas e riscos com secrets"><b>⚙</b><span>CI/CD</span><small>Workflows e secrets</small></button>
+    <button type="button" class="jarvis-cap" data-quick="Mostre ferramentas de forense e Blue Team disponíveis"><b>🔎</b><span>Forense</span><small>FIM · malware · DFIR</small></button>
+    <button type="button" class="jarvis-cap" data-quick="Mostre ferramentas de cloud e container security disponíveis"><b>☁</b><span>Cloud Security</span><small>Cloud · Kubernetes · SBOM</small></button>
+    <button type="button" class="jarvis-cap" data-quick="Faça uma auditoria de segurança dos cookies e sessões"><b>🍪</b><span>Sessões</span><small>Cookies · CSRF · rotação</small></button>
+    <button type="button" class="jarvis-cap" data-quick="Analise a política CSP atual e sugira hardening sem quebrar o frontend"><b>🧬</b><span>CSP/XSS</span><small>Headers · nonce · frames</small></button>
+    <button type="button" class="jarvis-cap" data-quick="Analise dependências e procure vulnerabilidades conhecidas sem atualizar nada"><b>📚</b><span>Dependências</span><small>SBOM · CVE · pip-audit</small></button>
+    <button type="button" class="jarvis-cap" data-quick="Verifique uploads, backups e secrets com foco defensivo"><b>🗄</b><span>Data Security</span><small>Uploads · backups · secrets</small></button>
+  </div>
+</div>
+
+<div class="jarvis-intel-grid">
+  <div class="jarvis-intel card"><span>👤</span><b>{{ jarvis_role|upper }}</b><small>papel atual</small><em>{{ 'MASTER_PASSWORD ativo' if auth_state.plaintext_active else ('hash ativo' if auth_state.hash_configured else 'credencial ausente') }}</em></div>
+  <div class="jarvis-intel card"><span>🧰</span><b>{{ jarvis_stats.jarvis_tools }}</b><small>ferramentas liberadas</small><em>{{ jarvis_stats.tool_categories }} categorias</em></div>
+  <div class="jarvis-intel card"><span>🐉</span><b>{{ jarvis_stats.kali_installed }}/{{ jarvis_stats.kali_total }}</b><small>ferramentas detectadas</small><em>{{ jarvis_stats.kali_categories }} categorias Kali</em></div>
+  <div class="jarvis-intel card"><span>🎯</span><b>{{ jarvis_stats.cyber_challenges }}</b><small>desafios disponíveis</small><em>Cyber Lab + secure coding</em></div>
+  <div class="jarvis-intel card"><span>🛡</span><b>{{ jarvis_stats.security_tools }}</b><small>recursos de segurança</small><em>auditoria · blue team · análise</em></div>
+  <div class="jarvis-intel card"><span>🌐</span><b>{{ jarvis_stats.sites }}</b><small>sites do workspace</small><em>criação · edição · preview</em></div>
+</div>
+
+<div class="card jarvis-card">
+  <div class="jarvis-card-border" aria-hidden="true"></div>
+
+  <div class="jarvis-toolbar">
+    <button id="new-chat-btn" class="btn small" title="Começar uma conversa nova">➕ Nova conversa</button>
+    <button id="history-btn" class="btn small" title="Ver conversas salvas">🕓 Histórico</button>
+    <button id="jarvis-settings-btn" class="btn small" title="Modos especializados e voz">⚙ Configurações</button>
+    <button id="telemetry-btn" class="btn small" title="Painel de telemetria (FPS, câmera, microfone, gestos...)">📊 Telemetria</button>
+    {% if has_cap("developer") %}<button id="developer-mode-btn" class="btn small" title="Ferramentas completas do Tristan Thorne para desenvolvimento">🧑‍💻 Desenvolvedor</button>{% endif %}
+  </div>
+
+  <div id="jarvis-history-panel" class="jarvis-panel hidden">
+    <div class="jarvis-panel-header">
+      <span class="jarvis-options-label">Conversas salvas</span>
+      <input id="jarvis-history-search" class="jarvis-history-search" type="search" placeholder="Pesquisar conversas…" aria-label="Pesquisar conversas">
+      <button id="history-close-btn" class="btn small ghost" title="Fechar">✕</button>
+    </div>
+    <div id="jarvis-history-list" class="jarvis-history-list"></div>
+  </div>
+
+  <div id="jarvis-settings-panel" class="jarvis-panel hidden">
+    <div class="jarvis-panel-header">
+      <span class="jarvis-options-label">Configurações do Jarvis</span>
+      <button id="settings-close-btn" class="btn small ghost" title="Fechar">✕</button>
+    </div>
+    <div class="jarvis-options">
+      <div class="jarvis-options-group">
+        <span class="jarvis-options-label">Modos especializados</span>
+        <div class="jarvis-modes">
+          <label class="checkbox small mode-chip" title="Tutor de alto nível em matemática, lógica, exatas e olimpíadas (OBMEP, OBM, ITA, IME, IMO...)"><input type="checkbox" id="pitagoras-mode"> 🔺 Academia de Pitágoras</label>
+          <label class="checkbox small mode-chip" title="Jarvis vira seu professor de código"><input type="checkbox" id="code-mode"> 🧑‍💻 Programação</label>
+          <label class="checkbox small mode-chip" title="Segurança digital de forma responsável"><input type="checkbox" id="cyber-mode"> 🛡 Cyber</label>
+          <label class="checkbox small mode-chip" title="Consultoria prática de empreendedorismo, marketing e gestão para o seu negócio"><input type="checkbox" id="negocios-mode"> 💼 Mentor de Negócios</label>
+          <label class="checkbox small mode-chip" title="Passo a passo para CTF e laboratórios: conceito, pista, correção e próximo desafio"><input type="checkbox" id="ctf-mode"> 🚩 CTF / Estudo</label>
+        </div>
+      </div>
+      <div class="jarvis-options-group">
+        <span class="jarvis-options-label">Voz</span>
+        <div class="jarvis-modes">
+          <label class="checkbox small mode-chip"><input type="checkbox" id="auto-voice" checked> 🔊 Ler em voz alta</label>
+          <label class="checkbox small mode-chip"><input type="checkbox" id="continuous-mode"> 🎙 Conversa contínua</label>
+          <label class="checkbox small voice-picker">🗣
+            <select id="voice-select"></select>
+          </label>
+        </div>
+        <div class="jarvis-voice-sliders">
+          <label class="small">Tom (mais grave = mais masculino)
+            <input type="range" id="voice-pitch" min="0.4" max="1.4" step="0.05">
+          </label>
+          <label class="small">Velocidade da fala
+            <input type="range" id="voice-rate" min="0.6" max="1.3" step="0.05">
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ITEM 27/28 do briefing: painel de telemetria + nível de performance.
+       Só números que o navegador consegue expor de forma confiável. -->
+  <div id="jarvis-telemetry-panel" class="jarvis-panel hidden">
+    <div class="jarvis-panel-header">
+      <span class="jarvis-options-label">Telemetria</span>
+      <button id="telemetry-close-btn" class="btn small ghost" title="Fechar">✕</button>
+    </div>
+    <div class="telemetry-grid">
+      <div class="telemetry-row"><span>FPS</span><b data-tm="fps">—</b></div>
+      <div class="telemetry-row"><span>Renderer</span><b data-tm="renderer">—</b></div>
+      <div class="telemetry-row"><span>Objetos na cena</span><b data-tm="objects">—</b></div>
+      <div class="telemetry-row"><span>Partículas</span><b data-tm="particles">—</b></div>
+      <div class="telemetry-row"><span>Pós-processamento</span><b data-tm="postfx">—</b></div>
+      <div class="telemetry-row"><span>Holograma atual</span><b data-tm="holotype">—</b></div>
+      <div class="telemetry-row"><span>Microfone</span><b data-tm="mic">—</b></div>
+      <div class="telemetry-row"><span>Câmera (gestos)</span><b data-tm="camera">—</b></div>
+      <div class="telemetry-row"><span>Confiança do gesto</span><b data-tm="gesture-confidence">—</b></div>
+      <div class="telemetry-row"><span>Palmas</span><b data-tm="clap">—</b></div>
+      <div class="telemetry-row"><span>Status do Jarvis (IA)</span><b data-tm="ai-status">—</b></div>
+      <div class="telemetry-row"><span>Último input (InputManager)</span><b data-tm="last-input">—</b></div>
+    </div>
+    <div class="jarvis-options-group" style="margin-top:10px">
+      <span class="jarvis-options-label">Nível de performance</span>
+      <select id="telemetry-perf-select">
+        <option value="auto">Automático</option>
+        <option value="low">Baixo</option>
+        <option value="medium">Médio</option>
+        <option value="high">Alto</option>
+        <option value="ultra">Ultra</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="jarvis-hud">
+    <div id="jarvis-orb" class="jarvis-orb">
+      <div class="jarvis-orb-beam"></div>
+      <div class="jarvis-orb-ring-outer"></div>
+      <div class="jarvis-orb-ring"></div>
+      <div class="jarvis-orb-scan"></div>
+      <div class="jarvis-orb-motes" aria-hidden="true">
+        <i></i><i></i><i></i>
+      </div>
+      <div class="jarvis-orb-core"></div>
+    </div>
+    <div id="jarvis-status" class="jarvis-status">Sistemas on-line.</div>
+    <button id="jarvis-stop-btn" class="btn small danger hidden" title="Parar geração ou fala">⏹ Parar</button>
+  </div>
+
+  <div id="jarvis-chat" class="jarvis-chat"></div>
+
+  <div class="jarvis-holo-panel" data-holo-widget id="jarvis-holo-widget">
+    <div class="holo-stage" data-holo="stage" style="display:none;">
+      <canvas data-holo="canvas"></canvas>
+      <div class="holo-label" data-holo="label"></div>
+      <div class="holo-hint">arraste para girar · botão direito ou 2 dedos para mover · scroll/pinça para zoom</div>
+      <button class="btn small holo-close" type="button" data-holo="close">✕</button>
+    </div>
+  </div>
+
+  <div id="gesture-preview" class="gesture-preview hidden">
+    <video id="gesture-video" playsinline muted></video>
+    <canvas id="gesture-overlay"></canvas>
+    <div id="gesture-status" class="gesture-status small"></div>
+  </div>
+
+  {% if sites %}
+  <div class="jarvis-site-panel">
+    <label class="small">🛠 Trabalhar em um site (o Jarvis edita o arquivo de verdade, não só conversa sobre ele):</label>
+    <select id="jarvis-site-select">
+      <option value="">— nenhum site selecionado —</option>
+      {% for s in sites %}<option value="{{ s.slug }}">{{ s.name }}</option>{% endfor %}
+    </select>
+    <div class="jarvis-site-actions">
+      <button id="jarvis-apply-btn" class="btn small" disabled title="Escreva a instrução no campo de mensagem abaixo e clique aqui">🤖 Aplicar mensagem no site</button>
+      <button id="jarvis-improve-btn" class="btn small" disabled>✨ Melhorar esse site sozinho</button>
+    </div>
+    <div id="jarvis-site-status" class="muted small" style="margin-top:6px"></div>
+  </div>
+  {% endif %}
+
+  <div id="jarvis-attachment-preview" class="jarvis-attachment-preview hidden"></div>
+
+  <div class="jarvis-quick-actions" id="jarvis-quick-actions">
+    <button type="button" class="jarvis-suggestion-chip" data-quick="Analisar código">🔎 Analisar código</button>
+    <button type="button" class="jarvis-suggestion-chip" data-quick="Criar projeto">🧱 Criar projeto</button>
+    <button type="button" class="jarvis-suggestion-chip" data-quick="Corrigir erro">🛠 Corrigir erro</button>
+    <button type="button" class="jarvis-suggestion-chip" data-quick="Explicar">💡 Explicar</button>
+    <button type="button" class="jarvis-suggestion-chip" data-quick="Security Scan">🛡 Security Scan</button>
+    <button type="button" class="jarvis-suggestion-chip" data-quick="Criar arquivo">📄 Criar arquivo</button>
+    <button type="button" class="jarvis-suggestion-chip" data-quick="Modo Estudos">📚 Modo Estudos</button>
+  </div>
+
+  <div class="jarvis-input-row">
+    <input type="file" id="jarvis-file-input" accept="image/*,.txt,.md,.csv,.json,.log,.py,.js,.ts,.html,.css,.java,.c,.cpp,.php,.sql,.yml,.yaml,.xml" hidden>
+    <button id="attach-btn" class="btn" type="button" title="Anexar uma foto ou um arquivo para o Jarvis revisar">📎</button>
+    <button id="gesture-btn" class="btn" type="button" title="Controlar o holograma com gestos de mão pela webcam">✋</button>
+    <button id="clap-btn" class="btn" type="button" title="Acordar o Jarvis batendo palmas">👏</button>
+    <button id="mic-btn" class="btn" title="Falar">🎤</button>
+    <input id="jarvis-input" type="text" placeholder="Digite sua mensagem, use o microfone ou anexe uma foto/arquivo 📎...">
+    <button id="send-btn" class="btn primary">Enviar</button>
+    <button id="clear-btn" class="btn small">🗑 Limpar</button>
+  </div>
+  <div id="clap-status" class="small muted" style="margin-top:4px"></div>
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ static_v('js/hologram.js') }}"></script>
+<script src="{{ static_v('js/jarvis-tools.js') }}"></script>
+<script src="{{ static_v('js/jarvis.js') }}"></script>
+<script src="{{ static_v('js/gesture-control.js') }}"></script>
+<script src="{{ static_v('js/clap-control.js') }}"></script>
+<script src="{{ static_v('js/input-manager.js') }}"></script>
+<script src="{{ static_v('js/telemetry-panel.js') }}"></script>
+{% endblock %}

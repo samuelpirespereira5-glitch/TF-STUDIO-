@@ -1,0 +1,1757 @@
+:root {
+  --bg: #060a14;
+  --bg2: #0b1220;
+  --card: #101c30;
+  --border: #22344f;
+  --text: #eef4ff;
+  --muted: #8fa3c2;
+  --primary: #3b6bff;
+  --primary-hover: #5a82ff;
+  --accent: #00e5ff;
+  --accent2: #b026ff;
+  --success: #22c55e;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --mx: 60%;
+  --my: 10%;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  position: relative;
+  background:
+    radial-gradient(650px circle at var(--mx) var(--my), rgba(0, 229, 255, 0.22), transparent 60%),
+    radial-gradient(circle at 12% 92%, rgba(176, 38, 255, 0.20), transparent 48%),
+    radial-gradient(circle at 88% 25%, rgba(59, 107, 255, 0.16), transparent 50%),
+    linear-gradient(180deg, #060a14 0%, #050810 100%);
+  background-attachment: fixed;
+  color: var(--text);
+  font-family: "Inter", "Segoe UI", -apple-system, sans-serif;
+  animation: bg-drift 22s ease-in-out infinite alternate;
+}
+
+/* Grade holográfica em perspectiva, tipo "painel futurista" */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0, 229, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 255, 0.07) 1px, transparent 1px);
+  background-size: 42px 42px;
+  -webkit-mask-image: radial-gradient(circle at 50% 0%, black 0%, transparent 75%);
+          mask-image: radial-gradient(circle at 50% 0%, black 0%, transparent 75%);
+  animation: grid-pan 16s linear infinite;
+}
+
+/* Partículas/estrelas discretas flutuando no fundo */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.34)),
+    radial-gradient(1.5px 1.5px at 20% 30%, rgba(0, 229, 255, 0.55), transparent 100%),
+    radial-gradient(1.5px 1.5px at 70% 65%, rgba(176, 38, 255, 0.5), transparent 100%),
+    radial-gradient(1px 1px at 40% 80%, rgba(238, 244, 255, 0.4), transparent 100%),
+    radial-gradient(1.5px 1.5px at 85% 15%, rgba(0, 229, 255, 0.4), transparent 100%),
+    radial-gradient(1px 1px at 55% 45%, rgba(238, 244, 255, 0.3), transparent 100%);
+  background-repeat: no-repeat, repeat;
+  background-size: 100% 100%, 300px 300px;
+  animation: particles-drift 60s linear infinite;
+}
+
+/* Deriva lenta e contínua, para o fundo continuar "vivo" mesmo em
+   telas sem mouse (celular) — some junto com a reação ao cursor. */
+@keyframes bg-drift {
+  0%   { background-position: 0% 0%, 0% 0%, 0% 0%, 0 0; }
+  100% { background-position: 6% 4%, -6% -4%, 4% -6%, 0 0; }
+}
+@keyframes grid-pan {
+  0%   { background-position: 0 0, 0 0; }
+  100% { background-position: 42px 42px, 42px 42px; }
+}
+@keyframes particles-drift {
+  0%   { background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
+  100% { background-position: 0 0, 300px 300px, -300px 300px, 150px -300px, -200px -150px, 250px 100px; }
+}
+
+#neural-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  pointer-events: none;
+  opacity: 0.78;
+}
+
+.layout { display: flex; min-height: 100vh; }
+
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, rgba(11, 18, 32, 0.97), rgba(4, 6, 12, 0.99) 85%);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-right: 1px solid var(--border);
+  box-shadow: inset -1px 0 0 rgba(0, 229, 255, 0.06), 4px 0 24px rgba(0, 0, 0, 0.55);
+  padding: 20px 14px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+.sidebar::after {
+  content: "";
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(0, 229, 255, 0.5) 40%, rgba(176, 38, 255, 0.35) 75%, transparent);
+  pointer-events: none;
+}
+
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 26px; padding: 0 6px 18px;
+  border-bottom: 1px solid rgba(0, 229, 255, 0.14);
+}
+.brand-dot {
+  width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 15px; color: #fff;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.45);
+}
+.brand-title {
+  font-family: "Orbitron", "Inter", sans-serif;
+  font-weight: 800; font-size: 16px; letter-spacing: 1.4px;
+  background: linear-gradient(90deg, #fff, var(--accent));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.brand-sub { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; }
+
+.sidebar nav { display: flex; flex-direction: column; gap: 5px; }
+.sidebar nav a {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #c3d3ec;
+  text-decoration: none;
+  padding: 12px 12px 12px 16px;
+  border-radius: 8px;
+  border-left: 2px solid transparent;
+  font-family: "Rajdhani", "Inter", sans-serif;
+  font-weight: 700;
+  font-size: 14.5px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+.sidebar nav a:hover {
+  background: rgba(0, 229, 255, 0.12);
+  color: #ffffff;
+  border-left-color: rgba(0, 229, 255, 0.6);
+}
+.sidebar nav a.active {
+  background: linear-gradient(90deg, rgba(59, 107, 255, 0.32), rgba(0, 229, 255, 0.08));
+  color: #ffffff;
+  border-left-color: var(--accent);
+  box-shadow: 0 0 14px rgba(0, 229, 255, 0.08);
+}
+
+.content { flex: 1; padding: 30px 40px; max-width: 1100px; }
+
+h1 { margin-top: 0; font-family: "Rajdhani", "Inter", sans-serif; font-weight: 700; letter-spacing: 0.3px; }
+h3 { font-family: "Rajdhani", "Inter", sans-serif; font-weight: 700; letter-spacing: 0.2px; }
+.muted { color: var(--muted); }
+.muted.small { font-size: 12px; }
+
+a { color: var(--accent); }
+
+.card {
+  background: linear-gradient(160deg, var(--card), #0d1524);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.warning-card { border-color: var(--warning); color: var(--warning); }
+
+.chat-creator-card {
+  border: 1px solid var(--accent);
+  box-shadow: 0 0 24px rgba(0, 229, 255, 0.12);
+}
+.chat-creator-card h3 { margin-top: 0; }
+.chat-creator-card textarea { width: 100%; margin: 10px 0; }
+
+.stats-row { display: flex; gap: 16px; margin: 20px 0 30px; }
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 26px;
+  text-align: center;
+  text-decoration: none;
+  color: inherit;
+  flex: 1;
+}
+.stat-value { font-size: 30px; font-weight: 700; }
+.stat-label { color: var(--muted); font-size: 13px; margin-top: 4px; }
+.stat-cta { background: var(--primary); }
+.stat-cta .stat-label { color: rgba(255,255,255,0.85); }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+
+.site-card h3 { margin: 0 0 6px; }
+.card-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+input, select, textarea, button {
+  font-family: inherit;
+  font-size: 14px;
+}
+
+input[type=text], input[type=email], input[type=number], input[type=password],
+input[type=date], input[type=file], select, textarea {
+  width: 100%;
+  background: #0b1220;
+  border: 1px solid #334155;
+  color: var(--text);
+  border-radius: 8px;
+  padding: 9px 10px;
+  margin-top: 4px;
+  margin-bottom: 10px;
+}
+input[type=color] { width: 60px; height: 36px; padding: 2px; border-radius: 8px; border: 1px solid #334155; background: #0b1220; margin-bottom: 10px; }
+textarea { resize: vertical; }
+
+label { font-size: 13px; color: #cbd5e1; font-weight: 600; }
+.checkbox { display: flex; align-items: center; gap: 6px; font-weight: 400; color: var(--text); }
+.checkbox.small { font-size: 12px; }
+.checkbox input { width: auto; margin: 0; }
+
+.inline { display: flex; gap: 8px; align-items: center; }
+.inline input, .inline select { margin-bottom: 0; }
+
+.btn {
+  display: inline-block;
+  background: #1a2436;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 16px;
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 600;
+}
+.btn:hover { background: #232f45; }
+.btn.small { padding: 6px 10px; font-size: 12px; }
+.btn.big { padding: 14px 22px; font-size: 16px; }
+.btn.primary { background: var(--primary); border-color: var(--primary); }
+.btn.primary:hover { background: var(--primary-hover); }
+.btn.danger { background: transparent; border-color: var(--danger); color: var(--danger); }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 20px; }
+.field { display: flex; flex-direction: column; }
+.field.full { grid-column: 1 / -1; }
+.checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 6px 14px; margin: 6px 0 14px; }
+
+.flash-stack { margin-bottom: 16px; }
+.flash { padding: 10px 14px; border-radius: 8px; margin-bottom: 8px; }
+.flash-success { background: rgba(34,197,94,0.15); color: var(--success); border: 1px solid var(--success); }
+.flash-error { background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid var(--danger); }
+
+.tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.tab-btn { background: var(--card); border: 1px solid var(--border); color: var(--muted); padding: 9px 14px; border-radius: 8px; cursor: pointer; }
+.tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+.tab-panel.hidden { display: none; }
+
+#code-editor { width: 100%; height: 60vh; font-family: "Consolas", monospace; font-size: 13px; }
+.preview-frame { width: 100%; height: 75vh; border: 1px solid var(--border); border-radius: 10px; background: white; }
+
+/* A tela do Jarvis usa a largura extra do .content (que nas outras
+   páginas fica limitado a 1100px) e a caixa de chat ganha mais altura
+   e mais espaço de leitura — o cartão inteiro sobe para ~92vh e o
+   texto das bolhas fica maior (ver .bubble abaixo). */
+.jarvis-page { max-width: 1560px; margin: 0 auto; }
+.content:has(.jarvis-page) { max-width: 1560px; padding-top: 10px; }
+
+.jarvis-card {
+  display: flex;
+  flex-direction: column;
+  height: 92vh;
+  min-height: 640px;
+  position: relative;
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(0, 229, 255, 0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 100% 100%, rgba(176, 38, 255, 0.08) 0%, transparent 60%),
+    repeating-linear-gradient(60deg, rgba(0, 229, 255, 0.04) 0px, rgba(0, 229, 255, 0.04) 1px, transparent 1px, transparent 34px),
+    repeating-linear-gradient(-60deg, rgba(176, 38, 255, 0.032) 0px, rgba(176, 38, 255, 0.032) 1px, transparent 1px, transparent 34px),
+    linear-gradient(160deg, rgba(18, 32, 54, 0.94), rgba(5, 10, 20, 0.98));
+  border: 1px solid rgba(0, 229, 255, 0.35);
+  box-shadow:
+    0 0 0 1px rgba(0, 229, 255, 0.06) inset,
+    0 0 42px rgba(0, 229, 255, 0.13),
+    0 8px 28px rgba(0, 0, 0, 0.4);
+  /* Mantemos "overflow-y: auto" aqui como uma rede de segurança para
+     o caso raro do holograma embutido precisar de mais altura do que
+     sobra dentro dos 92vh fixos do cartão (nesse caso é melhor rolar
+     o cartão inteiro do que cortar o holograma). No uso normal do
+     chat isso não entra em ação: com "min-height: 0" no .jarvis-chat
+     (ver abaixo), é a lista de mensagens que rola sozinha, por dentro,
+     sem precisar mexer no cartão inteiro. */
+  overflow-x: hidden;
+  overflow-y: auto;
+  /* Firefox: barra fina e discreta na cor de destaque, em vez da
+     barra cinza padrão do sistema operacional. */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 229, 255, 0.55) transparent;
+}
+/* Chrome/Edge/Safari: sem isso, a barra de rolagem nativa (grossa,
+   branca/cinza) aparecia por cima dos cantinhos decorativos do HUD
+   (.jarvis-card::after, .jarvis-hud::before/::after), lendo como um
+   "bug" — uma tarja brilhante travada no canto do painel. */
+.jarvis-card::-webkit-scrollbar { width: 6px; }
+.jarvis-card::-webkit-scrollbar-track { background: transparent; }
+.jarvis-card::-webkit-scrollbar-thumb {
+  background: rgba(0, 229, 255, 0.45);
+  border-radius: 6px;
+}
+.jarvis-card::-webkit-scrollbar-thumb:hover { background: rgba(0, 229, 255, 0.7); }
+
+/* Borda com gradiente girando devagar — dá um acabamento "premium" de
+   painel de tecnologia sem competir com a leitura do conteúdo dentro. */
+.jarvis-card-border {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(from 0deg,
+    rgba(0, 229, 255, 0.55), rgba(176, 38, 255, 0.5),
+    rgba(59, 107, 255, 0.5), rgba(0, 229, 255, 0.55));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  animation: border-spin 8s linear infinite;
+  opacity: 0.55;
+  pointer-events: none;
+  z-index: 0;
+}
+@keyframes border-spin { to { transform: rotate(360deg); } }
+/* Cantos estilo "HUD" holográfico, tipo interface de nave espacial */
+.jarvis-card::before, .jarvis-card::after,
+.jarvis-hud::before, .jarvis-hud::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(0, 229, 255, 0.55);
+  pointer-events: none;
+  z-index: 2;
+}
+.jarvis-card::before { top: 8px; left: 8px; border-right: none; border-bottom: none; }
+.jarvis-card::after  { top: 8px; right: 8px; border-left: none; border-bottom: none; }
+.jarvis-hud::before   { bottom: -6px; left: 8px; border-right: none; border-top: none; }
+.jarvis-hud::after    { bottom: -6px; right: 8px; border-left: none; border-top: none; }
+
+/* Varredura de scanline sutil cruzando o painel, tipo interface do futuro */
+.jarvis-card > .jarvis-chat {
+  position: relative;
+}
+.jarvis-chat::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 229, 255, 0.05) 50%, transparent 100%);
+  background-size: 100% 260%;
+  animation: jarvis-scan 5.5s linear infinite;
+  mix-blend-mode: screen;
+}
+@keyframes jarvis-scan {
+  0%   { background-position: 0 -100%; }
+  100% { background-position: 0 260%; }
+}
+
+.jarvis-chat {
+  flex: 1;
+  /* Sem "min-height: 0" aqui, um item flex dentro de uma coluna flex
+     nunca encolhe abaixo da altura do próprio conteúdo (é o
+     comportamento padrão "min-height: auto" do flexbox) — então em
+     vez de esta caixa rolar internamente quando as mensagens não
+     cabem, ela simplesmente crescia e empurrava o .jarvis-card (altura
+     fixa de 92vh) pra além do próprio tamanho. Isso fazia o CARTÃO
+     INTEIRO (cabeçalho, HUD, chat e caixa de mensagem juntos) ganhar
+     uma barra de rolagem gigante, em vez de só a lista de mensagens —
+     e como o "rolar pro final" do JS (chatEl.scrollTop =
+     chatEl.scrollHeight) só mexe nesta caixa aqui, que na prática não
+     tinha nada pra rolar, a barra de rolagem certa (a de fora) nunca
+     acompanhava sozinha as mensagens novas: parecia travada, ou só ia
+     "pra cima" quando o usuário tentava usá-la. min-height: 0 faz esta
+     caixa realmente respeitar o espaço que sobra e rolar por conta
+     própria, do jeito que era pra ser desde o início. */
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 8px 6px;
+}
+
+/* Sugestões rápidas na conversa vazia (ver renderSuggestions() em jarvis.js) */
+.jarvis-suggestions { display: flex; flex-wrap: wrap; gap: 8px; padding: 2px 6px 4px; animation: bubble-in 0.28s ease; }
+.jarvis-suggestion-chip {
+  background: transparent;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.jarvis-suggestion-chip:hover { background: rgba(0, 229, 255, 0.1); border-color: var(--accent); }
+
+/* Cada mensagem é uma linha com avatar + bolha, como num app de chat
+   moderno — o avatar do Jarvis ecoa o "arc reactor" do HUD acima. */
+.bubble-row { display: flex; gap: 9px; max-width: 88%; position: relative; z-index: 1; animation: bubble-in 0.28s ease; }
+.bubble-row.user { align-self: flex-end; flex-direction: row-reverse; }
+.bubble-row.assistant { align-self: flex-start; }
+@keyframes bubble-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.bubble-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800;
+  margin-top: 2px;
+}
+.bubble-avatar.assistant {
+  font-family: "Orbitron", sans-serif;
+  color: #04141c;
+  background: radial-gradient(circle, #d6f8ff 0%, var(--accent) 60%, var(--primary) 100%);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.55);
+}
+.bubble-avatar.user {
+  background: linear-gradient(135deg, #2a3a55, #182034);
+  border: 1px solid var(--border);
+}
+
+.bubble {
+  max-width: 100%;
+  padding: 13px 16px;
+  border-radius: 16px;
+  line-height: 1.65;
+  font-size: 15.5px;
+  white-space: pre-wrap;
+  position: relative;
+  backdrop-filter: blur(6px);
+}
+.attach-chip {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(0, 229, 255, 0.08);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  border-radius: 10px;
+  padding: 6px 10px;
+  max-width: 260px;
+}
+.attach-chip img {
+  width: 40px; height: 40px; object-fit: cover;
+  border-radius: 6px; flex-shrink: 0;
+  border: 1px solid rgba(0, 229, 255, 0.35);
+}
+.attach-chip-name {
+  font-size: 12px; color: #cbd5e1;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.bubble.user {
+  border-bottom-right-radius: 5px;
+  background: linear-gradient(135deg, var(--primary), #274bcc);
+  box-shadow: 0 4px 18px rgba(59, 107, 255, 0.32);
+}
+.bubble.assistant {
+  border-bottom-left-radius: 5px;
+  background: linear-gradient(160deg, rgba(18, 35, 59, 0.88), rgba(10, 18, 34, 0.92));
+  border: 1px solid rgba(0, 229, 255, 0.25);
+  box-shadow: 0 4px 18px rgba(0, 229, 255, 0.10);
+}
+.bubble h1, .bubble h2, .bubble h3, .bubble h4 {
+  font-family: "Rajdhani", "Inter", sans-serif;
+  color: var(--accent);
+  margin: 12px 0 6px;
+  font-size: 1.1em;
+}
+.bubble strong { color: #fff; }
+.bubble p { margin: 0 0 8px; }
+.bubble p:last-child { margin-bottom: 0; }
+.bubble ul, .bubble ol { margin: 4px 0 8px; padding-left: 22px; }
+.bubble code {
+  background: rgba(0, 229, 255, 0.12);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-family: "Consolas", "Menlo", monospace;
+  font-size: 0.92em;
+}
+.bubble .code-block {
+  position: relative;
+  margin: 8px 0;
+  background: #060d1a;
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.bubble .code-block pre {
+  margin: 0;
+  padding: 12px 14px;
+  overflow-x: auto;
+  white-space: pre;
+  font-family: "Consolas", "Menlo", monospace;
+  font-size: 0.88em;
+}
+.bubble .code-block code { background: none; padding: 0; }
+.bubble .code-copy-btn {
+  position: absolute;
+  top: 6px; right: 6px;
+  font-size: 0.75em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  background: rgba(0, 229, 255, 0.1);
+  color: var(--text);
+  cursor: pointer;
+}
+.bubble .code-copy-btn:hover { background: rgba(0, 229, 255, 0.22); }
+.bubble .typing-cursor {
+  display: inline-block;
+  width: 7px; height: 1em;
+  background: var(--accent);
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: cursor-blink 0.9s step-start infinite;
+}
+@keyframes cursor-blink { 50% { opacity: 0; } }
+.jarvis-input-row {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 12px; flex-wrap: wrap; position: relative; z-index: 1;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(0, 229, 255, 0.22);
+  border-radius: 16px;
+  padding: 6px 6px 6px 8px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.jarvis-input-row:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.28);
+}
+.jarvis-input-row input[type=text] {
+  flex: 1; margin: 0; min-width: 140px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+.jarvis-input-row input[type=text]:focus {
+  outline: none;
+  border: none;
+  box-shadow: none;
+}
+.jarvis-input-row .btn {
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+.jarvis-input-row .btn.primary {
+  box-shadow: 0 0 14px rgba(59, 107, 255, 0.4);
+}
+#mic-btn { font-size: 15px; }
+
+/* ---------- Anexo pendente (foto/arquivo escolhido, antes de enviar) ---------- */
+.jarvis-attachment-preview {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 10px;
+  background: rgba(0, 229, 255, 0.06);
+  border: 1px solid rgba(0, 229, 255, 0.28);
+  border-radius: 12px;
+  padding: 7px 10px;
+  position: relative; z-index: 1;
+}
+.jarvis-attachment-preview img {
+  width: 36px; height: 36px; object-fit: cover; border-radius: 6px;
+  border: 1px solid rgba(0, 229, 255, 0.35); flex-shrink: 0;
+}
+.jarvis-attachment-preview .attach-icon { font-size: 18px; flex-shrink: 0; }
+.jarvis-attachment-preview-info { flex: 1; min-width: 0; }
+.jarvis-attachment-preview-name {
+  font-size: 12.5px; font-weight: 600; color: #e2f6ff;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.jarvis-attachment-preview-hint { font-size: 11px; color: var(--muted); }
+.jarvis-attachment-remove {
+  background: transparent; border: none; color: var(--muted);
+  cursor: pointer; font-size: 16px; padding: 2px 6px; flex-shrink: 0;
+}
+.jarvis-attachment-remove:hover { color: var(--danger); }
+#attach-btn.has-attachment {
+  border-color: var(--accent);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+}
+
+/* ---------- Barra de ferramentas (nova conversa / histórico / config) ---------- */
+.hidden { display: none !important; }
+.btn.ghost { background: transparent; border-color: transparent; padding: 4px 8px; }
+.btn.ghost:hover { background: rgba(255, 255, 255, 0.06); }
+
+.jarvis-toolbar {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  position: relative; z-index: 1;
+  margin-bottom: 4px;
+}
+
+.jarvis-panel {
+  position: relative; z-index: 2;
+  border: 1px solid rgba(0, 229, 255, 0.25);
+  background: rgba(6, 12, 24, 0.92);
+  border-radius: 12px;
+  padding: 10px 12px 12px;
+  margin-bottom: 10px;
+}
+.jarvis-panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+/* ITEM 27 do briefing: painel de telemetria */
+.telemetry-grid { display: flex; flex-direction: column; gap: 4px; }
+.telemetry-row {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 12.5px; padding: 4px 2px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.telemetry-row:last-child { border-bottom: none; }
+.telemetry-row span { color: var(--muted); }
+.telemetry-row b { color: var(--accent); font-weight: 600; font-family: "Consolas", "SFMono-Regular", monospace; }
+#telemetry-perf-select {
+  background: rgba(255, 255, 255, 0.03); color: var(--text, #e5e7eb);
+  border: 1px solid var(--border); border-radius: 6px; padding: 4px 6px; font-size: 12.5px;
+}
+
+.jarvis-history-list { display: flex; flex-direction: column; gap: 6px; max-height: 320px; overflow-y: auto; }
+.jarvis-history-empty { color: var(--muted); font-size: 13px; padding: 8px 2px; }
+.jarvis-history-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.jarvis-history-item:hover { border-color: var(--accent); }
+.jarvis-history-item.active { border-color: var(--accent); background: rgba(0, 229, 255, 0.08); }
+.jarvis-history-item-info { min-width: 0; flex: 1; }
+.jarvis-history-item-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.jarvis-history-item-date { font-size: 11px; color: var(--muted); }
+.jarvis-history-item-delete { background: transparent; border: none; color: var(--muted); cursor: pointer; font-size: 14px; padding: 2px 6px; flex-shrink: 0; }
+.jarvis-history-item-delete:hover { color: var(--danger); }
+
+#jarvis-stop-btn { margin-top: -4px; }
+
+/* ---------- Grupos de opções (modos + voz) em formato de "chips" ---------- */
+.jarvis-options {
+  display: flex; flex-direction: column; gap: 10px;
+  position: relative; z-index: 1;
+}
+.jarvis-options-group { display: flex; flex-direction: column; gap: 6px; }
+.jarvis-options-label {
+  font-size: 10.5px; font-weight: 700; letter-spacing: 1.2px;
+  text-transform: uppercase; color: var(--muted);
+}
+.jarvis-modes { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.mode-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+  padding: 6px 12px 6px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+}
+.mode-chip:hover { border-color: rgba(0, 229, 255, 0.4); }
+.mode-chip input { position: absolute; opacity: 0; width: 0; height: 0; }
+/* Chip "acesa" quando o checkbox interno está marcado (navegadores modernos) */
+.mode-chip:has(input:checked) {
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.20), rgba(59, 107, 255, 0.20));
+  border-color: var(--accent);
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.28);
+  color: #fff;
+}
+.voice-picker { padding-right: 8px; }
+.voice-picker select {
+  width: auto; margin: 0 0 0 4px; padding: 4px 8px;
+  background: #0b1220; border-color: #334155; font-size: 12px;
+}
+
+.jarvis-voice-sliders {
+  display: flex; flex-wrap: wrap; gap: 14px 20px; margin-top: 4px;
+}
+.jarvis-voice-sliders label {
+  display: flex; flex-direction: column; gap: 4px;
+  color: var(--muted); font-size: 11px; min-width: 180px; flex: 1;
+}
+.jarvis-voice-sliders input[type="range"] {
+  accent-color: var(--accent); width: 100%;
+}
+
+.jarvis-site-panel { padding: 10px 4px; border-top: 1px solid var(--border); margin-top: 4px; position: relative; z-index: 1; display: flex; flex-direction: column; gap: 8px; }
+.jarvis-site-panel select { width: 100%; }
+.jarvis-site-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.jarvis-site-actions .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.debug-issue { padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; font-size: 0.92em; }
+.image-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+.image-item { border: 1px solid var(--border); border-radius: 8px; padding: 8px; text-align: center; }
+.image-item img { width: 100%; height: 90px; object-fit: cover; border-radius: 6px; margin-bottom: 6px; }
+.image-item-name { font-size: 0.75em; word-break: break-all; margin-bottom: 6px; opacity: 0.8; }
+.image-item .btn { display: block; width: 100%; margin-top: 4px; }
+.btn.danger { color: #f66; border-color: #a33; }
+
+/* ---------- HUD estilo "arc reactor" (Homem de Ferro falando com o Jarvis) ---------- */
+.jarvis-hud {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 4px 22px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(0, 229, 255, 0.25);
+  position: relative;
+}
+.jarvis-orb {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Feixe de projeção saindo de baixo, tipo mesa de holograma */
+.jarvis-orb-beam {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  width: 3px;
+  height: 22px;
+  background: linear-gradient(180deg, rgba(0, 229, 255, 0.9), transparent);
+  transform: translateX(-50%);
+  filter: blur(0.5px);
+}
+.jarvis-orb-core {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #d6f8ff 0%, var(--accent) 55%, var(--primary) 100%);
+  box-shadow: 0 0 16px 4px rgba(6, 182, 212, 0.75), 0 0 40px 10px rgba(0, 229, 255, 0.25);
+  transition: box-shadow 0.2s ease;
+  animation: jarvis-flicker 4.5s ease-in-out infinite;
+}
+/* Partículas orbitando o núcleo — mesma leitura de "poeira de luz" do
+   holograma principal, dando ao orbe a sensação de ter volume real em
+   vez de ser um círculo achatado com anéis girando por cima. */
+.jarvis-orb-motes { position: absolute; inset: 0; pointer-events: none; }
+.jarvis-orb-motes i {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 2px; height: 2px;
+  margin: -1px;
+  border-radius: 50%;
+  background: #eafffe;
+  box-shadow: 0 0 6px 2px rgba(0, 229, 255, 0.85);
+  animation: jarvis-orbit 3.6s linear infinite;
+  opacity: 0.85;
+}
+.jarvis-orb-motes i:nth-child(1) { animation-duration: 3.2s; }
+.jarvis-orb-motes i:nth-child(2) { animation-duration: 4.4s; animation-delay: -1.4s; box-shadow: 0 0 6px 2px rgba(176, 38, 255, 0.8); }
+.jarvis-orb-motes i:nth-child(3) { animation-duration: 5.1s; animation-delay: -2.6s; }
+@keyframes jarvis-orbit {
+  from { transform: rotate(0deg) translateX(30px) rotate(0deg); }
+  to   { transform: rotate(360deg) translateX(30px) rotate(-360deg); }
+}
+/* Instabilidade fraca de energia — nunca 100% constante, como um
+   projetor de luz de verdade oscilando de leve. */
+@keyframes jarvis-flicker {
+  0%, 100% { filter: brightness(1); }
+  42% { filter: brightness(1); }
+  44% { filter: brightness(0.82); }
+  46% { filter: brightness(1.08); }
+  48% { filter: brightness(1); }
+  76% { filter: brightness(1); }
+  77% { filter: brightness(0.9); }
+  78% { filter: brightness(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jarvis-orb-core { animation: none; }
+  .jarvis-orb-motes i { animation: none; display: none; }
+}
+.jarvis-orb-ring {
+  position: absolute;
+  inset: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(6, 182, 212, 0.45);
+  transition: border-color 0.2s ease;
+  animation: jarvis-spin 6s linear infinite;
+}
+.jarvis-orb-ring::before {
+  content: "";
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  border: 1px dashed rgba(37, 99, 235, 0.45);
+  animation: jarvis-spin 9s linear infinite reverse;
+}
+/* Anel externo com marcações, tipo régua de radar/mira holográfica */
+.jarvis-orb-ring-outer {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  background: repeating-conic-gradient(rgba(0, 229, 255, 0.6) 0deg 2deg, transparent 2deg 12deg);
+  -webkit-mask: radial-gradient(circle, transparent 66%, black 68%, black 74%, transparent 76%);
+          mask: radial-gradient(circle, transparent 66%, black 68%, black 74%, transparent 76%);
+  animation: jarvis-spin 16s linear infinite reverse;
+  opacity: 0.85;
+}
+/* Linha de varredura girando, tipo radar */
+.jarvis-orb-scan {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(0, 229, 255, 0.4), transparent 30%);
+  animation: jarvis-spin 2.4s linear infinite;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+.jarvis-status {
+  color: var(--accent);
+  font-size: 12px;
+  font-family: "Consolas", "SFMono-Regular", monospace;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.5);
+}
+
+/* Ouvindo: pulso rápido e mais claro, como captando a voz */
+.jarvis-orb.listening .jarvis-orb-core {
+  animation: jarvis-pulse 0.9s ease-in-out infinite;
+  box-shadow: 0 0 20px 6px rgba(239, 68, 68, 0.75), 0 0 46px 12px rgba(239, 68, 68, 0.25);
+  background: radial-gradient(circle, #fff 0%, #f87171 55%, var(--danger) 100%);
+}
+.jarvis-orb.listening .jarvis-orb-ring { border-color: rgba(239, 68, 68, 0.6); animation: jarvis-spin 2.5s linear infinite; }
+.jarvis-orb.listening .jarvis-orb-scan { background: conic-gradient(from 0deg, rgba(239, 68, 68, 0.45), transparent 30%); animation: jarvis-spin 1s linear infinite; }
+
+/* Pensando/gerando: giro contínuo */
+.jarvis-orb.thinking .jarvis-orb-ring { animation: jarvis-spin 1.1s linear infinite; border-color: rgba(245, 158, 11, 0.6); }
+.jarvis-orb.thinking .jarvis-orb-core { background: radial-gradient(circle, #fff8e1 0%, var(--warning) 60%, #b45309 100%); }
+.jarvis-orb.thinking .jarvis-orb-scan { background: conic-gradient(from 0deg, rgba(245, 158, 11, 0.45), transparent 30%); animation: jarvis-spin 0.8s linear infinite; }
+
+/* FASE 7/13: estado EXECUTING — Jarvis chamando uma ferramenta (ex:
+   ajuste do holograma), visualmente distinto de "pensando" (âmbar) e
+   "ouvindo" (vermelho): pulso verde rápido e reto, sem o giro lento de
+   quem só está processando texto. */
+.jarvis-orb.executing .jarvis-orb-ring { animation: jarvis-spin 0.6s linear infinite; border-color: rgba(34, 197, 94, 0.65); }
+.jarvis-orb.executing .jarvis-orb-core { background: radial-gradient(circle, #e8fff3 0%, var(--success) 55%, #14532d 100%); animation: jarvis-pulse 0.5s ease-in-out infinite; }
+.jarvis-orb.executing .jarvis-orb-scan { background: conic-gradient(from 0deg, rgba(34, 197, 94, 0.5), transparent 30%); animation: jarvis-spin 0.5s linear infinite; }
+
+/* Falando: pulso suave em ciano/roxo */
+.jarvis-orb.speaking .jarvis-orb-core {
+  animation: jarvis-pulse 0.6s ease-in-out infinite;
+  box-shadow: 0 0 20px 6px rgba(37, 99, 235, 0.7), 0 0 46px 12px rgba(176, 38, 255, 0.25);
+}
+.jarvis-orb.speaking .jarvis-orb-ring { animation: jarvis-spin 1.8s linear infinite; }
+.jarvis-orb.speaking .jarvis-orb-scan { animation: jarvis-spin 1.4s linear infinite; }
+
+/* ITEM 3 do briefing: PROCESSING — trabalho de fundo mais longo (ex:
+   job de site rodando no servidor), distinto de THINKING: giro lento e
+   constante em ciano, sem o pulso "vivo" dos outros estados. */
+.jarvis-orb.processing .jarvis-orb-ring { animation: jarvis-spin 2s linear infinite; border-color: rgba(0, 229, 255, 0.55); }
+.jarvis-orb.processing .jarvis-orb-core { background: radial-gradient(circle, #e0feff 0%, var(--accent) 60%, #0e7490 100%); }
+.jarvis-orb.processing .jarvis-orb-scan { background: conic-gradient(from 0deg, rgba(0, 229, 255, 0.4), transparent 30%); animation: jarvis-spin 1.6s linear infinite; }
+
+/* ITEM 3 do briefing: SUCCESS/ERROR — feedback rápido de fim de ação
+   (flashHudState em jarvis.js), depois volta sozinho pro estado neutro. */
+.jarvis-orb.success .jarvis-orb-core {
+  animation: jarvis-pulse 0.35s ease-in-out 2;
+  box-shadow: 0 0 24px 8px rgba(34, 197, 94, 0.8), 0 0 50px 14px rgba(34, 197, 94, 0.3);
+  background: radial-gradient(circle, #f0fff6 0%, var(--success) 55%, #14532d 100%);
+}
+.jarvis-orb.success .jarvis-orb-ring { border-color: rgba(34, 197, 94, 0.7); animation: none; }
+.jarvis-orb.success .jarvis-orb-scan { display: none; }
+
+.jarvis-orb.error .jarvis-orb-core {
+  animation: jarvis-pulse 0.3s ease-in-out 3;
+  box-shadow: 0 0 24px 8px rgba(239, 68, 68, 0.85), 0 0 50px 14px rgba(239, 68, 68, 0.3);
+  background: radial-gradient(circle, #fff0f0 0%, var(--danger) 55%, #7f1d1d 100%);
+}
+.jarvis-orb.error .jarvis-orb-ring { border-color: rgba(239, 68, 68, 0.75); animation: none; }
+.jarvis-orb.error .jarvis-orb-scan { display: none; }
+
+@keyframes jarvis-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.35); }
+}
+@keyframes jarvis-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.tool-filter { max-width: 400px; margin-bottom: 16px; }
+.tools-category {
+  grid-column: 1 / -1;
+  margin: 22px 0 2px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--accent);
+  font-size: 15px;
+  letter-spacing: 0.3px;
+}
+.tools-category:first-of-type { margin-top: 0; }
+.tools-grid .tool h3 { margin-top: 0; }
+.tool.hidden { display: none; }
+.result { margin-top: 10px; color: #cbd5e1; font-size: 13px; white-space: pre-wrap; }
+.result img { max-width: 100%; border-radius: 8px; }
+
+code { background: #0b1220; padding: 2px 6px; border-radius: 4px; }
+
+/* Bolha de "processando", com três pontinhos piscando em sequência */
+.thinking-dots { display: flex; gap: 5px; align-items: center; padding: 14px 16px; }
+.thinking-dots span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 6px rgba(0, 229, 255, 0.7);
+  animation: thinking-blink 1.2s ease-in-out infinite;
+}
+.thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+.thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes thinking-blink {
+  0%, 80%, 100% { opacity: 0.25; transform: scale(0.85); }
+  40% { opacity: 1; transform: scale(1.15); }
+}
+
+/* ---------- Navegação inferior (só aparece no celular) ---------- */
+.mobile-nav {
+  display: none;
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  background: rgba(6, 10, 20, 0.97);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-top: 1px solid var(--border);
+  padding: 6px env(safe-area-inset-right, 0) calc(6px + env(safe-area-inset-bottom, 0)) env(safe-area-inset-left, 0);
+  z-index: 50;
+}
+.mobile-nav a {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: #c3d3ec;
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 0;
+  border-radius: 8px;
+}
+.mobile-nav a span { font-size: 18px; }
+.mobile-nav a.active { color: var(--accent); }
+
+/* ---------- Responsivo (celular e telas estreitas) ---------- */
+@media (max-width: 820px) {
+  .layout { flex-direction: column; }
+  .sidebar { display: none; }
+  .content {
+    padding: 14px 12px calc(82px + env(safe-area-inset-bottom, 0));
+    max-width: 100%;
+  }
+  .mobile-nav { display: flex; }
+
+  h1 { font-size: 22px; }
+  .stats-row { flex-direction: column; }
+  .grid { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .checkbox-grid { grid-template-columns: repeat(2, 1fr); }
+  .tabs { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
+  .tab-btn { flex-shrink: 0; }
+  .jarvis-card { height: calc(100vh - 235px); min-height: 430px; }
+  .jarvis-hero { align-items:flex-start; }
+  .jarvis-hero h1 { font-size:24px; }
+  .jarvis-live { min-width:86px; padding:7px 8px; }
+  .jarvis-overview-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .jarvis-cap-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .jarvis-cap-head { align-items:flex-start; }
+  .kali-command-grid { grid-template-columns:1fr; }
+  .kali-launcher-head { flex-direction:column; }
+  .kali-launcher-row { flex-direction:column; }
+  .kali-launcher-row input { min-width:0; }
+  .bubble-row { max-width: 96%; }
+  .bubble { font-size: 14.5px; padding: 11px 14px; }
+  .bubble-avatar { width: 24px; height: 24px; font-size: 11px; }
+  .jarvis-input-row { gap: 6px; }
+  .jarvis-input-row input[type=text] { width: 100%; }
+  #code-editor { height: 50vh; font-size: 12px; }
+  .preview-frame { height: 55vh; }
+  .inline { flex-wrap: wrap; }
+}
+
+:root { padding-top: env(safe-area-inset-top, 0px); }
+
+/* ---------- Barra de progresso (criação de site) ---------- */
+.progress-wrap {
+  background: #0b1220;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  height: 10px;
+  margin-top: 12px;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--primary));
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.55);
+  transition: width 0.4s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body, body::before, body::after { animation: none; }
+  .jarvis-card-border { animation: none; }
+  .bubble-row { animation: none; }
+}
+
+/* ---------- Camada extra "holográfica" no estilo ano 2500 ---------- */
+.scanlines {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 229, 255, 0.035) 0px,
+    rgba(0, 229, 255, 0.035) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  mix-blend-mode: overlay;
+  opacity: 0.6;
+}
+@media (prefers-reduced-motion: reduce) {
+  .scanlines { display: none; }
+}
+
+.brand-dot {
+  animation: brand-pulse 3.2s ease-in-out infinite;
+}
+@keyframes brand-pulse {
+  0%, 100% { box-shadow: 0 4px 14px rgba(37, 99, 235, 0.45); }
+  50% { box-shadow: 0 4px 22px rgba(0, 229, 255, 0.75); }
+}
+
+.sidebar nav a.active {
+  box-shadow: inset 0 0 14px rgba(0, 229, 255, 0.12);
+}
+
+h1 {
+  text-shadow: 0 0 18px rgba(0, 229, 255, 0.25);
+}
+
+/* ---------- Holograma 3D ---------- */
+.tool-hologram { grid-column: 1 / -1; border-color: var(--accent); box-shadow: 0 0 26px rgba(0, 229, 255, 0.12); }
+.tool-hologram .holo-controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-start; }
+.tool-hologram .holo-controls input[type=text] { flex: 1; min-width: 220px; }
+.tool-hologram .holo-controls select { width: auto; min-width: 170px; }
+.tool-hologram .holo-controls-real { margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.12); }
+.holo-presets { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.holo-presets .btn.small { background: transparent; border-color: rgba(0, 229, 255, 0.3); }
+.holo-presets .btn.small:hover { background: rgba(0, 229, 255, 0.1); border-color: var(--accent); }
+.holo-page .holo-stage { height: 460px; }
+@media (min-width: 900px) {
+  .holo-page .holo-stage { height: 560px; }
+}
+.jarvis-holo-panel .holo-stage { margin-bottom: 14px; }
+.holo-stage {
+  position: relative;
+  margin-top: 14px;
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  overflow: hidden;
+  height: 360px;
+  background:
+    radial-gradient(ellipse at center, transparent 42%, rgba(0, 0, 0, 0.68) 100%),
+    radial-gradient(ellipse at center, rgba(0, 229, 255, 0.10) 0%, rgba(6, 10, 20, 0.9) 70%),
+    repeating-linear-gradient(0deg, rgba(0, 229, 255, 0.05) 0px, rgba(0, 229, 255, 0.05) 1px, transparent 1px, transparent 26px),
+    repeating-linear-gradient(90deg, rgba(0, 229, 255, 0.05) 0px, rgba(0, 229, 255, 0.05) 1px, transparent 1px, transparent 26px);
+  box-shadow: inset 0 0 60px rgba(0, 229, 255, 0.12);
+}
+/* Brilho (bloom) permanente em volta de toda aresta acesa do holograma —
+   truque de graça em GPU: como o canvas WebGL tem fundo transparente,
+   um drop-shadow desfocado vira um halo de luz "vazando" em torno de
+   cada linha/partícula, exatamente como um projetor de luz de verdade
+   contra o ar. A cor acompanha o holograma via variável CSS, atualizada
+   em hologram.js toda vez que ele é (re)gerado ou trocado de cor. */
+.holo-stage canvas {
+  display: block; width: 100%; height: 100%; cursor: grab; touch-action: none;
+  filter:
+    drop-shadow(0 0 3px var(--holo-glow-color, #00e5ff))
+    drop-shadow(0 0 13px var(--holo-glow-color2, #b026ff))
+    saturate(1.18) contrast(1.06);
+}
+.holo-stage canvas:active { cursor: grabbing; }
+/* Varredura de linhas + feixe de luz passando por cima do holograma, e
+   um grão fraco (ruído) por cima de tudo — puramente decorativo (CSS),
+   reforça a leitura de "projeção de luz captada por uma lente" em vez
+   de uma renderização 3D limpa e digital demais. */
+.holo-stage::before {
+  content: "";
+  position: absolute; inset: 0;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 1px, transparent 1px, transparent 3px),
+    linear-gradient(180deg, transparent 0%, rgba(0, 229, 255, 0.10) 50%, transparent 100%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/></svg>");
+  background-size: 100% 100%, 100% 220%, 140px 140px;
+  background-position: 0 0, 0 -120%, 0 0;
+  background-blend-mode: normal, normal, overlay;
+  mix-blend-mode: screen;
+  opacity: 0.9;
+  pointer-events: none;
+  z-index: 2;
+  animation: holo-scan 5s linear infinite;
+}
+@keyframes holo-scan {
+  0%   { background-position: 0 0, 0 -120%, 0 0; }
+  100% { background-position: 0 0, 0 120%, 0 0; }
+}
+.holo-stage.holo-loading::after {
+  content: "projetando holograma...";
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  color: var(--accent); font-family: 'Orbitron', sans-serif; letter-spacing: 1px; font-size: 13px;
+  animation: holo-blink 1.1s ease-in-out infinite;
+  z-index: 3;
+}
+@keyframes holo-blink { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+/* Micro-glitch periódico (ver hologram.js) — tremor rápido de posição
+   e brilho, como uma projeção "estabilizando". */
+.holo-stage.holo-glitch canvas {
+  animation: holo-glitch-kf 0.15s steps(2) 1;
+  filter:
+    drop-shadow(0 0 3px var(--holo-glow-color, #00e5ff))
+    drop-shadow(0 0 13px var(--holo-glow-color2, #b026ff))
+    brightness(1.35) saturate(1.4) contrast(1.12)
+    url(#holo-chromatic);
+}
+@keyframes holo-glitch-kf {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-2px, 1px); }
+  50% { transform: translate(2px, -1px); }
+  75% { transform: translate(-1px, 0); }
+  100% { transform: translate(0, 0); }
+}
+.holo-upload-row {
+  display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+  margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.12);
+}
+.holo-upload-row input[type=file] { flex: 1; min-width: 220px; }
+@media (prefers-reduced-motion: reduce) {
+  .holo-stage::before { animation: none; }
+  .holo-stage.holo-glitch canvas { animation: none; }
+}
+.holo-label {
+  position: absolute; top: 10px; left: 14px;
+  font-family: 'Orbitron', sans-serif; font-size: 12px; letter-spacing: 1px;
+  color: var(--accent); text-shadow: 0 0 10px rgba(0, 229, 255, 0.8);
+  pointer-events: none; max-width: 70%;
+}
+.holo-hint {
+  position: absolute; bottom: 10px; left: 14px;
+  font-size: 11px; color: var(--muted); pointer-events: none;
+}
+.holo-close {
+  position: absolute; top: 8px; right: 8px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .holo-stage.holo-loading::after { animation: none; }
+}
+
+/* ---------- FASE 4: controle por gestos de mão (webcam) ---------- */
+#gesture-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.5);
+}
+#clap-btn.active {
+  border-color: var(--accent2);
+  color: var(--accent2);
+  box-shadow: 0 0 8px rgba(176, 38, 255, 0.5);
+}
+.gesture-preview {
+  position: fixed; right: 14px; bottom: 84px; z-index: 40;
+  width: 168px; border: 1px solid var(--border); border-radius: 10px;
+  overflow: hidden; background: #000; box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+}
+.gesture-preview.hidden { display: none; }
+.gesture-preview video, .gesture-preview canvas {
+  position: absolute; top: 0; left: 0; width: 100%; height: 126px;
+  object-fit: cover; transform: scaleX(-1); /* espelha, igual selfie */
+}
+.gesture-status {
+  position: relative; margin-top: 126px; padding: 5px 8px;
+  color: var(--accent); background: rgba(6,10,20,0.85); text-align: center;
+}
+@media (max-width: 640px) {
+  .gesture-preview { width: 128px; right: 8px; bottom: 78px; }
+  .gesture-preview video, .gesture-preview canvas { height: 96px; }
+  .gesture-status { margin-top: 96px; font-size: 11px; }
+}
+
+/* ---------- Painel "Holographic 3D Studio": seletor de tipo + controles ---------- */
+.holo-kind-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 8px; margin-top: 10px;
+}
+.holo-kind-btn {
+  background: rgba(0, 229, 255, 0.04); border: 1px solid rgba(0, 229, 255, 0.22);
+  border-radius: 10px; color: var(--text, #e8f6ff); padding: 10px 6px;
+  font-size: 11px; text-align: center; cursor: pointer; line-height: 1.3;
+  transition: border-color .15s ease, background .15s ease, transform .1s ease;
+}
+.holo-kind-btn span { display: block; font-size: 20px; margin-bottom: 4px; }
+.holo-kind-btn:hover { border-color: var(--accent); background: rgba(0, 229, 255, 0.1); }
+.holo-kind-btn:active { transform: scale(0.97); }
+.holo-kind-btn.active { border-color: var(--accent2); box-shadow: 0 0 14px rgba(176, 38, 255, 0.35); }
+
+.holo-panel {
+  margin-top: 14px; padding-top: 12px; border-top: 1px dashed rgba(255,255,255,0.12);
+}
+.holo-panel-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+.holo-panel-group h4 {
+  margin: 0 0 8px; font-family: 'Orbitron', sans-serif; font-size: 11px;
+  letter-spacing: 1px; color: var(--accent2); text-transform: uppercase;
+}
+.holo-control-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 12px; color: var(--muted); }
+.holo-control-row label { flex: 0 0 88px; }
+.holo-control-row input[type=range] { flex: 1; accent-color: var(--accent); }
+.holo-control-row input[type=color] {
+  width: 34px; height: 24px; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px;
+  background: none; padding: 0; cursor: pointer;
+}
+.holo-control-row input[type=checkbox] { accent-color: var(--accent); width: 16px; height: 16px; }
+.holo-control-row .holo-control-val { flex: 0 0 34px; text-align: right; color: var(--accent); font-size: 11px; }
+
+
+/* ---------- Jarvis Tools: cartão de execução de ferramenta ---------- */
+.tool-card {
+  width: min(560px, 86vw);
+  background: linear-gradient(180deg, rgba(16, 28, 48, 0.92), rgba(8, 14, 26, 0.92));
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-shadow: 0 0 22px rgba(0, 229, 255, 0.08);
+  font-size: 0.86rem;
+}
+.tool-card.done-ok { border-left-color: var(--success); }
+.tool-card.done-err { border-left-color: var(--danger); }
+.tool-card-head { display: flex; align-items: center; gap: 9px; margin-bottom: 8px; color: var(--text); }
+.tool-card-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); animation: tool-pulse 1.1s ease-in-out infinite; flex: none; }
+.tool-card.done-ok .tool-card-dot { background: var(--success); box-shadow: 0 0 10px var(--success); animation: none; }
+.tool-card.done-err .tool-card-dot { background: var(--danger); box-shadow: 0 0 10px var(--danger); animation: none; }
+@keyframes tool-pulse { 50% { opacity: 0.35; transform: scale(0.8); } }
+.tool-progress { height: 4px; background: #0b1220; border-radius: 4px; overflow: hidden; margin-bottom: 10px; }
+.tool-progress-fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--primary)); transition: width 0.35s ease; }
+.tool-steps { display: flex; flex-direction: column; gap: 4px; }
+.tool-step { display: flex; gap: 8px; color: var(--muted); line-height: 1.35; word-break: break-word; }
+.tool-step.ok { color: #b8f5cf; }
+.tool-step.err { color: #ffb4b4; }
+.tool-step.diag { color: var(--warning); }
+.tool-step-mark { flex: none; width: 1em; text-align: center; }
+.tool-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 8px; }
+.tool-chip { padding: 2px 9px; border-radius: 999px; font-size: 0.75rem; border: 1px solid var(--border); color: var(--muted); }
+.tool-chip.sev-critical, .tool-chip.risk.crítico { color: #fff; background: #b91c1c; border-color: #b91c1c; }
+.tool-chip.sev-high, .tool-chip.risk.alto { color: #fff; background: #c2410c; border-color: #c2410c; }
+.tool-chip.sev-medium, .tool-chip.risk.médio { color: #1a1200; background: var(--warning); border-color: var(--warning); }
+.tool-chip.sev-low, .tool-chip.risk.baixo { color: #04210f; background: #4ade80; border-color: #4ade80; }
+.tool-chip.sev-info { color: var(--accent); }
+.tool-finding { border: 1px solid var(--border); border-radius: 8px; margin-top: 6px; background: rgba(6, 10, 20, 0.6); }
+.tool-finding > summary { cursor: pointer; padding: 7px 10px; display: flex; gap: 9px; align-items: baseline; list-style: none; }
+.tool-finding > summary::-webkit-details-marker { display: none; }
+.tool-sev { flex: none; font-size: 0.7rem; padding: 1px 7px; border-radius: 4px; background: #22344f; color: var(--text); }
+.tool-finding.sev-critical .tool-sev { background: #b91c1c; }
+.tool-finding.sev-high .tool-sev { background: #c2410c; }
+.tool-finding.sev-medium .tool-sev { background: var(--warning); color: #1a1200; }
+.tool-finding.sev-low .tool-sev { background: #4ade80; color: #04210f; }
+.tool-find-title { color: var(--text); }
+.tool-find-row { padding: 2px 10px 8px; color: var(--muted); word-break: break-word; }
+.tool-find-row b { color: var(--accent); font-weight: 600; }
+.tool-ok { color: var(--success); margin-top: 10px; }
+.tool-more, .tool-retest { color: var(--muted); margin-top: 8px; font-size: 0.8rem; }
+.tool-text { background: #060a14; border: 1px solid var(--border); border-radius: 8px; padding: 8px; max-height: 220px; overflow: auto; white-space: pre-wrap; color: var(--muted); font-size: 0.78rem; }
+.tool-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.tool-btn { background: transparent; color: var(--accent); border: 1px solid var(--accent); border-radius: 7px; padding: 6px 12px; font: inherit; font-size: 0.8rem; cursor: pointer; }
+.tool-btn:hover, .tool-btn:focus-visible { background: rgba(0, 229, 255, 0.12); outline: none; }
+@media (prefers-reduced-motion: reduce) { .tool-card-dot { animation: none; } .tool-progress-fill { transition: none; } }
+
+/* Desafios práticos */
+.badge { display: inline-block; padding: 2px 8px; border-radius: 999px; border: 1px solid rgba(0,229,255,0.35); background: rgba(0,229,255,0.08); font-size: 11px; text-transform: capitalize; }
+
+/* Central de Ferramentas — aproveita o grid/cartões já existentes. */
+.central-tools-grid { margin-bottom: 18px; }
+.central-tool-card .central-tool-form { display: grid; gap: 8px; }
+.central-field { display: grid; gap: 4px; }
+.central-field label { font-size: 12px; color: var(--muted, #94a3b8); }
+.central-field input, .central-field textarea, .central-field select {
+  width: 100%; box-sizing: border-box;
+}
+
+
+/* Jarvis v14 — ações de conversa e modo desenvolvedor */
+.jarvis-message-actions { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; opacity:.78; }
+.jarvis-msg-btn { background:transparent; border:1px solid var(--border); color:var(--muted); border-radius:6px; padding:3px 8px; font-size:11px; cursor:pointer; }
+.jarvis-msg-btn:hover { color:var(--accent); border-color:var(--accent); }
+.jarvis-history-item-actions { display:flex; gap:3px; align-items:center; }
+.jarvis-history-action { background:transparent; border:0; cursor:pointer; padding:3px; opacity:.8; }
+.jarvis-history-action:hover { opacity:1; transform:translateY(-1px); }
+.jarvis-quick-actions { display:flex; gap:7px; flex-wrap:wrap; padding:8px 0; }
+.jarvis-quick-actions .jarvis-suggestion-chip { cursor:pointer; }
+#developer-mode-btn.active { border-color:var(--accent); box-shadow:0 0 12px rgba(0,229,255,.18); color:var(--accent); }
+
+.jarvis-history-search { max-width:180px; flex:1; min-width:120px; background:rgba(0,0,0,.18); border:1px solid var(--border); color:var(--text); border-radius:7px; padding:5px 8px; }
+
+
+/* ---------- Jarvis Command Center / visual depth ---------- */
+body {
+  background:
+    radial-gradient(circle at 18% 12%, rgba(0,229,255,.10), transparent 26%),
+    radial-gradient(circle at 82% 20%, rgba(59,107,255,.10), transparent 28%),
+    radial-gradient(circle at 50% 100%, rgba(0,229,255,.055), transparent 34%),
+    #030711;
+}
+body::before {
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:-1; opacity:.34;
+  background-image:linear-gradient(rgba(0,229,255,.045) 1px, transparent 1px),linear-gradient(90deg, rgba(0,229,255,.045) 1px, transparent 1px);
+  background-size:46px 46px; mask-image:linear-gradient(to bottom, black, transparent 92%);
+}
+body::after {
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:-1;
+  background:radial-gradient(circle at var(--mx,50%) var(--my,20%), rgba(0,229,255,.10), transparent 24%);
+}
+.jarvis-page { position:relative; }
+.jarvis-page::before {
+  content:""; position:absolute; inset:-20px -10px auto; height:240px; pointer-events:none;
+  background:linear-gradient(180deg, rgba(0,229,255,.035), transparent); border-top:1px solid rgba(0,229,255,.06);
+}
+
+/* ---------- Jarvis Command Center / mobile polish ---------- */
+.jarvis-hero { display:flex; justify-content:space-between; align-items:flex-start; gap:18px; margin:4px 0 14px; }
+.jarvis-eyebrow { display:block; font:700 10px/1.2 "Orbitron", sans-serif; letter-spacing:1.7px; color:var(--accent); opacity:.9; margin-bottom:5px; }
+.jarvis-hero h1 { margin:0 0 3px; font-size:30px; }
+.jarvis-hero p { margin:0; max-width:720px; }
+.jarvis-live { min-width:110px; border:1px solid rgba(34,197,94,.35); background:rgba(34,197,94,.06); border-radius:12px; padding:9px 11px; text-align:right; font:800 11px "Rajdhani",sans-serif; letter-spacing:1px; color:#9ff7bb; }
+.jarvis-live small { display:block; margin-top:2px; color:var(--muted); font:500 10px "Inter",sans-serif; letter-spacing:0; }
+.live-dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:#22c55e; box-shadow:0 0 10px #22c55e; margin-right:5px; animation:jarvis-live-pulse 1.6s infinite; }
+@keyframes jarvis-live-pulse { 50% { opacity:.35; transform:scale(.75); } }
+.jarvis-overview-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; margin-bottom:12px; }
+.jarvis-overview-card { min-width:0; padding:11px 12px; border:1px solid rgba(0,229,255,.14); border-radius:12px; background:linear-gradient(145deg,rgba(12,25,45,.86),rgba(8,13,25,.9)); box-shadow:0 8px 22px rgba(0,0,0,.16); }
+.jarvis-overview-card span { float:right; font-size:17px; opacity:.8; }
+.jarvis-overview-card b { display:block; font:800 23px "Rajdhani",sans-serif; color:#fff; }
+.jarvis-overview-card small { display:block; color:var(--muted); font-size:10.5px; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.jarvis-capabilities { padding:14px; }
+.jarvis-cap-head { display:flex; justify-content:space-between; gap:12px; align-items:center; margin-bottom:11px; }
+.jarvis-cap-head strong { display:block; font:700 15px "Rajdhani",sans-serif; }
+.jarvis-cap-head span { color:var(--muted); font-size:11px; }
+.jarvis-cap-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+.jarvis-cap { appearance:none; border:1px solid var(--border); color:var(--text); background:rgba(255,255,255,.025); border-radius:10px; text-align:left; padding:10px; cursor:pointer; transition:.18s ease; }
+.jarvis-cap:hover { border-color:rgba(0,229,255,.55); background:rgba(0,229,255,.07); transform:translateY(-1px); }
+.jarvis-cap b { font-size:17px; margin-right:5px; }
+.jarvis-cap span { font-weight:700; font-size:12px; }
+.jarvis-cap small { display:block; margin-top:4px; color:var(--muted); font-size:10px; }
+
+/* ---------- Kali lab terminal ---------- */
+.kali-terminal-card { border-color:rgba(0,229,255,.34); box-shadow:0 0 28px rgba(0,229,255,.08); }
+.kali-terminal-head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
+.kali-terminal-head h2 { margin:0 0 3px; font-size:18px; }
+.kali-terminal-output { margin-top:12px; min-height:250px; max-height:430px; overflow:auto; padding:16px; border:1px solid rgba(0,229,255,.22); border-radius:12px; background:#03060b; color:#c9f8ff; font:500 13px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; white-space:pre-wrap; box-shadow:inset 0 0 28px rgba(0,229,255,.04); }
+.kali-terminal-form { display:flex; gap:8px; align-items:center; margin-top:10px; }
+.kali-terminal-prompt { color:#65f7c5; font:700 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; white-space:nowrap; }
+.kali-terminal-form input { flex:1; min-width:0; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+.kali-terminal-shortcuts { margin-top:8px; }
+@media (max-width:700px) {
+  .jarvis-overview-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .jarvis-hero { flex-direction:column; }
+  .jarvis-live { width:100%; box-sizing:border-box; text-align:left; }
+  .kali-terminal-head { flex-direction:column; }
+  .kali-terminal-form { align-items:stretch; flex-wrap:wrap; }
+  .kali-terminal-prompt { width:100%; }
+  .kali-terminal-form input { width:100%; }
+  .kali-terminal-form .btn { width:100%; }
+}
+
+/* ---------- Kali command center ---------- */
+.kali-command-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin:14px 0; }
+.kali-stat { margin:0; padding:13px 14px; position:relative; overflow:hidden; }
+.kali-stat span { float:right; font-size:19px; opacity:.8; }
+.kali-stat b { display:block; font:800 26px "Rajdhani",sans-serif; }
+.kali-stat small { color:var(--muted); font-size:11px; }
+.kali-launcher { border-color:rgba(0,229,255,.28); box-shadow:0 0 24px rgba(0,229,255,.07); }
+.kali-launcher-head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
+.kali-launcher-head h2 { margin:0 0 3px; font-size:18px; }
+.kali-launcher-row { margin-top:9px; align-items:stretch; }
+.kali-launcher-row select { flex:1.25; }
+.kali-launcher-row input { flex:1; min-width:180px; }
+.kali-use-btn { white-space:nowrap; }
+
+/* ---------- Mobile "Mais" sheet ---------- */
+.mobile-more-btn { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; color:#c3d3ec; background:transparent; border:0; font-size:10px; font-weight:600; padding:4px 0; border-radius:8px; }
+.mobile-more-btn span { font-size:18px; }
+.mobile-more-btn[aria-expanded="true"] { color:var(--accent); }
+.mobile-more-panel { position:fixed; inset:0; z-index:80; }
+.mobile-more-backdrop { position:absolute; inset:0; background:rgba(0,0,0,.58); backdrop-filter:blur(2px); }
+.mobile-more-sheet { position:absolute; left:10px; right:10px; bottom:calc(70px + env(safe-area-inset-bottom,0)); background:linear-gradient(160deg,#0e1b31,#070c17); border:1px solid rgba(0,229,255,.25); border-radius:16px; padding:12px; box-shadow:0 -10px 40px rgba(0,0,0,.5); }
+.mobile-more-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:9px; color:#dceaff; font:700 12px "Orbitron",sans-serif; letter-spacing:1px; }
+.mobile-more-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+.mobile-more-grid a { display:flex; align-items:center; gap:9px; padding:12px; border:1px solid var(--border); border-radius:11px; color:var(--text); text-decoration:none; background:rgba(255,255,255,.025); font-size:13px; }
+.mobile-more-grid a:hover { border-color:var(--accent); background:rgba(0,229,255,.06); }
+.mobile-more-grid a:first-letter { font-size:18px; }
+
+@media (max-width: 640px) {
+  .jarvis-hero { gap:8px; }
+  .jarvis-hero p { font-size:11px; line-height:1.45; }
+  .jarvis-live small { display:none; }
+  .jarvis-capabilities { padding:11px; }
+  .jarvis-cap-grid { gap:6px; }
+  .jarvis-cap { padding:9px; }
+  .jarvis-cap small { font-size:9.5px; }
+  .mobile-more-sheet { left:7px; right:7px; }
+}
+
+/* ---------- Secure login screen ---------- */
+.login-screen { min-height:100vh; background:#030711; }
+.login-screen .content { position:relative; z-index:2; }
+.login-card { position:relative; overflow:hidden; border-color:rgba(0,229,255,.30); box-shadow:0 0 45px rgba(0,229,255,.09), 0 24px 80px rgba(0,0,0,.45); backdrop-filter:blur(12px); }
+.login-card::before { content:""; position:absolute; inset:0 0 auto; height:2px; background:linear-gradient(90deg,transparent,var(--accent),transparent); opacity:.8; }
+.login-brand { width:54px; height:54px; display:grid; place-items:center; border-radius:16px; background:linear-gradient(135deg,#00e5ff,#3b6bff); color:#00121b; font:800 18px "Orbitron",sans-serif; box-shadow:0 0 28px rgba(0,229,255,.25); margin-bottom:16px; }
+.login-card h1 { margin:5px 0 8px; }
+.login-card label { display:block; margin-top:12px; }
+.login-card input { width:100%; box-sizing:border-box; }
+@media (max-width:520px) { .login-card { margin:12px; } }
+.password-field { position:relative; }
+.password-field input { padding-right:42px; }
+.password-toggle { position:absolute; right:4px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:17px; line-height:1; padding:6px 8px; opacity:.75; }
+.password-toggle:hover { opacity:1; }
+.btn:disabled, button:disabled { opacity:.5; cursor:not-allowed; }
+
+/* ---------- V29 Jarvis intelligence layer ---------- */
+.jarvis-secure-badge{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border:1px solid rgba(34,197,94,.24);border-radius:999px;background:rgba(34,197,94,.05);color:#a7f3bd;font:700 10px "Rajdhani",sans-serif;letter-spacing:.8px;white-space:nowrap}
+.jarvis-intel-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:9px;margin:10px 0 14px}
+.jarvis-intel{padding:11px 12px;min-width:0;position:relative;overflow:hidden;background:linear-gradient(145deg,rgba(10,26,48,.88),rgba(5,10,21,.92));border-color:rgba(0,229,255,.13)}
+.jarvis-intel::after{content:"";position:absolute;right:-24px;bottom:-30px;width:80px;height:80px;border-radius:50%;background:rgba(0,229,255,.07);filter:blur(12px)}
+.jarvis-intel>span{float:right;font-size:16px;opacity:.8}.jarvis-intel b{display:block;font:800 20px "Rajdhani",sans-serif;color:#fff}.jarvis-intel small{display:block;color:var(--muted);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.jarvis-intel em{display:block;margin-top:5px;color:#77dce9;font-style:normal;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.login-security-note{margin-top:12px;padding:9px 10px;border:1px solid rgba(0,229,255,.15);border-radius:9px;background:rgba(0,229,255,.035);color:var(--muted);font-size:10px;line-height:1.5}.login-security-note b{color:#ccefff}.login-security-note code{color:#9fefff}
+.auth-config-card{border-color:rgba(255,180,70,.22)}
+.security-mini-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}.security-mini-grid>div{padding:9px;border:1px solid var(--border);border-radius:9px;background:rgba(255,255,255,.02)}.security-mini-grid span{display:block;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.7px}.security-mini-grid b{display:block;margin-top:3px;font:800 12px "Rajdhani",sans-serif;color:#dffcff}
+@media(max-width:1000px){.jarvis-intel-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:640px){.jarvis-intel-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.jarvis-intel{padding:9px}.jarvis-secure-badge{font-size:9px}.security-mini-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.login-security-note{font-size:9px}}
+
+/* ---------- V29 deeper neural background ---------- */
+body::before{background-image:linear-gradient(rgba(0,229,255,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.055) 1px,transparent 1px),linear-gradient(135deg,transparent 0 48%,rgba(0,229,255,.025) 50%,transparent 52%);background-size:48px 48px,48px 48px,120px 120px;animation:tt-grid-drift 22s linear infinite}
+body::after{background:radial-gradient(circle at var(--mx,50%) var(--my,20%),rgba(0,229,255,.13),transparent 22%),radial-gradient(circle at 78% 72%,rgba(70,80,255,.08),transparent 30%)}
+.login-screen::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;background:repeating-linear-gradient(0deg,transparent 0 5px,rgba(0,229,255,.018) 6px 7px);mix-blend-mode:screen;opacity:.7}
+@keyframes tt-grid-drift{from{background-position:0 0,0 0,0 0}to{background-position:48px 48px,-48px 48px,120px -120px}}
+
+/* ---------- Jarvis V30 system intelligence ---------- */
+.jarvis-system-strip { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; margin:10px 0 12px; padding:9px; border-color:rgba(176,38,255,.18); background:linear-gradient(110deg,rgba(8,16,31,.88),rgba(19,10,37,.78)); }
+.jarvis-system-strip > div { min-width:0; padding:8px 9px; border:1px solid rgba(255,255,255,.055); border-radius:9px; background:rgba(255,255,255,.018); }
+.jarvis-system-strip span { margin-right:5px; }
+.jarvis-system-strip b { font:700 12px "Rajdhani",sans-serif; }
+.jarvis-system-strip small { display:block; margin-top:3px; color:var(--muted); font-size:9.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.jarvis-page::after { content:"JARVIS // SECURE COMMAND NETWORK // ONLINE"; position:absolute; top:4px; right:8px; font:600 8px "Orbitron",sans-serif; letter-spacing:1.5px; color:rgba(0,229,255,.22); pointer-events:none; }
+@media (max-width:700px) { .jarvis-system-strip { grid-template-columns:repeat(2,minmax(0,1fr)); } .jarvis-page::after { display:none; } }
+
+/* =========================================================
+   V30.1 UI HARDENING — sidebar, workspace and Cyber Lab
+   Reuses existing components; no route/API replacement.
+   ========================================================= */
+.layout{min-height:100vh;align-items:stretch}
+.sidebar{
+  width:246px;
+  min-height:100vh;
+  height:100vh;
+  position:sticky;
+  top:0;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  padding:18px 12px 12px;
+}
+.sidebar-nav{
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding:2px 2px 10px;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(0,229,255,.35) transparent;
+}
+.sidebar-nav::-webkit-scrollbar{width:5px}
+.sidebar-nav::-webkit-scrollbar-thumb{background:rgba(0,229,255,.28);border-radius:8px}
+.sidebar-caption{
+  margin:0 8px 10px;
+  color:#6f86a8;
+  font:700 10px/1 "Rajdhani","Inter",sans-serif;
+  letter-spacing:2px;
+}
+.sidebar-group{margin:0 0 14px}
+.sidebar-group-title{
+  display:block;
+  padding:3px 10px 7px;
+  color:#6f86a8;
+  font:700 10px/1 "Inter",sans-serif;
+  letter-spacing:1.4px;
+  text-transform:uppercase;
+}
+.sidebar-footer{
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin:6px 2px 0;
+  padding:10px 10px;
+  border:1px solid rgba(0,229,255,.12);
+  border-radius:10px;
+  background:rgba(8,17,31,.75);
+}
+.sidebar-footer strong{display:block;font-size:10px;letter-spacing:1px}
+.sidebar-footer small{display:block;color:#7186a6;font-size:10px;margin-top:2px}
+.sidebar-status-dot{
+  width:8px;height:8px;border-radius:50%;background:#22c55e;
+  box-shadow:0 0 12px rgba(34,197,94,.7);flex:0 0 auto;
+}
+.content{
+  width:100%;
+  max-width:none;
+  min-width:0;
+  padding:28px clamp(18px,3vw,44px) 40px;
+}
+.content > *{max-width:1440px;margin-left:auto;margin-right:auto}
+.content > .jarvis-page{max-width:1480px}
+.card{box-shadow:0 10px 30px rgba(0,0,0,.24)}
+input[type=text],input[type=email],input[type=number],input[type=password],
+input[type=date],input[type=file],select,textarea{
+  color:#f4f8ff;
+  border-color:#3a4d69;
+}
+input:focus,select:focus,textarea:focus{
+  outline:none;border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(0,229,255,.10);
+}
+.btn{min-height:38px}
+.btn.small{min-height:32px}
+.tool-filter{max-width:680px}
+.tools-grid{align-items:stretch}
+.tools-grid .tool,.tool.card{min-width:0}
+.table{width:100%;display:block;overflow-x:auto}
+.result,.finding,.scan-result{color:#eaf2ff}
+.muted{color:#a7b8d2}
+.jarvis-chat{background:rgba(3,8,17,.42);border-radius:12px}
+.bubble-row{margin-bottom:13px}
+.bubble{
+  line-height:1.62;
+  letter-spacing:.05px;
+  color:#f2f6ff;
+  border-color:rgba(126,157,197,.25);
+}
+.bubble.user{background:linear-gradient(135deg,rgba(43,76,150,.7),rgba(25,45,85,.8))}
+.bubble.jarvis,.bubble.assistant{background:linear-gradient(160deg,rgba(18,31,51,.96),rgba(9,17,29,.96))}
+.jarvis-input-row input[type=text]{min-height:46px}
+.jarvis-cap{min-height:96px}
+.cyber-command-bar{
+  display:grid;grid-template-columns:minmax(220px,1.5fr) minmax(180px,1fr) auto;
+  gap:10px;align-items:end;
+}
+.cyber-scope-badge{
+  display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border-radius:999px;
+  background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.22);
+  color:#9be7b3;font-size:11px;font-weight:700;
+}
+.cyber-tool-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.cyber-tool-card{display:flex;flex-direction:column;min-height:190px}
+.cyber-tool-card .card-actions{margin-top:auto}
+.cyber-category-title{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin:28px 0 12px;padding-bottom:9px;border-bottom:1px solid rgba(0,229,255,.12)
+}
+.cyber-category-title small{color:#7186a6;font-size:11px}
+.cyber-status-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0 20px}
+.cyber-status-card{padding:14px 16px;border:1px solid rgba(72,103,139,.3);border-radius:12px;background:rgba(9,17,30,.72)}
+.cyber-status-card b{display:block;font-size:20px;margin-top:3px}
+.cyber-status-card span{font-size:10px;color:#8196b5;text-transform:uppercase;letter-spacing:1px}
+.cyber-empty{padding:30px;text-align:center;border:1px dashed #344b69;border-radius:12px;color:#8498b7}
+.scan-progress{
+  display:none;margin-top:12px;height:7px;border-radius:99px;overflow:hidden;background:#0b1423;
+  border:1px solid #263c59
+}
+.scan-progress.active{display:block}
+.scan-progress i{display:block;width:35%;height:100%;background:linear-gradient(90deg,var(--accent),var(--primary));animation:scan-progress 1.1s ease-in-out infinite}
+@keyframes scan-progress{0%{transform:translateX(-110%)}100%{transform:translateX(330%)}}
+@media (max-width:1100px){
+  .sidebar{width:220px}
+  .cyber-status-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:820px){
+  .content{padding:14px 12px calc(88px + env(safe-area-inset-bottom,0))}
+  .cyber-command-bar{grid-template-columns:1fr}
+  .cyber-status-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sidebar{display:none}
+  .card{padding:15px}
+}
+@media (max-width:480px){
+  .cyber-status-grid{grid-template-columns:1fr 1fr;gap:7px}
+  .cyber-status-card{padding:11px}
+  .cyber-status-card b{font-size:17px}
+}
+
+/* ---------- Cyber Lab Phase 2 ---------- */
+.p2-dashboard{border:1px solid rgba(0,229,255,.22);background:linear-gradient(150deg,rgba(9,20,36,.96),rgba(5,10,20,.96));}
+.p2-kpis{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:9px;margin:12px 0}
+.p2-kpi{padding:13px;border:1px solid rgba(72,103,139,.3);border-radius:11px;background:rgba(4,11,21,.72);min-width:0}
+.p2-kpi strong{display:block;font-size:22px}.p2-kpi small{color:#8297b6;text-transform:uppercase;letter-spacing:1px;font-size:9px}
+.p2-kpi.critical{border-color:rgba(239,68,68,.35)}.p2-kpi.high{border-color:rgba(249,115,22,.35)}
+.p2-services{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}.p2-service{font-size:10px;color:#a8b7cc;padding:5px 8px;border:1px solid #31435c;border-radius:999px}.p2-service.ok{color:#9be7b3;border-color:rgba(34,197,94,.28)}
+.p2-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:12px}.p2-tool{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;padding:9px;border-bottom:1px solid rgba(126,157,197,.10)}
+.p2-tool small,.p2-asset small,.p2-alert small{display:block;color:#7890b0;font-size:10px;margin-top:2px}.p2-badge{font-size:9px;color:#9be7b3;border:1px solid rgba(34,197,94,.2);padding:4px 6px;border-radius:999px}.p2-alert,.p2-asset{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:9px;border-bottom:1px solid rgba(126,157,197,.10)}
+.p2-alert.critical{border-left:3px solid #ef4444}.p2-alert.high{border-left:3px solid #f97316}.p2-alert.medium{border-left:3px solid #eab308}.p2-history-row{display:grid;grid-template-columns:55px 150px 1fr 70px 145px;gap:8px;padding:8px;border-bottom:1px solid rgba(126,157,197,.10);font-size:12px}.p2-history-row small{color:#7890b0}.p2-evolution{height:120px;display:flex;align-items:flex-end;gap:5px;padding:8px;border:1px solid rgba(72,103,139,.24);border-radius:10px;background:#050b15;overflow:hidden}.p2-bar{flex:1;height:100%;display:flex;align-items:flex-end;min-width:5px}.p2-bar i{display:block;width:100%;background:linear-gradient(180deg,var(--accent),var(--primary));border-radius:3px 3px 0 0;min-height:4px}.p2-error{padding:10px;border:1px solid #ef4444;color:#fecaca;border-radius:8px;margin:8px 0}
+@media(max-width:1100px){.p2-kpis{grid-template-columns:repeat(4,1fr)}.p2-grid{grid-template-columns:1fr}}
+@media(max-width:820px){.p2-kpis{grid-template-columns:repeat(2,1fr)}.p2-tool{grid-template-columns:1fr auto auto}.p2-tool .p2-badge{display:none}.p2-history-row{grid-template-columns:45px 1fr 70px}.p2-history-row span:nth-child(3),.p2-history-row small{display:none}}
+.p2-investigation{border-color:rgba(0,229,255,.3);background:rgba(4,12,22,.92)}
+.p2-investigation pre{max-height:260px;overflow:auto;background:#030812;padding:10px;border-radius:8px;color:#c8dcf6;white-space:pre-wrap}
+
+/* ==========================================================================
+   v33 · LEGIBILIDADE (bloco no fim do arquivo: só sobrescreve, não remove nada)
+   - textos maiores e com mais contraste
+   - as linhas "scanlines" ficavam POR CIMA do texto (z-index 9999): agora ficam atrás
+   - controles A− / A+ e "Modo leitura" (canto da tela) ajustam tudo e lembram a escolha
+   ========================================================================== */
+:root { --text: #f6faff; --muted: #c2d0e6; --tt-line: #3d5a80; }
+html { font-size: 17px; }
+html[data-tt-size="-1"] { font-size: 15.5px; }
+html[data-tt-size="1"]  { font-size: 19px; }
+html[data-tt-size="2"]  { font-size: 21px; }
+body { line-height: 1.6; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+
+/* efeitos de fundo: continuam, mas nunca mais cobrem o texto */
+.scanlines { z-index: -1 !important; opacity: .35 !important; }
+#neural-bg { opacity: .4; }
+body::before { opacity: .65; }
+
+/* textos pequenos demais (9–12px) ficam confortáveis */
+.small, small, .muted.small { font-size: .9rem; }
+.muted { color: var(--muted); }
+.bubble { font-size: 1.02rem; line-height: 1.65; color: var(--text); }
+.jarvis-msg-btn { font-size: .88rem; padding: 6px 13px; color: #dbe8fb; border-color: var(--tt-line); background: rgba(15, 30, 52, .9); }
+.jarvis-msg-btn:hover { color: #fff; border-color: var(--accent); }
+.tool-chip { font-size: .86rem; padding: 4px 11px; color: #dbe8fb; border-color: var(--tt-line); }
+.jarvis-suggestion-chip, .mode-chip { font-size: .95rem; color: #eef5ff; border-color: var(--tt-line); }
+.btn { font-size: .98rem; color: var(--text); border-color: var(--tt-line); }
+.btn.small { font-size: .88rem; padding: 7px 12px; }
+.btn.ghost { color: #dbe8fb; }
+input, select, textarea { font-size: 1rem; color: var(--text); }
+::placeholder { color: #a9bbd6; opacity: 1; }
+label { font-size: .98rem; }
+.sidebar-nav a { font-size: .96rem; line-height: 1.25; }
+.sidebar-group { margin-bottom: 4px; }
+.sidebar-caption, .sidebar-group-title { line-height: 1.2; }
+.brand-sub { line-height: 1.3; }
+.sidebar-group-title, .sidebar-caption { font-size: .8rem; color: #a9bbd6; }
+.jarvis-page h3, .jarvis-site-panel strong, .jarvis-site-panel label { font-size: 1.05rem; color: #fff; }
+.jarvis-cap, .jarvis-options-label, .telemetry-row { font-size: .92rem; }
+.p2-kpi small, .p2-service, .p2-badge, .p2-tool small, .p2-asset small, .p2-alert small { font-size: .8rem; color: #b4c4dc; }
+.card { background-color: rgba(13, 24, 42, .96); }
+
+/* foco visível para quem navega pelo teclado */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid #ffd166; outline-offset: 2px;
+}
+
+/* Modo leitura: sem animações nem efeitos, fundo liso, máximo contraste */
+html[data-tt-read="on"] .scanlines,
+html[data-tt-read="on"] #neural-bg,
+html[data-tt-read="on"] body::before,
+html[data-tt-read="on"] body::after { display: none !important; }
+html[data-tt-read="on"] body { animation: none !important; background: #050a14 !important; }
+html[data-tt-read="on"] .card, html[data-tt-read="on"] .bubble { background: #0c1626 !important; text-shadow: none !important; }
+html[data-tt-read="on"] * { text-shadow: none !important; }
+
+@media (max-width: 820px) { html { font-size: 16.5px; } }
+@media (prefers-contrast: more) { :root { --muted: #e3ecf9; --tt-line: #8fb0d9; } }
+
+/* painel flutuante dos controles */
+.tt-read-tools { position: fixed; right: 12px; bottom: 14px; z-index: 10000; display: flex; gap: 6px; padding: 6px;
+  background: rgba(6, 12, 24, .94); border: 1px solid var(--tt-line); border-radius: 12px; box-shadow: 0 4px 18px rgba(0,0,0,.5); }
+.tt-read-tools button { min-width: 40px; min-height: 40px; border-radius: 9px; border: 1px solid var(--tt-line); background: #0f1f36;
+  color: #fff; font: 700 15px/1 inherit; cursor: pointer; }
+.tt-read-tools button[aria-pressed="true"] { background: #1d4ed8; border-color: #7aa2ff; }
+.tt-read-tools button:hover { border-color: var(--accent); }
+@media (max-width: 820px) { .tt-read-tools { bottom: calc(84px + env(safe-area-inset-bottom, 0px)); } }
+
+/* v33 · piso de tamanho: nada de texto abaixo de ~12,5px */
+.badge, .jarvis-secure-badge, .cyber-scope-badge, .jarvis-status, .holo-status-label,
+.holo-control-val, .holo-panel-group h4, .jarvis-live span { font-size: .8rem; }
+.brand-sub { font-size: .75rem; letter-spacing: 1.4px; }
+.jarvis-eyebrow { font-size: .78rem; letter-spacing: 1.4px; }
+.jarvis-cap span { font-size: 1rem; }
+.jarvis-cap small, .jarvis-intel small, .jarvis-overview-card small { font-size: .86rem; color: var(--muted); }
+.jarvis-intel em, .security-mini-grid span { font-size: .8rem; }
+.security-mini-grid b { font-size: .92rem; }
+.sidebar-footer strong { font-size: .86rem; }
+.sidebar-footer small { font-size: .78rem; color: var(--muted); }
+.p2-history-row span, .p2-history-row strong { font-size: .86rem; }
+/* v33 · seletores mais específicos que ainda ganhavam da regra acima */
+.jarvis-cap-head span, .jarvis-live small { font-size: .82rem; }
+#holo-status-orb .holo-status-label { font-size: .8rem !important; } /* CSS injetado por hologram-status.js vem depois */
+.holo-control-row .holo-control-val { font-size: .8rem; flex-basis: 44px; }
+.holo-kind-btn { font-size: .85rem; }
+.checkbox.small { font-size: .88rem; }
+
+/* Fase 12 — indicador de processamento */
+.thinking-dots .jarvis-processing-label {
+  font-size: 0.85rem;
+  opacity: 0.85;
+  margin-right: 8px;
+  white-space: nowrap;
+}
+.jarvis-error-card {
+  border-left: 3px solid #f59e0b;
+  padding: 12px 14px;
+  background: rgba(245, 158, 11, 0.08);
+  border-radius: 8px;
+}
+
+/* Social login / account onboarding */
+.social-login { width: 100%; }
+.social-divider { display:flex; align-items:center; gap:10px; color:var(--muted,#9aa4b2); font-size:.82rem; margin:4px 0 12px; }
+.social-divider::before,.social-divider::after { content:""; height:1px; flex:1; background:rgba(255,255,255,.12); }
+.social-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.social-btn { text-decoration:none; text-align:center; display:flex; align-items:center; justify-content:center; min-height:46px; color:#f5f7fb !important; border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.055); }
+.social-btn:hover { background:rgba(255,255,255,.10); transform:translateY(-1px); }
+@media (max-width:620px){ .social-grid{grid-template-columns:1fr;} }

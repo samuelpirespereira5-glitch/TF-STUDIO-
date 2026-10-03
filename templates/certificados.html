@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Certificados JARVIS{% endblock %}
+{% block content %}
+<div class="edu-wrap" style="max-width:900px;margin:0 auto;padding:20px">
+  <header>
+    <h1>📜 Certificados JARVIS</h1>
+    <p class="muted">Certificados <strong>próprios do JARVIS</strong> para trilhas e módulos criados neste sistema.</p>
+    <p class="muted small">Não são certificados do Curso em Vídeo, Gustavo Guanabara, YouTube ou qualquer instituição externa.</p>
+  </header>
+
+  <div class="card" style="margin:16px 0;padding:16px;border:1px solid rgba(255,255,255,.1);border-radius:12px">
+    <h2>Emitir certificado</h2>
+    <label>Seu nome <input id="cert-name" type="text" maxlength="80" placeholder="Nome no certificado" style="width:100%;margin:6px 0;padding:8px"></label>
+    <label>Trilha JARVIS
+      <select id="cert-track" style="width:100%;margin:6px 0;padding:8px"></select>
+    </label>
+    <label>Projeto final (opcional) <input id="cert-project" type="text" maxlength="120" style="width:100%;margin:6px 0;padding:8px"></label>
+    <button type="button" class="btn primary" id="cert-issue">Emitir certificado JARVIS</button>
+    <pre id="cert-out" class="edu-out" style="margin-top:12px;white-space:pre-wrap"></pre>
+  </div>
+
+  <div class="card" style="padding:16px;border:1px solid rgba(255,255,255,.1);border-radius:12px">
+    <h2>Meus certificados</h2>
+    <div id="cert-list" class="muted">Carregando…</div>
+  </div>
+
+  <p style="margin-top:16px"><a href="/certificados/verificar">Verificar um certificado →</a> · <a href="/educacao">Voltar à Educação</a></p>
+</div>
+<script>
+(async function(){
+  const trackSel = document.getElementById('cert-track');
+  try {
+    const r = await fetch('/api/cyber/phase12/tracks');
+    const d = await r.json();
+    trackSel.innerHTML = (d.tracks||[]).map(t => `<option value="${t.id}">${t.icon||''} ${t.titulo} (${t.carga_horas||0}h)</option>`).join('');
+  } catch(e) {
+    trackSel.innerHTML = '<option value="">Indisponível</option>';
+  }
+  async function loadList(){
+    const box = document.getElementById('cert-list');
+    try {
+      const r = await fetch('/api/cyber/phase12/certificates');
+      const d = await r.json();
+      const list = d.certificates||[];
+      box.innerHTML = list.length ? list.map(c =>
+        `<div style="margin:8px 0"><strong>${c.codigo}</strong> — ${c.trilha||''} · ${c.nome||''} · ${c.data||''}
+        <a href="/certificados/verificar/${encodeURIComponent(c.codigo)}">validar</a></div>`
+      ).join('') : '<span class="muted">Nenhum certificado emitido ainda.</span>';
+    } catch(e) { box.textContent = 'Não foi possível carregar.'; }
+  }
+  document.getElementById('cert-issue').onclick = async () => {
+    const out = document.getElementById('cert-out');
+    out.textContent = 'Emitindo…';
+    try {
+      const r = await fetch('/api/cyber/phase12/certificates/issue', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          nome: document.getElementById('cert-name').value,
+          trilha_id: trackSel.value,
+          projeto: document.getElementById('cert-project').value
+        })
+      });
+      const d = await r.json();
+      if (d.ok) {
+        out.textContent = d.titulo + '\\nCódigo: ' + d.codigo + '\\nTrilha: ' + d.trilha + '\\n' + d.aviso + '\\nValidação: ' + d.validacao_url;
+        loadList();
+      } else {
+        out.textContent = d.error || 'Falha ao emitir';
+      }
+    } catch(e) { out.textContent = 'Erro de conexão'; }
+  };
+  loadList();
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}JARVIS · Fase 9 — Educação + Labs + Jogos{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/phase9.css') }}">
+{% endblock %}
+{% block content %}
+<div class="p9-wrap" id="p9">
+  <header class="p9-hero">
+    <div>
+      <h1>JARVIS · Fase 9.0</h1>
+      <p class="muted">Educação · Programação · Jogos · IA · UX — expansão incremental</p>
+    </div>
+    <div class="p9-modes" id="modeBar"></div>
+  </header>
+
+  <nav class="p9-tabs" id="tabs">
+    <button class="active" data-tab="dash">Dashboard</button>
+    <button data-tab="labs">Laboratórios</button>
+    <button data-tab="algo">Algoritmos</button>
+    <button data-tab="debug">Debug Lab</button>
+    <button data-tab="games">Jogos educacionais</button>
+    <button data-tab="project">Project Builder</button>
+    <button data-tab="mentor">Mentor</button>
+    <button data-tab="review">Code Review</button>
+    <button data-tab="search">Busca</button>
+  </nav>
+
+  <section class="p9-panel active" data-panel="dash">
+    <div class="p9-grid" id="dashCards"></div>
+    <div class="p9-row">
+      <article class="card"><h3>Trilha completa</h3><ol id="trackList" class="p9-track"></ol></article>
+      <article class="card"><h3>Desafio diário</h3><div id="dailyBox" class="muted">Carregando…</div></article>
+      <article class="card"><h3>Projeto semanal</h3><div id="weeklyBox" class="muted">Carregando…</div></article>
+    </div>
+  </section>
+
+  <section class="p9-panel" data-panel="labs">
+    <div class="p9-grid" id="labsGrid"></div>
+    <article class="card hidden" id="labDetail"></article>
+  </section>
+
+  <section class="p9-panel" data-panel="algo">
+    <div class="p9-algo-controls">
+      <select id="algoSelect"></select>
+      <button class="btn primary" id="algoStart">INICIAR</button>
+      <button class="btn" id="algoPause">PAUSAR</button>
+      <button class="btn" id="algoStep">AVANÇAR</button>
+      <button class="btn" id="algoReset">REINICIAR</button>
+    </div>
+    <div class="p9-viz" id="algoViz">
+      <div class="p9-bars" id="algoBars"></div>
+      <p class="p9-msg" id="algoMsg">Selecione um algoritmo e clique em INICIAR.</p>
+      <p class="muted" id="algoMeta"></p>
+    </div>
+    <div class="p9-row">
+      <article class="card"><h3>Estruturas de dados</h3><div id="dsButtons"></div><pre id="dsState" class="code"></pre></article>
+      <article class="card"><h3>Arquitetura</h3><div id="archView"></div></article>
+      <article class="card"><h3>Rede + DNS</h3><div id="netView"></div></article>
+    </div>
+  </section>
+
+  <section class="p9-panel" data-panel="debug">
+    <div id="debugList" class="p9-grid"></div>
+    <article class="card hidden" id="debugDetail">
+      <h3 id="dbgTitle"></h3>
+      <p class="muted" id="dbgError"></p>
+      <pre class="code" id="dbgBroken"></pre>
+      <div class="actions">
+        <button class="btn" id="dbgHint">💡 Dica progressiva</button>
+        <button class="btn" id="dbgReveal">Mostrar solução</button>
+      </div>
+      <p id="dbgHintBox" class="p9-msg"></p>
+      <pre class="code hidden" id="dbgFixed"></pre>
+    </article>
+  </section>
+
+  <section class="p9-panel" data-panel="games">
+    <div class="p9-grid" id="gamesGrid"></div>
+    <article class="card hidden" id="gameDetail"></article>
+  </section>
+
+  <section class="p9-panel" data-panel="project">
+    <article class="card">
+      <h3>Project Builder</h3>
+      <p class="muted">Informe uma ideia. O JARVIS monta objetivo, arquitetura, tarefas e testes — ensinando o processo.</p>
+      <textarea id="ideaInput" rows="3" placeholder="Ex: um app de lista de tarefas com tags e lembretes"></textarea>
+      <button class="btn primary" id="buildProject">Gerar plano</button>
+      <div id="projectOut"></div>
+    </article>
+  </section>
+
+  <section class="p9-panel" data-panel="mentor">
+    <article class="card">
+      <h3>Mentor Mode</h3>
+      <p class="muted">PERGUNTA → PISTA → TENTATIVA → FEEDBACK → NOVA PISTA → SOLUÇÃO</p>
+      <input id="mentorCtx" placeholder="Contexto do problema (opcional)">
+      <div class="actions">
+        <button class="btn primary" id="mentorNext">Próxima etapa</button>
+        <button class="btn" id="mentorReset">Reiniciar</button>
+      </div>
+      <div id="mentorOut" class="p9-msg"></div>
+    </article>
+  </section>
+
+  <section class="p9-panel" data-panel="review">
+    <article class="card">
+      <h3>Code Review + Refactor</h3>
+      <select id="revLang"><option>javascript</option><option>python</option><option>html</option></select>
+      <textarea id="revCode" rows="10" placeholder="Cole seu código aqui"></textarea>
+      <button class="btn primary" id="revRun">Analisar</button>
+      <div id="revOut"></div>
+    </article>
+  </section>
+
+  <section class="p9-panel" data-panel="search">
+    <article class="card">
+      <h3>Smart Search</h3>
+      <input id="searchQ" placeholder="aulas, labs, jogos, conceitos…">
+      <button class="btn primary" id="searchBtn">Buscar</button>
+      <div id="searchOut" class="p9-grid"></div>
+    </article>
+  </section>
+
+  <div id="p9toast" class="p9-toast hidden"></div>
+</div>
+<script src="{{ url_for('static', filename='js/phase9.js') }}"></script>
+{% endblock %}

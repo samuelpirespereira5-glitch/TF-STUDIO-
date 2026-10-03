@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}JARVIS Ultra Platform{% endblock %}
+{% block head %}
+<style>
+.u2{max-width:1500px;margin:auto;padding:18px}.u2-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:18px}.u2-card{grid-column:span 6;background:rgba(12,18,28,.86);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:22px;min-width:0}.u2-wide{grid-column:span 12}.u2 h1{font-size:clamp(1.6rem,3vw,2.5rem);margin:0 0 8px}.u2 h2{font-size:1.2rem;margin:0 0 14px}.u2 p,.u2 li{line-height:1.55}.u2-actions{display:flex;gap:10px;flex-wrap:wrap}.u2-btn,.u2-select{min-height:44px;border-radius:11px;padding:10px 14px;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.06);color:inherit}.u2-btn{cursor:pointer}.u2-btn.primary{background:rgba(50,140,255,.18)}.u2-grid-games{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}.game{padding:17px;border:1px solid rgba(255,255,255,.09);border-radius:15px;background:rgba(255,255,255,.035);min-height:150px}.game h3{margin:0 0 8px}.muted{opacity:.7}.status{display:inline-block;padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.08);font-size:.78rem}.list{display:grid;gap:9px}.row{padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08)}.row:last-child{border-bottom:0}.mono{font-family:ui-monospace,monospace;white-space:pre-wrap;overflow:auto}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.kpi{padding:15px;border-radius:14px;background:rgba(255,255,255,.04)}.kpi b{display:block;font-size:1.4rem;margin-top:4px}.notice{padding:12px;border-left:3px solid currentColor;background:rgba(255,255,255,.035);border-radius:8px}.game-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99;align-items:center;justify-content:center;padding:15px}.game-modal.open{display:flex}.game-box{width:min(650px,100%);background:#101722;border-radius:18px;padding:22px;max-height:90vh;overflow:auto}.opt{display:block;width:100%;margin:8px 0;padding:12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:inherit;border-radius:10px;text-align:left}.opt:hover{background:rgba(255,255,255,.09)}
+@media(max-width:900px){.u2-card{grid-column:span 12}.kpis{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.u2{padding:10px}.u2-card{padding:16px}.kpis{grid-template-columns:1fr}.u2-grid-games{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+{% endblock %}
+{% block content %}
+<div class="u2">
+ <section class="u2-card u2-wide"><h1>JARVIS Ultra Platform</h1><p class="muted">Uma camada integrada sobre autenticação, Cyber Lab, gamificação, Academy, projetos e holograma existentes. Sem segundo sistema de XP ou autenticação.</p><div class="kpis" id="kpis"></div></section>
+ <section class="u2-card"><h2>Security Account Center</h2><div id="account" class="list">Carregando…</div><div class="u2-actions"><button class="u2-btn" id="revokeOthers">Encerrar outras sessões</button></div></section>
+ <section class="u2-card"><h2>System Health</h2><div id="health" class="list">Carregando…</div></section>
+ <section class="u2-card u2-wide"><h2>JARVIS Arcade</h2><div id="games" class="u2-grid-games"></div></section>
+ <section class="u2-card"><h2>Perfil / Progressão</h2><div id="profile"></div><h3>Missões diárias</h3><div id="missions" class="list"></div></section>
+ <section class="u2-card"><h2>Learning Paths</h2><div id="paths" class="list"></div></section>
+ <section class="u2-card"><h2>Quiz Engine</h2><select id="quiz" class="u2-select" style="width:100%"></select><div id="quizBox" style="margin-top:12px"></div></section>
+ <section class="u2-card"><h2>Self Diagnostic</h2><button class="u2-btn primary" id="diag">Executar diagnóstico</button><pre id="diagOut" class="mono"></pre></section>
+ <section class="u2-card"><h2>Security Checklist</h2><div id="checklist" class="list">Carregando…</div></section>
+ <section class="u2-card"><h2>Backup Safety</h2><button class="u2-btn" id="backup">Verificar integridade</button><pre id="backupOut" class="mono"></pre></section>
+ <section class="u2-card"><h2>Release Center</h2><div id="release"></div></section>
+ <section class="u2-card"><h2>Activity Center</h2><div id="activity" class="list"></div></section>
+ <section class="u2-card u2-wide"><h2>Project Templates</h2><div id="templates" class="u2-grid-games"></div></section>
+</div>
+<div class="game-modal" id="gm"><div class="game-box"><button class="u2-btn" id="closeGame">Fechar</button><div id="gameContent"></div></div></div>
+<script>
+const $=s=>document.querySelector(s); const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function api(url,opt={}){const r=await fetch(url,opt);const d=await r.json().catch(()=>({error:'Resposta inválida'}));if(!r.ok)throw Error(d.error||('HTTP '+r.status));return d}
+async function load(){
+ const [a,h,g,m,p,q,ch,b,r,act,t]=await Promise.all([api('/api/cyber/ultra2/account-security'),api('/api/cyber/ultra2/system-health'),api('/api/cyber/ultra2/arcade'),api('/api/cyber/ultra2/missions'),api('/api/cyber/ultra2/learning-paths'),api('/api/cyber/ultra2/quizzes'),api('/api/cyber/ultra2/checklist'),api('/api/cyber/ultra2/backup-safety'),api('/api/cyber/ultra2/release'),api('/api/cyber/ultra2/activity'),api('/api/cyber/ultra2/project-templates')]);
+ $('#kpis').innerHTML=[['Conta',a.status],['2FA',a.two_factor?'ATIVO':'PENDENTE'],['Sessões',a.session_count],['Jogos',g.games.length]].map(x=>`<div class="kpi"><span>${esc(x[0])}</span><b>${esc(x[1])}</b></div>`).join('');
+ $('#account').innerHTML=`<div class="row"><b>Status</b> <span class="status">${esc(a.status)}</span></div><div class="row">2FA: <b>${a.two_factor?'Ativo':'Recomendado'}</b></div><div class="row">Passkeys cadastradas: <b>${a.passkeys.length}</b></div><div class="row">Recovery codes restantes: <b>${esc(a.recovery_codes_remaining)}</b></div>`+a.sessions.map(s=>`<div class="row"><b>${esc(s.id)}</b> · ${esc(s.role)}<div class="muted">${esc(s.created)} · ${esc(s.ip_prefix||'rede mascarada')}</div><button class="u2-btn" onclick="revoke('${esc(s.id)}')">Encerrar</button></div>`).join('');
+ $('#health').innerHTML=h.services.map(s=>`<div class="row"><b>${esc(s.name)}</b> <span class="status">${esc(s.status)}</span></div>`).join('');
+ $('#games').innerHTML=g.games.map(x=>`<div class="game"><h3>${esc(x.name)}</h3><p class="muted">${esc(x.description)}</p><div>Recorde: <b>${esc(x.record)}</b></div><button class="u2-btn primary" style="margin-top:10px" onclick="play('${esc(x.id)}')">Jogar</button></div>`).join('');
+ $('#profile').innerHTML=`<div class="notice">${esc(g.profile.rank_name)} · nível ${esc(g.profile.level)} · XP ${esc(g.profile.xp)}<br>Jogos: ${esc(g.profile.games_played)} · Recordes: ${esc(g.profile.records)}</div>`;
+ $('#missions').innerHTML=m.missions.map(x=>`<div class="row"><span class="status">${x.done?'CONCLUÍDA':'PENDENTE'}</span> ${esc(x.mission)}</div>`).join('');
+ $('#paths').innerHTML=p.paths.map(x=>`<div class="row"><b>${esc(x.name)}</b><div class="muted">${x.modules.map(esc).join(' · ')}</div></div>`).join('');
+ $('#quiz').innerHTML=q.quizzes.map(x=>`<option value="${esc(x.id)}">${esc(x.name)} (${x.questions})</option>`).join(''); loadQuiz();
+ $('#checklist').innerHTML=ch.checks.map(x=>`<div class="row"><b>${esc(x.control)}</b> <span class="status">${esc(x.status)}</span><div class="muted">${esc(x.evidence)}</div></div>`).join('');
+ $('#release').innerHTML=`<div class="row">Versão: <b>${esc(r.version)}</b></div><div class="row">Build: ${esc(r.build)}</div><div class="row">Ambiente: ${esc(r.environment)}</div>`;
+ $('#activity').innerHTML=act.events.length?act.events.slice(0,30).map(x=>`<div class="row"><b>${esc(x.title)}</b><div class="muted">${esc(x.ts)} · ${esc(x.event_type)}</div></div>`).join(''):'Nenhuma atividade recente.';
+ $('#templates').innerHTML=t.templates.map(x=>`<div class="game"><h3>${esc(x.name)}</h3><p class="muted">${esc(x.description)}</p></div>`).join('');
+}
+async function revoke(id){await api('/api/cyber/ultra2/sessions/'+encodeURIComponent(id)+'/revoke',{method:'POST',headers:{'X-CSRF-Token':'{{ csrf_token }}'}});load()}
+async function play(id){$('#gm').classList.add('open');$('#gameContent').innerHTML='<h2>Desafio rápido</h2><p>Escolha uma resposta defensiva:</p><button class="opt" onclick="finish(100,30000)" >Aplicar controle apropriado e validar o resultado</button><button class="opt" onclick="finish(40,30000)">Ignorar o evento</button><button class="opt" onclick="finish(70,30000)">Fazer mudança sem confirmar o impacto</button>';window.currentGame=id}
+async function finish(score,dur){const d=await api('/api/cyber/ultra2/arcade/'+window.currentGame+'/score',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':'{{ csrf_token }}'},body:JSON.stringify({score,duration_ms:dur})});$('#gameContent').innerHTML='<h2>Resultado</h2><p>Score: <b>'+esc(d.score)+'</b> · XP: <b>'+esc(d.xp_awarded)+'</b></p><p class="muted">O jogo é educativo e usa cenários fictícios.</p>';load()}
+async function loadQuiz(){try{const q=await api('/api/cyber/ultra2/quizzes/'+encodeURIComponent($('#quiz').value));const x=q.questions[0];$('#quizBox').innerHTML=`<b>${esc(x.question)}</b>`+x.options.map((o,i)=>`<button class="opt" onclick="answer(${i})">${esc(o)}</button>`).join('')}catch(e){$('#quizBox').textContent=e.message}}
+async function answer(i){const d=await api('/api/cyber/ultra2/quizzes/'+encodeURIComponent($('#quiz').value)+'/check',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':'{{ csrf_token }}'},body:JSON.stringify({index:0,answer:i})});$('#quizBox').innerHTML=`<div class="notice">${d.correct?'Correto':'Não foi desta vez'} — ${esc(d.explanation)}</div>`}
+$('#quiz').onchange=loadQuiz;$('#closeGame').onclick=()=>$('#gm').classList.remove('open');$('#revokeOthers').onclick=async()=>{await api('/api/cyber/ultra2/sessions/revoke-others',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':'{{ csrf_token }}'},body:JSON.stringify({})});load()};$('#diag').onclick=async()=>{$('#diagOut').textContent='Executando…';$('#diagOut').textContent=JSON.stringify(await api('/api/cyber/ultra2/diagnostics'),null,2)};$('#backup').onclick=async()=>{$('#backupOut').textContent=JSON.stringify(await api('/api/cyber/ultra2/backup-safety'),null,2)};load().catch(e=>console.error(e));
+</script>
+{% endblock %}

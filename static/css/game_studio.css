@@ -1,0 +1,38 @@
+/* JARVIS Game Studio 5.0 */
+.gs-wrap { max-width: 1200px; margin: 0 auto; padding: 12px; }
+.gs-hero { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.gs-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.gs-tab { background: #0f172a; border: 1px solid rgba(148,163,184,.25); color: #e2e8f0; padding: 8px 12px; border-radius: 10px; cursor: pointer; }
+.gs-tab.active { border-color: #38bdf8; background: rgba(56,189,248,.12); }
+.gs-panel { display: none; }
+.gs-panel.active { display: block; }
+.gs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.gs-card { background: #0f172a; border: 1px solid rgba(148,163,184,.2); border-radius: 12px; padding: 12px; }
+.gs-card-actions { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.gs-editor-layout { display: grid; grid-template-columns: 200px 1fr 220px; gap: 10px; min-height: 420px; }
+.gs-side, .gs-props { background: #0f172a; border: 1px solid rgba(148,163,184,.2); border-radius: 12px; padding: 10px; overflow: auto; max-height: 70vh; }
+.gs-stage { background: #020617; border-radius: 12px; border: 1px solid rgba(148,163,184,.2); padding: 8px; display: flex; flex-direction: column; gap: 8px; }
+.gs-obj-item { display: block; width: 100%; text-align: left; background: transparent; border: none; color: #e2e8f0; padding: 8px; border-radius: 8px; cursor: pointer; font-size: 12px; }
+.gs-obj-item.active, .gs-obj-item:hover { background: rgba(56,189,248,.15); }
+.gs-prop { display: flex; flex-direction: column; gap: 2px; margin-bottom: 8px; font-size: 12px; color: #94a3b8; }
+.gs-prop input { background: #020617; border: 1px solid rgba(148,163,184,.3); color: #f1f5f9; border-radius: 8px; padding: 6px 8px; }
+#gs-editor-canvas, #gs-play-canvas { width: 100%; max-width: 640px; height: auto; aspect-ratio: 16/10; background: #0f172a; border-radius: 10px; touch-action: none; }
+.gs-toolbar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.gs-add-row { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+.gs-add-row .btn { font-size: 11px; padding: 4px 8px; }
+.gs-nudge { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; max-width: 140px; margin: 8px 0; }
+.gs-modal { position: fixed; inset: 0; z-index: 10001; display: flex; align-items: center; justify-content: center; background: rgba(2,6,23,.7); }
+.gs-modal[hidden] { display: none !important; }
+.gs-modal-card { background: #0f172a; border: 1px solid rgba(148,163,184,.35); border-radius: 14px; padding: 16px; width: min(440px, 94vw); }
+.gs-modal-card label { display: block; margin: 8px 0 4px; color: #94a3b8; font-size: 13px; }
+.gs-modal-card input, .gs-modal-card select, .gs-modal-card textarea { width: 100%; box-sizing: border-box; background: #020617; border: 1px solid rgba(148,163,184,.3); color: #f1f5f9; border-radius: 8px; padding: 8px; }
+.gs-touch-bar { display: none; gap: 8px; justify-content: center; margin-top: 8px; }
+.gs-touch-bar button { min-width: 56px; min-height: 48px; }
+#gs-code { width: 100%; min-height: 120px; background: #020617; color: #e2e8f0; border-radius: 8px; border: 1px solid rgba(148,163,184,.25); padding: 8px; font-family: ui-monospace, monospace; font-size: 12px; }
+#gs-check-out .ok { color: #4ade80; }
+#gs-check-out .bad { color: #f87171; }
+#gs-hud { font-size: 13px; color: #cbd5e1; }
+@media (max-width: 900px) {
+  .gs-editor-layout { grid-template-columns: 1fr; }
+  .gs-touch-bar { display: flex; }
+}

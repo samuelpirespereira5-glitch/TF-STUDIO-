@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+{% block title %}JARVIS Game Lab + Studio 5.0{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/game_studio.css') }}">
+{% endblock %}
+{% block content %}
+<style>
+.gl{max-width:1500px;margin:auto}.hero{padding:24px;border:1px solid rgba(255,255,255,.09);border-radius:24px;background:radial-gradient(circle at 80% 0%,rgba(72,180,255,.18),transparent 35%),linear-gradient(135deg,rgba(12,24,39,.98),rgba(6,12,20,.98));box-shadow:0 18px 60px rgba(0,0,0,.18)}
+.hero h1{margin:0 0 7px;font-size:clamp(1.8rem,4vw,3rem)}.hero p{max-width:760px}.tabs{display:flex;gap:8px;overflow:auto;padding:12px 0}.tab{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.035);color:inherit;border-radius:12px;padding:10px 14px;cursor:pointer;white-space:nowrap}.tab.active{background:rgba(70,170,255,.18);border-color:rgba(70,170,255,.45)}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.card{border:1px solid rgba(255,255,255,.09);border-radius:18px;background:rgba(255,255,255,.035);padding:16px}.card h3{margin:7px 0}.icon{font-size:2.2rem}.muted{opacity:.72}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btn{border:1px solid rgba(255,255,255,.1);border-radius:11px;padding:9px 12px;background:rgba(255,255,255,.05);color:inherit;cursor:pointer}.btn.primary{background:rgba(55,170,255,.2);border-color:rgba(55,170,255,.5)}.btn.good{background:rgba(70,210,140,.15)}
+.section{margin-top:18px}.panel{border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:18px;background:rgba(255,255,255,.025)}.two{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}.three{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.code{background:#050a10;border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:14px;overflow:auto;white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,monospace;font-size:.9rem}.bar{height:12px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}.bar i{display:block;height:100%;background:rgba(70,180,255,.8)}.kpi{padding:14px;border:1px solid rgba(255,255,255,.08);border-radius:15px}.kpi b{display:block;font-size:1.4rem;margin-top:4px}.challenge{border-left:3px solid rgba(255,190,70,.8)}.labstage{min-height:280px;border-radius:16px;background:#050a10;border:1px solid rgba(255,255,255,.08);display:grid;place-items:center;overflow:hidden}.labstage canvas{max-width:100%;touch-action:none}.field{display:grid;gap:6px}.field input,.field select,.field textarea{width:100%;box-sizing:border-box;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:#08111b;color:inherit;padding:10px}.block{display:inline-flex;padding:10px 13px;border-radius:12px;background:rgba(80,180,255,.13);border:1px solid rgba(80,180,255,.3);margin:4px;cursor:pointer}.toast{position:fixed;right:18px;bottom:18px;z-index:500;padding:12px 15px;border-radius:12px;background:#101c29;border:1px solid rgba(255,255,255,.12);display:none}.toast.show{display:block}@media(max-width:1050px){.grid{grid-template-columns:repeat(2,1fr)}.two,.three{grid-template-columns:1fr}}@media(max-width:620px){.grid{grid-template-columns:1fr}.hero{padding:18px}.card{padding:14px}}
+</style>
+<div class="gl">
+  <section class="hero">
+    <div class="muted">🎮 CODE & GAME LAB</div>
+    <h1>Aprenda programação criando coisas.</h1>
+    <p>Jogue, descubra como funciona, experimente mudanças, programe, teste e crie seus próprios jogos dentro do JARVIS.</p>
+    <div class="three" id="progressKpis"><div class="kpi">Carregando…</div></div>
+  </section>
+
+  <!-- GAME STUDIO 5.0 -->
+  <div class="gs-wrap" id="gs-root">
+    <div class="gs-hero">
+      <div>
+        <div class="muted">🛠️ GAME STUDIO 5.0</div>
+        <h2 style="margin:4px 0">Crie, edite, execute e publique jogos de verdade</h2>
+        <p class="muted" style="margin:0">Editor de cena · propriedades · preview · versões · JARVIS Coder · TEST PLATFORMER</p>
+      </div>
+      <div class="gs-toolbar">
+        <button type="button" class="btn primary" id="gs-new">+ Novo Jogo</button>
+        <button type="button" class="btn good" id="gs-ensure-test">JARVIS TEST PLATFORMER</button>
+      </div>
+    </div>
+    <div class="gs-tabs">
+      <button type="button" class="gs-tab active" data-panel="studio">Studio</button>
+      <button type="button" class="gs-tab" data-panel="mygames">Meus jogos</button>
+      <button type="button" class="gs-tab" data-panel="templates">Templates</button>
+      <button type="button" class="gs-tab" data-panel="editor">Editor</button>
+      <button type="button" class="gs-tab" data-panel="play">▶ Preview</button>
+      <button type="button" class="gs-tab" data-panel="gallery">Galeria</button>
+    </div>
+
+    <section class="gs-panel active" data-panel="studio">
+      <div class="gs-grid">
+        <article class="gs-card"><strong>+ Novo Jogo</strong><p class="muted small">Wizard com tipo e template</p><button type="button" class="btn primary" data-gs-action="new">Criar</button></article>
+        <article class="gs-card"><strong>TEST PLATFORMER</strong><p class="muted small">Fluxo completo obrigatório</p><button type="button" class="btn" data-gs-action="test">Abrir teste</button></article>
+        <article class="gs-card"><strong>Meus jogos</strong><p class="muted small">Projetos salvos no JARVIS</p><button type="button" class="btn" data-gs-action="mygames">Listar</button></article>
+        <article class="gs-card"><strong>Galeria</strong><p class="muted small">Jogos publicados (local)</p><button type="button" class="btn" data-gs-action="gallery">Ver</button></article>
+      </div>
+    </section>
+
+    <section class="gs-panel" data-panel="mygames">
+      <div id="gs-my-games" class="gs-grid"></div>
+    </section>
+
+    <section class="gs-panel" data-panel="templates">
+      <p class="muted">Templates funcionais (viram projeto editável):</p>
+      <div id="gs-templates" class="gs-toolbar"></div>
+    </section>
+
+    <section class="gs-panel" data-panel="editor">
+      <div class="gs-toolbar" style="margin-bottom:8px">
+        <strong id="gs-editor-title">Editor</strong>
+        <span class="muted small" id="gs-editor-meta"></span>
+        <span class="spacer"></span>
+        <button type="button" class="btn" id="gs-save">Salvar / Versionar</button>
+        <button type="button" class="btn" id="gs-check">GAME CHECK</button>
+        <button type="button" class="btn primary" id="gs-play">▶ Executar</button>
+        <button type="button" class="btn" id="gs-publish">Publicar</button>
+      </div>
+      <div class="gs-editor-layout">
+        <aside class="gs-side">
+          <div class="muted small">Objetos</div>
+          <div class="gs-add-row">
+            <button type="button" class="btn" data-gs-add="player">+ Personagem</button>
+            <button type="button" class="btn" data-gs-add="enemy">+ Inimigo</button>
+            <button type="button" class="btn" data-gs-add="platform">+ Plataforma</button>
+            <button type="button" class="btn" data-gs-add="coin">+ Moeda</button>
+            <button type="button" class="btn" data-gs-add="goal">+ Objetivo</button>
+            <button type="button" class="btn" data-gs-add="checkpoint">+ Checkpoint</button>
+            <button type="button" class="btn" data-gs-add="key">+ Chave</button>
+            <button type="button" class="btn" data-gs-add="door">+ Porta</button>
+            <button type="button" class="btn" data-gs-add="obstacle">+ Obstáculo</button>
+            <button type="button" class="btn" data-gs-add="npc">+ NPC</button>
+          </div>
+          <div id="gs-obj-list"></div>
+        </aside>
+        <div class="gs-stage">
+          <canvas id="gs-editor-canvas" width="640" height="400" aria-label="Editor de cena"></canvas>
+          <div class="gs-nudge" title="Controles touch / preciso">
+            <span></span><button type="button" class="btn" data-gs-nudge="up">↑</button><span></span>
+            <button type="button" class="btn" data-gs-nudge="left">←</button>
+            <button type="button" class="btn" data-gs-nudge="down">↓</button>
+            <button type="button" class="btn" data-gs-nudge="right">→</button>
+          </div>
+          <label class="muted small">Código (sandbox)</label>
+          <textarea id="gs-code" spellcheck="false"></textarea>
+          <div id="gs-check-out"></div>
+          <div class="gs-toolbar">
+            <input id="gs-coder-input" placeholder="JARVIS Coder: ex. Faça o personagem pular mais alto" style="flex:1;min-width:160px;padding:8px;border-radius:8px;border:1px solid rgba(148,163,184,.3);background:#020617;color:#fff" />
+            <button type="button" class="btn primary" id="gs-coder-run">Game Coder</button>
+          </div>
+        </div>
+        <aside class="gs-props">
+          <div class="muted small">Propriedades</div>
+          <div id="gs-props-form"></div>
+          <button type="button" class="btn" id="gs-dup-obj">Duplicar</button>
+          <button type="button" class="btn" id="gs-delete-obj">Excluir</button>
+        </aside>
+      </div>
+    </section>
+
+    <section class="gs-panel" data-panel="play">
+      <div class="gs-toolbar">
+        <span id="gs-hud">—</span>
+        <button type="button" class="btn" id="gs-stop">Voltar ao editor</button>
+        <button type="button" class="btn" onclick="window.JarvisGameStudio&&JarvisGameStudio.runtime&&JarvisGameStudio.runtime.pause()">Pausar</button>
+        <button type="button" class="btn" onclick="window.JarvisGameStudio&&JarvisGameStudio.runtime&&JarvisGameStudio.runtime.resume()">Continuar</button>
+        <button type="button" class="btn" onclick="window.JarvisGameStudio&&JarvisGameStudio.runtime&&JarvisGameStudio.runtime.restart()">Reiniciar</button>
+      </div>
+      <canvas id="gs-play-canvas" width="640" height="400" aria-label="Preview do jogo"></canvas>
+      <div class="gs-touch-bar">
+        <button type="button" class="btn" data-gs-touch="left">◀</button>
+        <button type="button" class="btn" data-gs-touch="jump">⬆ Pulo</button>
+        <button type="button" class="btn" data-gs-touch="right">▶</button>
+      </div>
+      <p class="muted small">Controles: setas / A D · Espaço para pular · touch no mobile</p>
+    </section>
+
+    <section class="gs-panel" data-panel="gallery">
+      <div id="gs-gallery" class="gs-grid"></div>
+    </section>
+  </div>
+
+  <div class="gs-modal" id="gs-new-modal" hidden>
+    <div class="gs-modal-card">
+      <h3>Novo jogo</h3>
+      <label>Nome</label>
+      <input id="gs-new-name" value="Meu Jogo" />
+      <label>Descrição</label>
+      <textarea id="gs-new-desc" rows="2"></textarea>
+      <label>Tipo</label>
+      <select id="gs-new-type">
+        <option value="plataforma">Plataforma</option>
+        <option value="rpg">RPG</option>
+        <option value="aventura">Aventura</option>
+        <option value="puzzle">Puzzle</option>
+        <option value="corrida">Corrida</option>
+        <option value="arcade">Arcade</option>
+        <option value="maze">Maze</option>
+        <option value="quiz">Quiz</option>
+        <option value="endless_runner">Endless Runner</option>
+      </select>
+      <label>Template</label>
+      <select id="gs-new-template">
+        <option value="platformer">Plataforma 2D</option>
+        <option value="platformer_simple">Plataforma simples</option>
+        <option value="test_platformer">JARVIS TEST PLATFORMER</option>
+        <option value="empty">Jogo vazio</option>
+        <option value="topdown">Top Down</option>
+        <option value="rpg">RPG 2D</option>
+        <option value="puzzle">Puzzle</option>
+        <option value="racing">Corrida</option>
+        <option value="arcade">Arcade</option>
+        <option value="endless">Endless Runner</option>
+        <option value="quiz">Quiz</option>
+      </select>
+      <label>Dificuldade</label>
+      <select id="gs-new-diff">
+        <option value="easy">Fácil</option>
+        <option value="normal" selected>Normal</option>
+        <option value="hard">Difícil</option>
+      </select>
+      <div class="gs-toolbar" style="margin-top:12px">
+        <button type="button" class="btn primary" id="gs-new-create">Criar projeto</button>
+        <button type="button" class="btn" id="gs-new-cancel">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-tab="home">🏠 Início</button><button class="tab" data-tab="arcade">🎮 Jogar</button><button class="tab" data-tab="learn">🧠 Aprender</button><button class="tab" data-tab="creator">🛠️ Criar jogo</button><button class="tab" data-tab="projects">🚀 Meus jogos</button><button class="tab" data-tab="challenges">🎯 Desafios</button><button class="tab" data-tab="lab">🧪 Labs</button><button class="tab" data-tab="achievements">🏆 Conquistas</button>
+  </div>
+
+  <section class="section tabpage" id="tab-home">
+    <div class="grid">
+      <article class="card"><div class="icon">🎮</div><h3>Jogar</h3><p class="muted">Arcade existente, agora conectado ao aprendizado.</p><button class="btn primary" data-go="arcade">Abrir Arcade</button></article>
+      <article class="card"><div class="icon">🧠</div><h3>Aprender</h3><p class="muted">Aulas curtas com exemplo, interação, desafio e resultado.</p><button class="btn primary" data-go="learn">Começar aula</button></article>
+      <article class="card"><div class="icon">🛠️</div><h3>Criar meu jogo</h3><p class="muted">Templates, blocos e código JavaScript no preview seguro.</p><button class="btn primary" data-go="creator">Criar agora</button></article>
+      <article class="card"><div class="icon">🐞</div><h3>Debug Lab</h3><p class="muted">Encontre bugs e descubra por que eles acontecem.</p><button class="btn primary" data-go="challenges">Praticar</button></article>
+    </div>
+    <div class="section two"><div class="panel"><h2>👨‍🏫 JARVIS Professor</h2><p>“Você quer que eu explique ou quer tentar sozinho?”</p><div class="actions"><button class="btn primary" data-teacher="explain">EXPLICAR</button><button class="btn" data-teacher="hint">DAR DICA</button><button class="btn" data-teacher="solo">TENTAR SOZINHO</button></div><div id="teacherOut" class="panel" style="margin-top:12px">Escolha um modo para começar.</div></div><div class="panel"><h2>🗺️ Code Quest</h2><p class="muted">Uma aventura de programação em etapas.</p><div class="code">FASE 1 → Variáveis
+FASE 2 → Condições
+FASE 3 → Loops
+FASE 4 → Funções
+FASE 5 → Game Logic
+FASE 6 → Criar seu jogo</div></div></div>
+  </section>
+
+  <section class="section tabpage" id="tab-arcade" hidden><div class="panel"><h2>🎮 Arcade + aprendizado</h2><p class="muted">Cada jogo possui Jogar, Como funciona, Ver código, Experimentar e Desafio.</p><div class="grid" id="games"></div></div></section>
+
+  <section class="section tabpage" id="tab-learn" hidden><div class="two"><div class="panel"><h2>📚 Cursos</h2><div class="grid" id="courses"></div></div><div class="panel"><h2>💻 Código explicado</h2><textarea id="explainCode" rows="8">if (score >= 100) {
+  win();
+}
+score += 10;</textarea><div class="actions"><button class="btn primary" id="explainBtn">🤖 EXPLICAR</button></div><div id="explainOut" class="panel" style="margin-top:12px"></div></div></div></section>
+
+  <section class="section tabpage" id="tab-creator" hidden><div class="two"><div class="panel"><h2>🎮 Criar meu jogo</h2><div class="grid" id="templates"></div><div class="field" style="margin-top:14px"><label>Nome do jogo</label><input id="newName" value="Minha Aventura"></div><div class="field"><label>Descrição</label><input id="newDesc" value="Meu primeiro jogo"></div><div class="actions"><button class="btn primary" id="createProject">CRIAR PROJETO</button></div></div><div class="panel"><h2>🤖 Crie com o JARVIS</h2><textarea id="idea" rows="5" placeholder="Quero criar um jogo de nave onde preciso desviar de meteoros..."></textarea><div class="actions"><button class="btn primary" id="generateIdea">GERAR PLANO EDUCACIONAL</button></div><div id="ideaOut" class="panel" style="margin-top:12px">O JARVIS vai mostrar conceito, mecânicas, arquivos e etapas sem esconder o processo.</div></div></div><div class="section panel"><h2>🧩 Programação por blocos → código</h2><div id="blocks"></div><div class="actions"><button class="btn" id="clearBlocks">Limpar</button><button class="btn primary" id="runBlocks">TESTAR</button></div><pre class="code" id="blockCode">// encaixe blocos para gerar código</pre></div><div class="section two"><div class="panel"><h2>💻 Editor de código</h2><textarea id="projectCode" rows="15" style="width:100%;box-sizing:border-box;background:#050a10;color:#eef6ff;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px;font-family:monospace">let score = 0;
+function collectCoin() {
+  score += 10;
+}</textarea><div class="actions"><button class="btn primary" id="testCode">▶ TESTAR CÓDIGO</button><button class="btn" id="saveCode">💾 SALVAR PROJETO</button><button class="btn" id="exportCode">📦 EXPORTAR</button></div><div id="codeResult" class="panel" style="margin-top:12px">O código será validado e, se permitido, testado em um Worker local isolado. Nunca é executado no servidor.</div></div><div class="panel"><h2>🧪 Game Test Mode</h2><div class="labstage"><iframe id="codePreview" sandbox="allow-scripts" title="Preview seguro do jogo" style="width:100%;height:280px;border:0;background:#050a10"></iframe></div><p class="muted">Sem acesso a cookies, tokens, banco, arquivos privados ou rede do JARVIS.</p></div></div></section>
+
+  <section class="section tabpage" id="tab-projects" hidden><div class="panel"><h2>🚀 Meus jogos</h2><div class="grid" id="projects"></div></div></section>
+
+  <section class="section tabpage" id="tab-challenges" hidden><div class="grid" id="challengeList"></div></section>
+
+  <section class="section tabpage" id="tab-lab" hidden><div class="three"><div class="panel"><h2>🧪 Experimentar</h2><p class="muted" id="experimentGame">Escolha um jogo no Arcade.</p><div class="field"><label>Velocidade</label><input id="expSpeed" type="range" min="0" max="20" value="5"></div><div class="field"><label>Pontuação</label><input id="expScore" type="range" min="0" max="100" value="10"></div><div class="field"><label>Inimigos</label><input id="expEnemies" type="range" min="0" max="10" value="3"></div><div class="actions"><button class="btn primary" id="applyExperiment">TESTAR</button></div><div id="experimentOut" class="muted"></div></div><div class="panel"><h2>⚙️ Game Mechanics</h2><div id="mechanics"></div></div><div class="panel"><h2>🌍 Physics Lab</h2><div class="field"><label>Gravidade</label><input id="gravity" type="range" min="0" max="8" value="2"><b id="gravityVal">2</b></div><div class="labstage"><canvas id="physics" width="360" height="220"></canvas></div><p class="muted">Altere a gravidade e observe o personagem cair.</p></div><div class="panel"><h2>🗺️ Level Designer</h2><div class="actions" id="levelTools"></div><div class="labstage"><canvas id="level" width="360" height="220"></canvas></div><button class="btn primary" id="testLevel">▶ TESTAR FASE</button></div></div><div class="section two"><div class="panel"><h2>🎨 Sprite / Asset Lab</h2><p class="muted">Crie elementos simples para o preview.</p><div class="field"><label>Tamanho</label><input id="assetSize" type="range" min="10" max="80" value="35"></div><div class="field"><label>Forma</label><select id="assetShape"><option value="square">Quadrado</option><option value="circle">Círculo</option><option value="triangle">Triângulo</option></select></div><div class="labstage"><canvas id="asset" width="360" height="180"></canvas></div></div><div class="panel"><h2>🔊 Sound Lab</h2><p class="muted">Sons simples gerados localmente no navegador.</p><div class="actions">{% for s in ['JUMP','COIN','HIT','WIN','CLICK'] %}<button class="btn" data-sound="{{s}}">{{s}}</button>{% endfor %}</div><p id="soundOut" class="muted">Nenhum som testado.</p></div></div></section>
+
+  <section class="section tabpage" id="tab-achievements" hidden><div class="panel"><h2>🏆 Conquistas educacionais</h2><div class="grid" id="achievements"></div></div></section>
+</div>
+<div class="toast" id="toast"></div>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/game-lab3.css') }}">
+<script src="{{ url_for('static', filename='js/game_lab3.js') }}"></script>
+<script>
+(()=>{const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s), csrf='{{ csrf_token }}';let data=null, selectedTemplate='platformer', selectedGame=null, blocks=[], currentProject=null;
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function api(u,o={}){const r=await fetch(u,o);const d=await r.json().catch(()=>({error:'Resposta inválida'}));if(!r.ok)throw Error(d.error||('HTTP '+r.status));return d}
+function toast(t){const x=$('#toast');x.textContent=t;x.classList.add('show');setTimeout(()=>x.classList.remove('show'),2200)}
+function go(tab){$$('.tabpage').forEach(x=>x.hidden=x.id!=='tab-'+tab);$$('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===tab))}
+$$('.tab').forEach(b=>b.onclick=()=>go(b.dataset.tab));$$('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+function render(){
+ $('#progressKpis').innerHTML=`<div class="kpi">Nível <b>${data.progress.level}</b></div><div class="kpi">XP <b>${data.progress.xp}</b></div><div class="kpi">Conceitos <b>${data.progress.concepts.length}</b></div><div class="kpi">Projetos <b>${data.projects}</b></div>`;
+ if(window.JarvisGameLabV3) window.JarvisGameLabV3.renderGames(data.games); else $('#games').innerHTML=data.games.map(g=>`<article class="card"><div class="icon">${esc(g.icon)}</div><h3>${esc(g.name)}</h3><p class="muted">${esc(g.description)}</p><p>${esc(g.learning)}</p><div class="actions"><button class="btn primary" data-play="${esc(g.id)}">JOGAR</button><button class="btn" data-learn="${esc(g.id)}">COMO FOI FEITO?</button><button class="btn" data-experiment="${esc(g.id)}">🧪 EXPERIMENTAR</button></div></article>`).join('');
+ $('#courses').innerHTML=data.courses.map(c=>`<article class="card"><h3>${esc(c.name)}</h3><p class="muted">${esc(c.description)}</p><button class="btn" data-course="${esc(c.id)}">ABRIR AULA</button></article>`).join('');
+ $('#templates').innerHTML=data.templates.map(t=>`<article class="card" data-template="${esc(t.id)}"><div class="icon">🎮</div><h3>${esc(t.name)}</h3><p class="muted">${esc(t.category)}</p><p>${t.features.map(esc).join(' · ')}</p><button class="btn">SELECIONAR</button></article>`).join('');
+ $('#challengeList').innerHTML=data.challenges.map(c=>`<article class="card challenge"><h3>🎯 ${esc(c.title)}</h3><p class="muted">Conceito: ${esc(c.concept)}</p><div class="actions"><button class="btn" data-detail="${esc(c.id)}">📚 ENTENDER O DESAFIO</button><button class="btn" data-hint="${esc(c.id)}">💡 DICA</button></div><div id="detail-${esc(c.id)}" class="muted"></div><pre class="code">${esc(c.starter)}</pre><input class="answer" data-cid="${esc(c.id)}" placeholder="Digite sua solução exata"><div class="actions"><button class="btn primary" data-check="${esc(c.id)}">TESTAR</button></div><div id="hint-${esc(c.id)}" class="muted"></div></article>`).join('');
+ $('#mechanics').innerHTML=Object.entries(data.mechanics).map(([k,v])=>`<button class="btn" style="margin:4px" data-mech="${esc(k)}">${esc(v.name)}</button>`).join('');
+ $('#achievements').innerHTML=[['🎯','Primeira variável','variables'],['🐞','Primeiro bug corrigido','debug'],['🔁','Primeiro loop','loops'],['⚙️','Primeira função','functions'],['🎮','Primeiro jogo','game-creation'],['🚀','Primeiro projeto completo','project-complete']].map(a=>`<article class="card"><div class="icon">${a[0]}</div><h3>${a[1]}</h3><p class="muted">${data.progress.concepts.includes(a[2])?'CONQUISTADA':'AINDA NÃO'}</p></article>`).join('');
+ renderProjects(); bind();
+}
+async function renderProjects(){const d=await api('/api/cyber/game-lab/projects');$('#projects').innerHTML=(d.projects||[]).map(p=>`<article class="card"><h3>🚀 ${esc(p.name)}</h3><p class="muted">${esc(p.template)} · v${p.version} · ${p.progress}%</p><div class="bar"><i style="width:${p.progress}%"></i></div><p>${esc(p.description)}</p><div class="actions"><button class="btn primary" data-edit-project="${p.id}">EDITAR</button><button class="btn" data-remix="${p.id}">CRIAR REMIX</button><button class="btn" data-history="${p.id}">VERSÕES</button></div></article>`).join('')||'<div class="card">Nenhum jogo ainda. Crie seu primeiro projeto.</div>';}
+function bind(){
+ $$('[data-detail]').forEach(b=>b.onclick=async()=>{const id=b.dataset.detail;try{const d=await api('/api/jarvis/experience6/challenges/'+encodeURIComponent(id));const box=$('#detail-'+CSS.escape(id));box.innerHTML=d.available?`<div class="panel" style="margin:10px 0"><p><b>Contexto:</b> ${esc(d.context)}</p><p><b>Você vai aprender:</b> ${esc(d.learn)}</p><p><b>Conceito:</b> ${esc(d.concept)}</p><p><b>Missão:</b> ${esc(d.mission)}</p><p><b>Extra:</b> ${esc(d.extra)}</p></div>`:'Detalhes educativos indisponíveis.'}catch(e){toast(e.message)}});
+ $$('[data-template]').forEach(x=>x.onclick=()=>{selectedTemplate=x.dataset.template;$$('[data-template]').forEach(y=>y.style.outline='none');x.style.outline='2px solid rgba(70,180,255,.8)';});
+ $$('[data-play]').forEach(b=>b.onclick=()=>playGame(b.dataset.play));
+ $$('[data-learn]').forEach(b=>b.onclick=()=>learnGame(b.dataset.learn));
+ $$('[data-experiment]').forEach(b=>b.onclick=()=>{selectedGame=b.dataset.experiment;$('#experimentGame').textContent='Jogo: '+b.dataset.experiment;go('lab');});
+ $$('[data-check]').forEach(b=>b.onclick=()=>check(b.dataset.check));
+ $$('[data-hint]').forEach(b=>b.onclick=()=>{const c=data.challenges.find(x=>x.id===b.dataset.hint);const box=$('#hint-'+b.dataset.hint);box.textContent=box.textContent?c.hint2:c.hint1;});
+ $$('[data-course]').forEach(b=>b.onclick=()=>openCourse(b.dataset.course));
+ $$('[data-mech]').forEach(b=>b.onclick=()=>{const m=data.mechanics[b.dataset.mech];$('#teacherOut').innerHTML=`<b>${esc(m.name)}</b><p>${esc(m.explanation)}</p><pre class="code">${esc(m.code)}</pre><p>🎯 ${esc(m.challenge)}</p>`;go('home');});
+ $$('[data-edit-project]').forEach(b=>b.onclick=async()=>{const p=await api('/api/cyber/game-lab/projects/'+b.dataset.editProject);currentProject=p;selectedTemplate=p.template;$('#newName').value=p.name;$('#newDesc').value=p.description||'';$('#projectCode').value=p.data.code||'';go('creator');toast('Projeto aberto no editor.');});
+ $$('[data-remix]').forEach(b=>b.onclick=async()=>{const d=await api('/api/cyber/game-lab/projects/'+b.dataset.remix+'/remix',{method:'POST',headers:{'X-CSRF-Token':csrf}});toast('Remix criado!');await refresh();go('projects');});
+ $$('[data-history]').forEach(b=>b.onclick=async()=>{const d=await api('/api/cyber/game-lab/projects/'+b.dataset.history+'/versions');alert(d.versions.map(v=>'v'+v.version+' — '+v.changes).join('\n')||'Sem versões');});
+}
+async function playGame(id){if(window.JarvisGameLabV3){window.JarvisGameLabV3.open(id);toast('🎮 Game Lab 3.0 iniciado.');return}selectedGame=id;}
+async function learnGame(id){const d=await api('/api/cyber/game-lab/games/'+encodeURIComponent(id));$('#explainOut').innerHTML=`<h3>${esc(d.game.icon)} ${esc(d.game.name)}</h3><p>${esc(d.game.learning)}</p><h4>INICIANTE</h4><pre class="code">${esc(d.code.beginner.join('\n'))}</pre><h4>INTERMEDIÁRIO</h4><pre class="code">${esc(d.code.intermediate.join('\n'))}</pre><h4>AVANÇADO</h4><pre class="code">${esc(d.code.advanced.join('\n'))}</pre><p><b>Player:</b> ${d.explanations.player}<br><b>Movimento:</b> ${d.explanations.movement}<br><b>Colisão:</b> ${d.explanations.collision}<br><b>Pontuação:</b> ${d.explanations.score}</p>`;go('learn');}
+async function check(id){const input=document.querySelector(`[data-cid="${id}"]`);const d=await api('/api/cyber/game-lab/challenges/'+id+'/check',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify({answer:input.value})});toast(d.correct?'✅ DESAFIO CONCLUÍDO +25 XP':'Ainda não. Use a dica e tente novamente.');await refresh();}
+function openCourse(id){const c=data.courses.find(x=>x.id===id);$('#teacherOut').innerHTML=`<h3>${esc(c.name)}</h3><p>${esc(c.description)}</p><p>EXPLICAÇÃO → EXEMPLO → INTERAÇÃO → DESAFIO → RESULTADO</p><pre class="code">// Exemplo\nlet score = 0;\nif (score >= 10) {\n  win();\n}</pre>`;go('home');}
+$('#explainBtn').onclick=async()=>{const d=await api('/api/cyber/game-lab/explain',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify({code:$('#explainCode').value,level:'BEGINNER'})});$('#explainOut').innerHTML=d.explanation.map(x=>`<p>🧠 ${esc(x)}</p>`).join('');};
+$('#createProject').onclick=async()=>{const d=await api('/api/cyber/game-lab/projects',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify({name:$('#newName').value,description:$('#newDesc').value,template:selectedTemplate})});toast('Projeto criado!');await refresh();go('projects');};
+$('#generateIdea').onclick=()=>{const t=$('#idea').value.trim();$('#ideaOut').innerHTML=t?`<h3>CONCEITO</h3><p>${esc(t)}</p><h3>ETAPAS</h3><div class="code">1. Criando estrutura\n2. Criando jogador\n3. Criando controles\n4. Criando inimigos\n5. Criando colisões\n6. Criando pontuação\n7. Criando interface\n8. Testando</div><p>🧩 O próximo passo é escolher um template e transformar cada etapa em uma mecânica.</p>`:'Descreva o jogo primeiro.';};
+$('#testCode').onclick=async()=>{const code=$('#projectCode').value;const d=await api('/api/cyber/game-lab/code-test',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify({code})});$('#codeResult').innerHTML=d.safe?'<p>✅ Código passou pela validação educativa.</p><p class="muted">O teste roda em Worker local, não no servidor.</p>':'<p>❌ O preview bloqueou este código:</p>'+d.errors.map(x=>'<p>• '+esc(x)+'</p>').join('');if(!d.safe)return;const workerCode=`self.onmessage=()=>{try{${code}\npostMessage({ok:true,message:'Código executado no Worker.'})}catch(e){postMessage({ok:false,name:e.name,message:e.message})}}`;const blob=new Blob([workerCode],{type:'text/javascript'}),url=URL.createObjectURL(blob),w=new Worker(url);let done=false;const timer=setTimeout(()=>{if(!done){w.terminate();$('#codeResult').innerHTML+='<p>⏱️ O teste foi encerrado por tempo limite.</p>';URL.revokeObjectURL(url)}},800);w.onmessage=e=>{done=true;clearTimeout(timer);w.terminate();URL.revokeObjectURL(url);$('#codeResult').innerHTML+='<p>'+ (e.data.ok?'✅ ':'⚠️ ')+esc(e.data.ok?e.data.message:(e.data.name==='ReferenceError'?'O jogo tentou usar uma variável ou função que ainda não existe.':e.data.name==='SyntaxError'?'Há um erro de escrita no código. Confira chaves e parênteses.':'O jogo encontrou um erro durante o teste.'))+'</p>';$('#codePreview').srcdoc='<body style="background:#07111c;color:#eef6ff;font:16px system-ui;padding:20px"><h3>Preview</h3><p>Teste concluído no Worker.</p></body>';};w.postMessage({});};
+$('#saveCode').onclick=async()=>{if(!currentProject){toast('Crie ou abra um projeto primeiro.');return}const p=await api('/api/cyber/game-lab/projects/'+currentProject.id,{method:'PUT',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify({code:$('#projectCode').value,progress:50,changes:'Código atualizado no Game Lab'})});currentProject=p;toast('Projeto salvo como v'+p.version);await refresh();};
+$('#exportCode').onclick=()=>{if(!currentProject){toast('Crie ou abra um projeto primeiro.');return}const safe={name:currentProject.name,description:currentProject.description,template:currentProject.template,version:currentProject.version,data:{...currentProject.data,code:$('#projectCode').value}};const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(safe,null,2)],{type:'application/json'}));a.download=(currentProject.name.replace(/[^a-z0-9_-]+/gi,'_')||'meu-jogo')+'.json';a.click();URL.revokeObjectURL(a.href);toast('Exportação criada sem segredos do servidor.');};
+const blockDefs=[['start','QUANDO COMEÇAR'],['move','MOVER JOGADOR'],['jump','PULAR'],['collision','SE TOCAR NO INIMIGO'],['score','SOMAR PONTOS'],['enemy','MOVER INIMIGO'],['win','VENCER'],['lose','PERDER VIDA']];$('#blocks').innerHTML=blockDefs.map(x=>`<button class="block" data-block="${x[0]}">${x[1]}</button>`).join('');$$('[data-block]').forEach(b=>b.onclick=()=>{blocks.push({type:b.dataset.block});$('#blockCode').textContent=blocks.map(x=>({start:'// quando começar',move:'player.x += 10;',jump:'player.vy = -jumpPower;',collision:'if (hit(player, enemy)) { loseLife(); }',score:'score += 10;',enemy:'enemy.x -= enemy.speed;',win:'win();',lose:'gameOver();'})[x.type]).join('\n');});$('#clearBlocks').onclick=()=>{blocks=[];$('#blockCode').textContent='// encaixe blocos para gerar código'};$('#runBlocks').onclick=()=>toast(blocks.length?'▶ Preview dos blocos executado com segurança.':'Adicione pelo menos um bloco.');
+$('#applyExperiment').onclick=async()=>{if(!selectedGame){toast('Escolha um jogo primeiro.');return}const d=await api('/api/cyber/game-lab/games/'+encodeURIComponent(selectedGame)+'/experiment',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify({values:{speed:$('#expSpeed').value,score:$('#expScore').value,enemies:$('#expEnemies').value,gravity:$('#gravity').value}})});$('#experimentOut').textContent='✅ '+d.message+' Valores: '+JSON.stringify(d.values);};
+function physics(){const c=$('#physics'),x=c.getContext('2d');let y=20,vy=0,last=performance.now(),raf=0;function f(t){if(document.hidden||$('#tab-lab')?.hidden){raf=0;return}const dt=Math.min(0.035,(t-last)/1000);last=t;const g=Number($('#gravity').value);vy+=g*80*dt;y+=vy*dt;if(y>185){y=185;vy=-vy*.55}x.clearRect(0,0,c.width,c.height);x.fillStyle='#182c40';x.fillRect(0,205,c.width,15);x.fillStyle='#4bb3ff';x.fillRect(165,y,30,30);$('#gravityVal').textContent=g;raf=requestAnimationFrame(f)}function wake(){if(!raf&&!document.hidden&&!$('#tab-lab')?.hidden){last=performance.now();raf=requestAnimationFrame(f)}}document.addEventListener('visibilitychange',wake);new MutationObserver(wake).observe($('#tab-lab'),{attributes:true,attributeFilter:['hidden']});wake()}physics();
+function asset(){const c=$('#asset'),x=c.getContext('2d');function draw(){x.clearRect(0,0,c.width,c.height);const s=Number($('#assetSize').value),shape=$('#assetShape').value;x.fillStyle='#4bb3ff';x.beginPath();if(shape==='circle')x.arc(180,90,s,0,7);else if(shape==='triangle'){x.moveTo(180,90-s);x.lineTo(180-s,90+s);x.lineTo(180+s,90+s);x.closePath()}else x.rect(180-s,90-s,2*s,2*s);x.fill()}$('#assetSize').oninput=draw;$('#assetShape').onchange=draw;draw()}asset();
+const lt=['PLAYER','WALL','GROUND','ENEMY','COIN','DOOR','KEY','CHECKPOINT','GOAL'];$('#levelTools').innerHTML=lt.map(x=>`<button class="btn" data-lt="${x}">${x}</button>`).join('');const lc=$('#level'),lx=lc.getContext('2d'),items=[];$$('[data-lt]').forEach(b=>b.onclick=()=>{items.push({type:b.dataset.lt,x:40+Math.random()*260,y:30+Math.random()*150});drawLevel()});function drawLevel(){lx.clearRect(0,0,lc.width,lc.height);items.forEach(i=>{lx.fillStyle=i.type==='PLAYER'?'#4bb3ff':i.type==='ENEMY'?'#ff6978':i.type==='COIN'?'#ffd45a':'#879ab0';lx.fillRect(i.x,i.y,24,24);lx.fillStyle='#fff';lx.font='8px sans-serif';lx.fillText(i.type,i.x,i.y-3)})}$('#testLevel').onclick=()=>toast(items.some(i=>i.type==='PLAYER')&&items.some(i=>i.type==='GOAL')?'✅ Fase contém jogador e objetivo. Preview pronto.':'Adicione PLAYER e GOAL para testar.');
+$$('[data-sound]').forEach(b=>b.onclick=()=>{try{const A=window.AudioContext||window.webkitAudioContext,ctx=new A(),o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=b.dataset.sound==='COIN'?880:b.dataset.sound==='HIT'?160:520;o.connect(g);g.connect(ctx.destination);g.gain.value=.04;o.start();o.stop(ctx.currentTime+.12);$('#soundOut').textContent='🔊 '+b.dataset.sound+' testado localmente.'}catch(e){$('#soundOut').textContent='Som indisponível neste navegador.'}});
+$$('[data-teacher]').forEach(b=>b.onclick=()=>{$('#teacherOut').innerHTML=b.dataset.teacher==='explain'?'<b>Vamos aprender passo a passo.</b><p>Começamos por uma variável e depois testamos uma mudança pequena.</p>':'<b>Você escolheu '+(b.dataset.teacher==='hint'?'uma dica.':'tentar sozinho.')+'</b><p>'+ (b.dataset.teacher==='hint'?'Procure uma variável que controla o comportamento que você quer mudar.':'Faça um teste pequeno e observe o resultado antes de pedir a resposta.')+'</p>'});
+async function refresh(){data=await api('/api/cyber/game-lab/overview');render()}const q=new URLSearchParams(location.search);refresh().then(()=>{if(q.get('game'))learnGame(q.get('game'));});
+})();
+</script>
+<script src="{{ url_for('static', filename='js/game_studio.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Sala da Comunidade — JARVIS{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ static_v('css/community-social.css') }}">{% endblock %}
+{% block content %}
+<div class="room-shell" data-space-id="{{ space_id }}">
+  <header class="room-top"><div><div class="eyebrow">COMMUNITY SPACE</div><h1 id="roomTitle">Sala</h1><p id="roomDesc" class="muted">Carregando espaço…</p></div><div class="room-top-actions"><button id="createEvent" class="btn primary">🔴 Criar evento</button><a class="btn ghost" href="/comunidade/espacos">← Voltar</a></div></header>
+  <section id="eventCreator" class="social-card event-creator hidden"><div class="section-head"><div><h2>📡 Criar evento</h2><p class="muted">Chat, vídeo ou workshop.</p></div><button id="closeEventCreator" class="btn ghost">Fechar</button></div><div class="event-form-grid"><input id="eventTitle" placeholder="Título do evento"><select id="eventKind"><option value="chat">💬 Chat ao vivo</option><option value="video">📹 Vídeo ao vivo</option><option value="workshop">🎓 Workshop</option></select><input id="eventDate" type="datetime-local"><input id="eventMedia" placeholder="Link YouTube/Vimeo (opcional)"></div><textarea id="eventDesc" rows="3" placeholder="Descrição, conteúdo do workshop..."></textarea><button id="saveEvent" class="btn primary">Agendar evento</button></section>
+  <div class="room-layout">
+    <aside class="room-sidebar">
+      <div class="room-section-title">CANAIS <button id="addChannel" class="icon-btn">＋</button></div>
+      <div id="channelList" class="channel-list"></div>
+      <div class="room-section-title live-title">EVENTOS AO VIVO</div>
+      <div id="eventList" class="event-list compact"></div>
+    </aside>
+    <main class="chat-main">
+      <div class="chat-header"><div><strong id="channelTitle"># geral</strong><small id="channelKind">Canal de texto</small></div><button id="refreshChat" class="btn ghost">↻ Atualizar</button></div>
+      <div id="livePanel" class="live-panel hidden"></div>
+      <div id="messageList" class="message-list"></div>
+      <form id="chatForm" class="chat-compose"><textarea id="chatInput" rows="1" maxlength="2000" placeholder="Enviar mensagem para #geral..."></textarea><button class="btn primary">Enviar</button></form>
+    </main>
+    <aside class="room-members"><div class="room-section-title">MEMBROS</div><div id="memberList" class="member-list"></div></aside>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ static_v('js/community-room.js') }}"></script>{% endblock %}

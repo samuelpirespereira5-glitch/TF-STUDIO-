@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="csrf-token" content="{{ csrf_token }}">
+<title>{% block title %}Tristan Thorne{% endblock %}</title>
+<link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/favicon.svg') }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ static_v('css/style.css') }}">
+<link rel="manifest" href="{{ url_for('static', filename='manifest.webmanifest') }}">
+<meta name="theme-color" content="#08111f">
+{% block head %}{% endblock %}
+<script src="{{ static_v('js/readability.js') }}"></script>
+</head>
+<body>
+<canvas id="neural-bg" aria-hidden="true"></canvas>
+<div class="scanlines" aria-hidden="true"></div>
+<!-- Filtro de aberração cromática (separação R/G/B), usado nos micro-
+     glitches do holograma (ver .holo-glitch em style.css) para simular
+     uma lente/projeção de luz real "estabilizando", em vez de um
+     tremor de posição simples. Fica invisível: 0x0px, aria-hidden. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="holo-chromatic" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
+    <feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="rCh"/>
+    <feOffset in="rCh" dx="-2" dy="0" result="rChOff"/>
+    <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="gCh"/>
+    <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="bCh"/>
+    <feOffset in="bCh" dx="2" dy="0" result="bChOff"/>
+    <feBlend in="rChOff" in2="gCh" mode="screen" result="rgBlend"/>
+    <feBlend in="rgBlend" in2="bChOff" mode="screen"/>
+  </filter>
+</svg>
+<div class="layout">
+  <aside class="sidebar" aria-label="Navegação principal">
+    <div class="brand">
+      <span class="brand-dot">TT</span>
+      <div>
+        <div class="brand-title">TRISTAN THORNE</div>
+        <div class="brand-sub">JARVIS · CYBER PLATFORM</div>
+      </div>
+    </div>
+    <div class="sidebar-caption">COMMAND CENTER</div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-group">
+        <span class="sidebar-group-title">Plataforma</span>
+      <a href="{{ url_for('dashboard') }}" class="{{ 'active' if request.endpoint in ['dashboard','jarvis'] }}">🤖 Jarvis</a>
+      <a href="{{ url_for('creator') }}" class="{{ 'active' if request.endpoint=='creator' }}">✨ Criar site</a>
+      <a href="{{ url_for('sites_list') }}" class="{{ 'active' if request.endpoint in ['sites_list','editor'] }}">🗂 Meus sites</a>
+      <a href="{{ url_for('desafios_page') }}" class="{{ 'active' if request.endpoint=='desafios_page' }}">🎯 Desafios</a>
+      <a href="{{ url_for('cyber.education_page') }}" class="{{ 'active' if request.endpoint=='cyber.education_page' }}">📚 Educação</a>
+      <a href="{{ url_for('holograma') }}" class="{{ 'active' if request.endpoint=='holograma' }}">🛰 Holograma</a>
+      </div>
+      <div class="sidebar-group">
+        <span class="sidebar-group-title">Jogos</span>
+        <a href="{{ url_for('game_creator_page') }}" class="{{ 'active' if request.endpoint=='game_creator_page' }}">🎮 Criar jogo</a>
+        <a href="{{ url_for('cyber.game_lab_page') }}" class="{{ 'active' if request.endpoint=='cyber.game_lab_page' }}">🧪 Game Lab</a>
+        <a href="{{ url_for('novas_features_page') }}" class="{{ 'active' if request.endpoint=='novas_features_page' }}">✨ Novas features</a>
+        <a href="{{ url_for('sprite_editor_page') }}" class="{{ 'active' if request.endpoint=='sprite_editor_page' }}">🎨 Sprites</a>
+        <a href="{{ url_for('next_level9_page') }}" class="{{ 'active' if request.endpoint=='next_level9_page' }}">🎓 Certificados</a>
+        <a href="{{ url_for('next_level10_page') }}" class="{{ 'active' if request.endpoint=='next_level10_page' }}">🏆 Arena & Mentoria</a>
+        <a href="{{ url_for('next_level11_page') }}" class="{{ 'active' if request.endpoint=='next_level11_page' }}">🤖 IA & Temporadas</a>
+        <a href="{{ url_for('next_level12_page') }}" class="{{ 'active' if request.endpoint=='next_level12_page' }}">⚙️ Acessibilidade & Admin</a>
+      </div>
+      <div class="sidebar-group">
+        <span class="sidebar-group-title">Comunidade</span>
+        <a href="{{ url_for('comunidade_hub_page') }}" class="{{ 'active' if request.endpoint=='comunidade_hub_page' }}">🌐 Comunidade</a>
+        <a href="{{ url_for('community_spaces_page') }}" class="{{ 'active' if request.endpoint=='community_spaces_page' }}">🧩 Comunidades & Clãs</a>
+      </div>
+      {% if has_cap('cyber') %}
+      <div class="sidebar-group">
+        <span class="sidebar-group-title">Cybersecurity</span>
+        <a href="{{ url_for('cyber_lab') }}" class="{{ 'active' if request.endpoint=='cyber_lab' }}">🛡 Cyber Lab</a>
+        <a href="{{ url_for('cyber_hub_page') }}" class="{{ 'active' if request.endpoint=='cyber_hub_page' }}">🧭 Cyber Hub</a>
+      {% if has_cap('cyber_advanced') %}
+        <a href="{{ url_for('security_center_page') }}" class="{{ 'active' if request.endpoint=='security_center_page' }}">🛡 Security Center</a>
+        <a href="{{ url_for('security_scan_page') }}" class="{{ 'active' if request.endpoint=='security_scan_page' }}">🔐 Security Scan</a>
+        <a href="{{ url_for('kali_page') }}" class="{{ 'active' if request.endpoint=='kali_page' }}">🐉 Kali Linux</a>
+      {% endif %}
+      </div>
+      {% endif %}
+      <div class="sidebar-group">
+        <span class="sidebar-group-title">Workspace</span>
+      {% if has_cap('thm_lab') %}
+        <a href="{{ url_for('thm_lab_page') }}" class="{{ 'active' if request.endpoint=='thm_lab_page' }}">🕵 TryHackMe Lab</a>
+      {% endif %}
+        <a href="{{ url_for('painel') }}" class="{{ 'active' if request.endpoint=='painel' }}">📊 Painel</a>
+      {% if has_cap('cyber') %}<a href="{{ url_for('cyber.mega_platform_page') }}" class="{{ 'active' if request.endpoint=='cyber.mega_platform_page' }}">⚡ Ultra Center</a>{% endif %}
+      {% if has_cap('cyber') %}<a href="{{ url_for('cyber.evolution_page') }}" class="{{ 'active' if request.endpoint=='cyber.evolution_page' }}">🧬 Evolution 2</a>{% endif %}
+      {% if has_cap('cyber') %}<a href="{{ url_for('cyber.game_lab_page') }}" class="{{ 'active' if request.endpoint=='cyber.game_lab_page' }}">🎮 Game Lab</a>{% endif %}
+      {% if has_cap('cyber') %}<a href="{{ url_for('cyber.jarvis_world_page') }}" class="{{ 'active' if request.endpoint=='cyber.jarvis_world_page' }}">🌐 JARVIS World</a>{% endif %}
+      {% if has_cap('settings') %}<a href="{{ url_for('settings') }}" class="{{ 'active' if request.endpoint=='settings' }}">⚙ Configurações</a>{% endif %}
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <span class="sidebar-status-dot"></span>
+      <div><strong>JARVIS ONLINE</strong><small>acesso controlado</small></div>
+    </div>
+  </aside>
+  <main class="content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-stack">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+
+<nav class="mobile-nav">
+  <a href="{{ url_for('dashboard') }}" class="{{ 'active' if request.endpoint in ['dashboard','jarvis'] }}"><span>🤖</span>Jarvis</a>
+  <a href="{{ url_for('creator') }}" class="{{ 'active' if request.endpoint=='creator' }}"><span>✨</span>Criar</a>
+  <a href="{{ url_for('game_creator_page') }}" class="{{ 'active' if request.endpoint=='game_creator_page' }}"><span>🎮</span>Jogos</a>
+  <a href="{{ url_for('sites_list') }}" class="{{ 'active' if request.endpoint in ['sites_list','editor'] }}"><span>🗂</span>Sites</a>
+  <a href="{{ url_for('desafios_page') }}" class="{{ 'active' if request.endpoint=='desafios_page' }}"><span>🎯</span>Desafios</a>
+  <button type="button" id="mobile-more-btn" class="mobile-more-btn" aria-expanded="false"><span>☰</span>Mais</button>
+</nav>
+<div id="mobile-more-panel" class="mobile-more-panel hidden" aria-hidden="true">
+  <div class="mobile-more-backdrop" data-close-mobile-more></div>
+  <div class="mobile-more-sheet" role="dialog" aria-modal="true" aria-label="Mais opções">
+    <div class="mobile-more-head"><strong>TRISTAN THORNE</strong><button type="button" class="btn small ghost" data-close-mobile-more>✕</button></div>
+    <div class="mobile-more-grid">
+      <a href="{{ url_for('holograma') }}">🛰 <span>Holograma</span></a>
+      {% if has_cap('cyber') %}<a href="{{ url_for('cyber_lab') }}">🛡 <span>Cyber Lab</span></a>{% endif %}
+      {% if has_cap('cyber') and has_cap('cyber_advanced') %}<a href="{{ url_for('cyber_hub_page') }}">🧭 <span>Cyber Hub</span></a>{% endif %}
+      {% if has_cap('thm_lab') %}<a href="{{ url_for('thm_lab_page') }}">🕵 <span>TryHackMe Lab</span></a>{% endif %}
+      <a href="{{ url_for('painel') }}">📊 <span>Painel</span></a>
+      {% if has_cap('cyber') %}<a href="{{ url_for('cyber.mega_platform_page') }}">⚡ <span>Ultra Center</span></a>{% endif %}
+      {% if has_cap('cyber') %}<a href="{{ url_for('cyber.evolution_page') }}">🧬 <span>Evolution 2</span></a>{% endif %}
+      <a href="{{ url_for('cyber.education_page') }}">📚 <span>Educação</span></a>
+      <a href="{{ url_for('comunidade_hub_page') }}">🌐 <span>Comunidade</span></a>
+      <a href="{{ url_for('community_spaces_page') }}">⚔️ <span>Clãs & Grupos</span></a>
+      {% if has_cap('cyber') %}<a href="{{ url_for('cyber.game_lab_page') }}">🎮 <span>Game Lab</span></a>{% endif %}
+      {% if has_cap('cyber') %}<a href="{{ url_for('cyber.jarvis_world_page') }}">🌐 <span>JARVIS World</span></a>{% endif %}
+      {% if has_cap('settings') %}<a href="{{ url_for('settings') }}">⚙ <span>Configurações</span></a>{% endif %}
+    </div>
+  </div>
+</div>
+
+<link rel="stylesheet" href="{{ static_v('css/phase13.css') }}">
+<script src="{{ static_v('js/hologram-status.js') }}"></script>
+<script src="{{ static_v('js/neural-bg.js') }}"></script>
+<script src="{{ static_v('js/main.js') }}"></script>
+<script src="{{ static_v('js/csrf.js') }}"></script>
+<script src="{{ static_v('js/jarvis-pwa.js') }}"></script>
+<script src="{{ static_v('js/phase13.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

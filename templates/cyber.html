@@ -1,0 +1,438 @@
+{% extends "base.html" %}
+{% block title %}Cyber Lab · Tristan Thorne{% endblock %}
+{% block content %}
+<div class="muted small">JARVIS SECURITY OPERATIONS</div><h1>🛡 Cyber Lab</h1>
+<p class="muted small">Central de auditoria autorizada. Resultados vêm de verificações reais implementadas no backend e são salvos no Evidence Center.</p>
+
+<div class="card p2-dashboard" id="cyber-phase2">
+  <div class="inline" style="justify-content:space-between;flex-wrap:wrap"><div><strong>🧠 JARVIS CYBER COMMAND CENTER — FASE 2</strong><div class="muted small">Painel baseado no Registry, Evidence Center e histórico reais. Nenhum contador é inventado.</div></div><button class="btn small" id="p2-refresh">↻ Atualizar</button><button class="btn small" id="p2-self-audit">🛡 Autoauditoria</button></div>
+  <div id="p2-error" class="p2-error" hidden></div><div id="p2-self-audit-result" class="result"></div>
+  <div class="p2-kpis">
+    <div class="p2-kpi"><small>JARVIS</small><strong id="p2-status">—</strong></div><div class="p2-kpi"><small>Ferramentas</small><strong id="p2-tools">—</strong></div><div class="p2-kpi"><small>Scans</small><strong id="p2-scans">—</strong></div><div class="p2-kpi"><small>Findings</small><strong id="p2-vulns">—</strong></div><div class="p2-kpi"><small>Projetos</small><strong id="p2-projects">—</strong></div><div class="p2-kpi"><small>Desafios</small><strong id="p2-challenges">—</strong></div><div class="p2-kpi"><small>Score médio</small><strong id="p2-score">—</strong></div><div class="p2-kpi"><small>XP</small><strong id="p2-xp">—</strong></div><div class="p2-kpi"><small>Nível</small><strong id="p2-level">—</strong></div>
+  </div>
+  <div class="p2-services" id="p2-services"></div>
+  <div class="p2-grid">
+    <div>
+      <h3>Risco atual</h3><div class="p2-kpis" style="grid-template-columns:repeat(4,1fr)"><div class="p2-kpi critical"><small>Critical</small><strong id="p2-critical">—</strong></div><div class="p2-kpi high"><small>High</small><strong id="p2-high">—</strong></div><div class="p2-kpi"><small>Medium</small><strong id="p2-medium">—</strong></div><div class="p2-kpi"><small>Low</small><strong id="p2-low">—</strong></div></div>
+      <h3>Evolução da segurança</h3><div id="p2-evolution" class="p2-evolution"></div>
+      <h3>Últimos scans</h3><div id="p2-history"></div><h3>Atividade recente</h3><div id="p2-activity"></div>
+    </div>
+    <div>
+      <h3>🏅 Conquistas</h3><div id="p2-badges" class="p2-services"></div><h3>🔔 Alertas</h3><div id="p2-alerts"></div>
+      <h3>🎯 Inventário de ativos</h3><div id="p2-assets"></div>
+    </div>
+  </div>
+  <h3>🧰 Central inteligente de ferramentas</h3><input id="p2-tool-search" type="text" placeholder="Buscar ferramenta, categoria ou descrição...">
+  <div id="p2-tools-list"></div>
+</div>
+
+<div class="card cyber-command-card">
+  <div class="inline" style="justify-content:space-between;flex-wrap:wrap;align-items:center">
+    <div><strong>🎯 Authorized Target Control</strong><div class="muted small">Toda análise de rede deve usar um alvo previamente autorizado. O escopo e o SSRF Guard continuam sendo aplicados no backend.</div></div>
+    <span class="cyber-scope-badge">● SAFE / READ-ONLY por padrão</span>
+  </div>
+  <div class="cyber-command-bar" style="margin-top:12px">
+    <div><label for="cyber-run-target">Alvo autorizado</label><input type="text" id="cyber-run-target" placeholder="https://seusite.com · localhost · API/endpoint"></div>
+    <div><label for="cyber-run-tool">Análise</label><select id="cyber-run-tool">
+      <option value="web_analyzer">HTTP / Headers / Cookies / CSP / CORS</option>
+      <option value="tls_analyzer">SSL / TLS</option>
+      <option value="dns_analyzer">DNS</option>
+      <option value="port_inventory">Portas / Serviços</option>
+      <option value="subdomain_discovery">Subdomínios</option>
+      <option value="owasp_scanner">OWASP — testes heurísticos não destrutivos</option>
+      <option value="security_investigator">Auditoria completa</option>
+      <option value="external_nmap">Nmap externo (se instalado)</option>
+      <option value="external_nikto">Nikto externo (se instalado)</option>
+      <option value="external_gobuster">Gobuster externo (se instalado)</option>
+    </select></div>
+    <div class="inline"><button class="btn primary big" type="button" onclick="CyberLab.runTool()">▶ Executar</button><button class="btn danger" type="button" onclick="CyberLab.cancelTool()">⏹ Cancelar</button></div>
+  </div>
+  <div id="cyber-scan-progress" class="scan-progress"><i></i></div>
+  <div class="result" id="cyber-run-result" aria-live="polite"></div>
+</div>
+
+<div class="grid" id="cyber-summary">
+  <div class="card"><h3>Ativos</h3><div class="result" id="sum-targets">—</div></div>
+  <div class="card"><h3>Críticos</h3><div class="result" id="sum-critical">—</div></div>
+  <div class="card"><h3>Altos</h3><div class="result" id="sum-high">—</div></div>
+  <div class="card"><h3>Médios</h3><div class="result" id="sum-medium">—</div></div>
+  <div class="card"><h3>Baixos</h3><div class="result" id="sum-low">—</div></div>
+</div>
+
+<h2 class="tools-category">📁 Projetos e inventário</h2>
+<div class="grid">
+  <div class="card tool"><h3>Novo ativo autorizado</h3><p class="muted small">Usa exatamente a lista de alvos autorizados existente; não cria um segundo mecanismo de escopo.</p><div class="inline"><input id="p2-asset-name" placeholder="Nome"><input id="p2-asset-target" placeholder="domínio / URL / localhost autorizado"><select id="p2-asset-env"><option>development</option><option>staging</option><option>production</option><option>lab</option></select><button class="btn" id="p2-add-asset">Adicionar</button></div><div id="p2-asset-msg" class="result"></div></div>
+  <div class="card tool"><h3>Novo projeto</h3><p class="muted small">Agrupe ativos e histórico sem misturar resultados de ambientes diferentes.</p><div class="inline"><input id="p2-project-name" placeholder="Meu projeto"><input id="p2-project-desc" placeholder="Descrição"><button class="btn" id="p2-add-project">Criar</button></div><div id="p2-project-msg" class="result"></div></div>
+</div>
+<div class="card tool"><h3>Organizar ativo em projeto</h3><div class="inline"><select id="p2-project-select"><option value="">Projeto</option></select><select id="p2-asset-select"><option value="">Ativo</option></select><button class="btn" id="p2-attach">Vincular</button></div><div id="p2-project-list" class="muted small"></div><div id="p2-attach-msg" class="result"></div></div>
+
+<h2 class="tools-category">🧠 JARVIS Analyst</h2>
+<div class="card tool"><p class="muted small">A análise usa os dados reais do scan selecionado e instrui o JARVIS a não inventar evidências.</p><button class="btn primary" id="p2-jarvis-analyze">Analisar scan selecionado</button><div id="p2-jarvis-result" class="result"></div></div>
+
+<h2 class="tools-category">🎯 Alvos autorizados</h2>
+<div class="card tool">
+  <div class="inline">
+    <input type="text" id="cyber-new-target" placeholder="ex: exemplo.com ou 192.168.0.0/24">
+    <input type="text" id="cyber-new-note" placeholder="nota (opcional)">
+    <label class="checkbox small"><input type="checkbox" id="cyber-confirm-owner"> Confirmo que sou dono/autorizado</label>
+    <button class="btn" onclick="CyberLab.addTarget()">Adicionar alvo</button>
+  </div>
+  <div class="result" id="cyber-target-msg"></div>
+  <table class="table" id="cyber-targets-table">
+    <thead><tr><th>Alvo</th><th>Nota</th><th>Adicionado por</th><th></th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<h2 class="tools-category">📊 Risco por alvo</h2>
+<div class="grid tools-grid" id="cyber-dashboard-grid"></div>
+
+<h2 class="tools-category">🧰 CENTRAL DE FERRAMENTAS</h2>
+<p class="muted small">⚠️ Estas são ferramentas de mercado que rodam <strong>fora</strong> deste site — Nmap, Wireshark, Burp
+  Suite etc. são programas que você instala no seu computador/laboratório, não algo que roda dentro do
+  servidor hospedado do Tristan Thorne. Por isso é normal e esperado aparecer <strong>"não instalada"</strong> aqui:
+  isso não é um erro, é a detecção real avisando que o binário não existe <em>neste</em> servidor. Cada linha
+  mostra o que a ferramenta faz, sua categoria (Network, Web Security, Blue Team, Forensics, Vulnerability
+  Assessment, Reverse Engineering, OSINT/Recon), o escopo permitido de uso e como instalar na sua máquina.</p>
+<p class="muted small">🔎 <strong>Se o que você quer é achar vulnerabilidades agora, sem instalar nada</strong>,
+  use as seções <a href="#exec-analise">"Executar análise"</a> e <a href="#vulndoctor-card">"Vulnerability
+  Doctor"</a> logo abaixo — essas rodam de verdade, direto no servidor, sem precisar de nenhum programa externo.</p>
+<div class="card tool">
+  <div class="inline">
+    <button class="btn" onclick="CyberLab.loadToolStatus()">Verificar ferramentas instaladas</button>
+    <select id="cyber-tools-category-filter" onchange="CyberLab.renderToolStatus()">
+      <option value="">Todas as categorias</option>
+      <option value="Network">Network</option>
+      <option value="Web Security">Web Security</option>
+      <option value="Blue Team">Blue Team</option>
+      <option value="Forensics">Forensics</option>
+      <option value="Vulnerability Assessment">Vulnerability Assessment</option>
+      <option value="Reverse Engineering">Reverse Engineering</option>
+      <option value="OSINT/Recon">OSINT/Recon</option>
+    </select>
+  </div>
+  <table class="table" id="cyber-tools-table">
+    <thead><tr><th>Ferramenta</th><th>Categoria</th><th>Status</th><th>Versão</th><th>O que faz</th><th>Escopo permitido</th><th>Nota / instalação</th><th>Ação</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<h2 class="tools-category" id="exec-analise">🔎 Executar análise (funciona agora, sem instalar nada)</h2>
+<p class="muted small">✅ Estas ferramentas são código Python do próprio Tristan Thorne — não dependem de nenhum
+  binário externo, então funcionam direto no servidor hospedado. É aqui que você encontra vulnerabilidades
+  de verdade: escolha um alvo autorizado (cadastrado acima) e uma análise. <strong>HTTP/Headers/CSP/CORS</strong>
+  checa cabeçalhos de segurança do site; <strong>TLS/HTTPS</strong> audita o certificado e a configuração de
+  criptografia; <strong>DNS</strong> lê os registros do domínio; <strong>Portas</strong> lista serviços
+  expostos; <strong>Subdomínios</strong> descobre outros hosts do mesmo domínio; <strong>Security
+  Investigator</strong> roda todas de uma vez e junta tudo num relatório único. Os resultados de cada uma
+  viram achados reais no <a href="#cyber-findings-card">histórico/findings</a> logo abaixo.</p>
+
+<h2 class="tools-category">🗂 Histórico de scans</h2>
+<div class="card tool">
+  <div class="inline">
+    <input type="text" id="cyber-hist-target" placeholder="filtrar por alvo (opcional)">
+    <button class="btn" onclick="CyberLab.loadHistory()">Atualizar</button>
+  </div>
+  <table class="table" id="cyber-history-table">
+    <thead><tr><th>#</th><th>Alvo</th><th>Ferramenta</th><th>Score</th><th>Achados</th><th>Data</th><th></th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<h2 class="tools-category">🔬 Findings do scan selecionado</h2>
+<div class="card tool" id="cyber-findings-card" style="display:none">
+  <div class="inline">
+    <select id="cyber-findings-severity" onchange="CyberLab.renderFindings()">
+      <option value="">Todas as gravidades</option>
+      <option value="critical">Crítico</option>
+      <option value="high">Alto</option>
+      <option value="medium">Médio</option>
+      <option value="low">Baixo</option>
+      <option value="info">Info</option>
+    </select>
+    <button class="btn" onclick="CyberLab.retestSelected()">🔁 Retestar este alvo/ferramenta</button>
+    <button class="btn" onclick="CyberLab.generateReport()">📄 Relatório Markdown</button>
+    <button class="btn" onclick="CyberLab.exportJson()">🗂 Exportar JSON</button>
+  </div>
+  <div id="cyber-findings-list"></div>
+  <div class="result" id="cyber-retest-result"></div>
+</div>
+{% if has_cap('cyber_advanced') %}
+<h2 class="tools-category">🕵️ Pentest Avançado (owner)</h2>
+
+<div class="card tool">
+  <h3>🎯 OWASP Top 10 Scanner</h3>
+  <p class="muted small">Testes heurísticos não destrutivos: SQLi (error-based), XSS refletido, LFI, candidatos a SSRF e BOLA/IDOR. Requer URL com parâmetro, ex: <code>http://alvo/?q=1</code>.</p>
+  <div class="inline">
+    <input type="text" id="owasp-target" placeholder="http://alvo-autorizado/?param=valor">
+    <button class="btn" onclick="CyberLab.runOwasp()">Escanear</button>
+  </div>
+  <div id="owasp-result"></div>
+</div>
+
+<div class="card tool">
+  <h3>🌐 WHOIS / OSINT</h3>
+  <p class="muted small">Consulta pública de registro do domínio (dono, datas, servidores DNS) — o primeiro passo de reconhecimento passivo em qualquer avaliação de segurança.</p>
+  <div class="inline">
+    <input type="text" id="whois-domain" placeholder="dominio.com">
+    <button class="btn" onclick="CyberLab.runWhois()">Consultar</button>
+  </div>
+  <div class="result" id="whois-result"></div>
+</div>
+
+<div class="card tool">
+  <h3>📧 Verificar vazamento de e-mail</h3>
+  <p class="muted small">Confere se o e-mail já apareceu em vazamentos públicos conhecidos — ajuda a saber se uma senha associada pode estar comprometida.</p>
+  <div class="inline">
+    <input type="text" id="breach-email" placeholder="email@exemplo.com">
+    <button class="btn" onclick="CyberLab.runBreachCheck()">Verificar</button>
+  </div>
+  <div class="result" id="breach-result"></div>
+</div>
+
+<div class="grid tools-grid">
+  <div class="card tool">
+    <h3>🔤 Encoder / Decoder</h3>
+    <p class="muted small">Converte texto entre Base64/URL/Hex — útil pra entender tokens e dados codificados que aparecem em requisições.</p>
+    <input type="text" id="enc-text" placeholder="texto">
+    <select id="enc-encoding"><option value="base64">Base64</option><option value="url">URL</option><option value="hex">Hex</option></select>
+    <div class="inline">
+      <button class="btn" onclick="CyberLab.runEncoder('encode')">Codificar</button>
+      <button class="btn" onclick="CyberLab.runEncoder('decode')">Decodificar</button>
+    </div>
+    <div class="result" id="enc-result"></div>
+  </div>
+
+  <div class="card tool">
+    <h3>🔑 JWT Decoder</h3>
+    <p class="muted small">Decodifica um token JWT e mostra header/payload legíveis — não valida a assinatura, só revela o que está codificado dentro dele.</p>
+    <input type="text" id="jwt-token" placeholder="eyJhbGciOi...">
+    <button class="btn" onclick="CyberLab.runJwt()">Decodificar</button>
+    <div class="result" id="jwt-result"></div>
+  </div>
+
+  <div class="card tool">
+    <h3>#️⃣ Identificador de Hash</h3>
+    <p class="muted small">Analisa o formato de um hash (tamanho, caracteres) e sugere o algoritmo mais provável (MD5, SHA-1, SHA-256...).</p>
+    <input type="text" id="hash-value" placeholder="5f4dcc3b5aa765d61d8327deb882cf99">
+    <button class="btn" onclick="CyberLab.runHashId()">Identificar</button>
+    <div class="result" id="hash-result"></div>
+  </div>
+
+  <div class="card tool">
+    <h3>🧮 Calculadora CIDR</h3>
+    <p class="muted small">Calcula faixa de IPs, máscara e número de hosts de uma notação CIDR — útil pra entender segmentação de rede.</p>
+    <input type="text" id="cidr-value" placeholder="192.168.0.0/24">
+    <button class="btn" onclick="CyberLab.runCidr()">Calcular</button>
+    <div class="result" id="cidr-result"></div>
+  </div>
+
+  <div class="card tool">
+    <h3>💣 Payloads de Teste</h3>
+    <p class="muted small">Gera exemplos de payload (XSS, SQLi, LFI, SSRF, Command Injection) só pra você testar em ambientes SEUS e autorizados e reconhecer como cada classe de falha se parece.</p>
+    <select id="payload-kind">
+      <option value="xss">XSS</option><option value="sqli">SQLi</option><option value="lfi">LFI</option>
+      <option value="ssrf">SSRF</option><option value="cmdi">Command Injection</option>
+    </select>
+    <button class="btn" onclick="CyberLab.runPayloads()">Gerar</button>
+    <div class="result" id="payload-result"></div>
+  </div>
+</div>
+
+<h2 class="tools-category">📖 Cheatsheet</h2>
+<p class="muted small">Referência rápida de comandos e conceitos de segurança, organizados por categoria (a mesma base usada no TryHackMe Lab).</p>
+<div class="card tool" id="cheatsheet-card">
+  <button class="btn" onclick="CyberLab.loadCheatsheet()">Carregar cheatsheet</button>
+  <div id="cheatsheet-content"></div>
+</div>
+
+<h2 class="tools-category">🧾 Auditoria (todas as ações)</h2>
+<p class="muted small">Trilha de auditoria do próprio Cyber Lab: quem rodou qual ferramenta, contra qual alvo, se deu certo e quanto tempo levou.</p>
+<div class="card tool">
+  <button class="btn" onclick="CyberLab.loadAudit()">Atualizar log</button>
+  <table class="table" id="cyber-audit-table">
+    <thead><tr><th>Data</th><th>Papel</th><th>Ferramenta</th><th>Alvo</th><th>OK</th><th>ms</th><th>Erro</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+{% endif %}
+
+
+<script>
+(function(){
+  const selected=sessionStorage.getItem("jarvis_selected_tool");
+  const select=document.getElementById("cyber-run-tool");
+  if(selected&&select&&Array.from(select.options).some(o=>o.value===selected)){select.value=selected;sessionStorage.removeItem("jarvis_selected_tool")}
+})();
+</script>
+
+<h2 class="tools-category">🩺 Vulnerability Doctor — achar falhas e ver como corrigir</h2>
+<div class="card tool" id="vulndoctor-card">
+  <p class="muted small">Analisa código, HTML, configs ou dependências e mostra, para cada falha, <strong>como consertar</strong> com exemplo antes/depois. Tudo local: nada é enviado a nenhum site.</p>
+  <div class="inline">
+    <select id="vd-site"><option value="">— escolher site criado pelo app —</option></select>
+    <button class="btn" onclick="CyberLab.vdScanSite()">Analisar site</button>
+  </div>
+  <p class="muted small">ou cole um arquivo abaixo:</p>
+  <div class="inline">
+    <input type="text" id="vd-filename" placeholder="nome do arquivo (ex: app.py, index.html, .env)">
+  </div>
+  <textarea id="vd-input" rows="8" placeholder="cole aqui o código, HTML, .env, nginx.conf ou requirements.txt..."></textarea>
+  <button class="btn" onclick="CyberLab.vdScanText()">🩺 Diagnosticar</button>
+  <div id="vd-result"></div>
+</div>
+
+<h2 class="tools-category">🧠 Threat Intelligence & MITRE ATT&CK</h2>
+<div class="card tool">
+  <p class="muted small">Busca táticas/técnicas no MITRE ATT&CK — o vocabulário padrão da indústria pra nomear e descrever comportamento de ataque corretamente num relatório.</p>
+  <div class="inline">
+    <input type="text" id="mitre-query" placeholder="buscar tática/técnica (ex: phishing, T1110, exfiltração)">
+    <button class="btn" onclick="CyberLab.mitreLookup()">Consultar</button>
+  </div>
+  <div id="mitre-result"></div>
+</div>
+
+<div class="card tool">
+  <h3>🧬 Feed de IoCs</h3>
+  <p class="muted small">Verifica um hash contra indicadores de comprometimento conhecidos — ajuda a saber se um arquivo já foi visto como malicioso antes.</p>
+  <div class="inline">
+    <input type="text" id="ioc-hash" placeholder="hash MD5 a verificar">
+    <button class="btn" onclick="CyberLab.iocCheck()">Verificar</button>
+  </div>
+  <div class="result" id="ioc-result"></div>
+</div>
+
+<h2 class="tools-category">🧾 Analisador de Logs (SIEM/IDS Light)</h2>
+<div class="card tool">
+  <p class="muted small">Cole linhas de access.log/syslog. Detecta SQLi, XSS, path traversal, varredura e força bruta SSH.</p>
+  <textarea id="logs-input" rows="6" placeholder="cole aqui o conteúdo do log..."></textarea>
+  <button class="btn" onclick="CyberLab.analyzeLogs()">Analisar Logs</button>
+  <div id="logs-result"></div>
+</div>
+
+<h2 class="tools-category">🧱 Hardening & WAF</h2>
+<div class="grid tools-grid">
+  <div class="card tool">
+    <h3>🧩 Gerador de Regras WAF/Firewall</h3>
+    <select id="waf-engine">
+      <option value="nginx">nginx</option><option value="modsecurity">ModSecurity</option><option value="iptables">iptables</option>
+    </select>
+    <button class="btn" onclick="CyberLab.wafGenerate()">Gerar regras defensivas</button>
+    <div id="waf-result"></div>
+  </div>
+
+  <div class="card tool">
+    <h3>🔒 Auditoria de Cabeçalhos HTTP</h3>
+    <p class="muted small">Cole a saída de <code>curl -I https://seusite</code>.</p>
+    <textarea id="headers-input" rows="5" placeholder="HTTP/1.1 200 OK&#10;Server: nginx&#10;..."></textarea>
+    <button class="btn" onclick="CyberLab.headersAudit()">Auditar</button>
+    <div id="headers-result"></div>
+  </div>
+
+  <div class="card tool">
+    <h3>🗄 Análise de Configuração (.env/nginx/sshd)</h3>
+    <textarea id="cfg-input" rows="5" placeholder="cole o conteúdo do arquivo de config..."></textarea>
+    <button class="btn" onclick="CyberLab.configAudit()">Analisar</button>
+    <div id="cfg-result"></div>
+  </div>
+
+  <div class="card tool">
+    <h3>✉️ Anti-Phishing: Cabeçalhos de E-mail</h3>
+    <p class="muted small">Analisa os cabeçalhos brutos de um e-mail (rota, SPF/DKIM/DMARC) procurando sinais de phishing/spoofing.</p>
+    <textarea id="email-input" rows="5" placeholder="cole os cabeçalhos brutos do e-mail..."></textarea>
+    <button class="btn" onclick="CyberLab.emailAnalyze()">Analisar</button>
+    <div id="email-result"></div>
+  </div>
+
+  <div class="card tool">
+    <h3>🔑 Analisador de Força de Senha</h3>
+    <p class="muted small">Educacional — a senha não é armazenada, só analisada localmente nesta requisição.</p>
+    <input type="password" id="pwd-input" placeholder="digite uma senha para testar">
+    <button class="btn" onclick="CyberLab.pwdStrength()">Analisar</button>
+    <div class="result" id="pwd-result"></div>
+  </div>
+
+  <div class="card tool">
+    <h3>🦠 Scanner de Padrões de Malware (Forense)</h3>
+    <p class="muted small">Cole trecho de código, log ou arquivo suspeito. Detecta webshells, JS ofuscado, comandos de download+execução, cryptominer.</p>
+    <textarea id="malware-input" rows="5" placeholder="cole o conteúdo suspeito..."></textarea>
+    <button class="btn" onclick="CyberLab.malwareScan()">Escanear</button>
+    <div id="malware-result"></div>
+  </div>
+</div>
+
+<h2 class="tools-category">🗃 Monitorização de Integridade de Ficheiros (FIM)</h2>
+<div class="card tool">
+  <p class="muted small">Gere um baseline de hashes agora e compare depois para detectar modificações não autorizadas.</p>
+  <div class="inline">
+    <button class="btn" onclick="CyberLab.fimSnapshot('baseline')">📸 Salvar baseline (arquivos do editor do site atual)</button>
+    <button class="btn" onclick="CyberLab.fimSnapshot('current')">🔍 Comparar agora</button>
+  </div>
+  <div id="fim-result"></div>
+</div>
+
+<h2 class="tools-category">🚑 Resposta a Incidentes & Relatórios</h2>
+<div class="grid tools-grid">
+  <div class="card tool">
+    <h3>📋 Playbooks de IR</h3>
+    <p class="muted small">Passo a passo de resposta a incidente — o que fazer primeiro em cenários comuns (contenção, comunicação, preservação de evidência).</p>
+    <select id="ir-select"></select>
+    <button class="btn" onclick="CyberLab.irShow()">Mostrar passos</button>
+    <div id="ir-result"></div>
+  </div>
+
+  <div class="card tool">
+    <h3>📑 Relatório de Auditoria + Security Score</h3>
+    <p class="muted small">Junta os achados salvos de um alvo num relatório único com nota de segurança — o que exportar/apresentar depois de rodar os scans.</p>
+    <div class="inline">
+      <input type="text" id="audit-target" placeholder="alvo (usa histórico salvo se vazio de achados)">
+      <select id="audit-format"><option value="markdown">Markdown</option><option value="html">HTML</option><option value="json">JSON</option></select>
+      <button class="btn" onclick="CyberLab.auditReport()">Gerar</button>
+    </div>
+    <div id="audit-report-result"></div>
+  </div>
+</div>
+
+<h2 class="tools-category">🧪 Laboratório de Secure Coding (CTF Educacional)</h2>
+<div class="card tool">
+  <p class="muted small">Código real com uma vulnerabilidade proposital (SQLi, XSS, deserialização insegura, etc.). Você corrige e o sistema confere se a falha sumiu, com explicação do porquê.</p>
+  <select id="ctf-select"></select>
+  <div class="inline">
+    <button class="btn" onclick="CyberLab.ctfShow()">Ver desafio</button>
+    <button class="btn" onclick="CyberLab.ctfReveal()">Ver solução</button>
+  </div>
+  <div id="ctf-challenge"></div>
+  <textarea id="ctf-answer" rows="6" placeholder="cole sua versão corrigida do código aqui..."></textarea>
+  <button class="btn" onclick="CyberLab.ctfCheck()">Verificar minha correção</button>
+  <div id="ctf-result"></div>
+</div>
+
+<div class="card tool">
+  <h3>🧪 Gerador de Testes de Segurança</h3>
+  <p class="muted small">Gera um esqueleto de teste automatizado (pytest/Jest) pra validar que uma rota resiste a entradas maliciosas básicas.</p>
+  <div class="inline">
+    <select id="tests-lang"><option value="python">Python (pytest)</option><option value="javascript">JavaScript (Jest)</option></select>
+    <input type="text" id="tests-path" placeholder="/api/exemplo">
+    <select id="tests-method"><option>GET</option><option>POST</option><option>PUT</option><option>DELETE</option></select>
+    <button class="btn" onclick="CyberLab.testsGenerate()">Gerar testes</button>
+  </div>
+  <div id="tests-result"></div>
+</div>
+
+<h2 class="tools-category">📖 Guia de Codificação Segura (OWASP Top 10)</h2>
+<div class="card tool">
+  <button class="btn" onclick="CyberLab.loadCheatsheet()">Ver checklist / exemplos de refatoração</button>
+  <div id="secure-guide-note" class="muted small">Usa o mesmo Cheatsheet acima — inclui exemplos "antes/depois" por categoria OWASP.</div>
+</div>
+
+<h2 class="tools-category">💻 Terminal de Logs em Tempo Real</h2>
+<div class="card tool">
+  <p class="muted small">Mostra em tempo real o que o Cyber Lab está executando nos bastidores durante um scan.</p>
+  <div id="cyber-terminal" style="background:#000;color:#0f0;font-family:monospace;padding:10px;height:180px;overflow-y:auto;border-radius:6px;font-size:12px;"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ static_v('js/cyber.js') }}"></script>
+<script src="{{ static_v('js/cyber-phase2.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="tfGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b6bff"/>
+      <stop offset="100%" stop-color="#00e5ff"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="#04060c" stroke="url(#tfGrad)" stroke-width="2.5"/>
+  <text x="32" y="41" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="27" text-anchor="middle" fill="url(#tfGrad)">TT</text>
+</svg>

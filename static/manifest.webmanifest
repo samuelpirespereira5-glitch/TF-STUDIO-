@@ -1,0 +1,9 @@
+{
+  "name": "JARVIS Ultra Platform",
+  "short_name": "JARVIS",
+  "start_url": "/cyber/world",
+  "display": "standalone",
+  "background_color": "#050b14",
+  "theme_color": "#08111f",
+  "icons": []
+}

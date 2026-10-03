@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: tristan-thorne
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --workers 1 --threads 8 --timeout 300 --bind 0.0.0.0:$PORT
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: MASTER_PASSWORD
+        sync: false
+      - key: MASTER_PASSWORD_HASH
+        sync: false
+      - key: FLASK_ENV
+        value: production
+      - key: PRODUCTION
+        value: "1"
+      # Sessão persistente: não pedir a senha ao trocar de página.
+      # Ações críticas continuam usando step-up/reautenticação.
+      - key: SESSION_HOURS
+        value: "720"
+      - key: SESSION_IDLE_MINUTES
+        value: "10080"
+      # Fail-closed: só habilitar após os testes criptográficos e a configuração de RP/Origin.
+      - key: WEBAUTHN_ENABLED
+        value: "false"

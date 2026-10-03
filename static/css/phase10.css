@@ -1,0 +1,47 @@
+/* Phase 10 — Education Hub */
+.edu-wrap{max-width:1200px;margin:0 auto;padding:12px 8px 48px}
+.edu-hero{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between;margin-bottom:16px}
+.edu-hero h1{margin:0;font-family:Orbitron,sans-serif;letter-spacing:.04em}
+.edu-kicker{margin:0;color:#5ce1ff;font-size:.75rem;text-transform:uppercase;letter-spacing:.12em}
+.edu-hero-actions{display:flex;gap:8px;flex-wrap:wrap}
+.edu-hero-actions input{min-width:220px;flex:1;background:#0b1524;border:1px solid #1e3a5f;color:#e8f1ff;border-radius:10px;padding:10px 12px}
+.edu-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.edu-tab{background:#0d1a2d;border:1px solid #1e3a5f;color:#c9d7ef;border-radius:999px;padding:8px 14px;cursor:pointer;font:inherit}
+.edu-tab.active,.edu-tab:hover{border-color:#2ec5ff;color:#fff;box-shadow:0 0 0 1px rgba(46,197,255,.25)}
+.edu-panel{display:none}
+.edu-panel.active{display:block}
+.edu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.edu-grid.stats{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));margin-bottom:12px}
+.edu-stat{background:linear-gradient(160deg,#0d1a2d,#0a1322);border:1px solid #1e3a5f;border-radius:14px;padding:14px}
+.edu-stat b{display:block;font-size:1.4rem;color:#5ce1ff}
+.edu-card{background:#0d1a2d;border:1px solid #1e3a5f;border-radius:14px;padding:14px;cursor:pointer;transition:border-color .15s,transform .15s}
+.edu-card:hover{border-color:#2ec5ff;transform:translateY(-1px)}
+.edu-card h3{margin:0 0 6px;font-size:1rem}
+.edu-card p{margin:0;color:#9bb0cc;font-size:.9rem}
+.edu-path{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.edu-path .step{background:#12233a;border:1px solid #2a4a72;border-radius:12px;padding:10px 12px;min-width:110px;text-align:center}
+.edu-path .arrow{color:#5ce1ff;opacity:.7}
+.edu-split{display:grid;grid-template-columns:260px 1fr;gap:12px}
+@media(max-width:800px){.edu-split{grid-template-columns:1fr}}
+.edu-list button{display:block;width:100%;text-align:left;margin-bottom:6px;background:#12233a;border:1px solid #1e3a5f;color:#e8f1ff;border-radius:10px;padding:10px;cursor:pointer}
+.edu-list button.active{border-color:#2ec5ff;background:#14304d}
+.edu-lesson h2{margin-top:0}
+.edu-lesson pre,.edu-out{background:#071018;border:1px solid #1e3a5f;border-radius:10px;padding:12px;overflow:auto;white-space:pre-wrap}
+.edu-lesson .section{margin:14px 0;padding-top:8px;border-top:1px solid #1a2f4a}
+.edu-chip-row{display:flex;flex-wrap:wrap;gap:8px}
+.edu-chip{background:#12233a;border:1px solid #2a4a72;border-radius:999px;padding:6px 12px;cursor:pointer;color:#dce8ff}
+.edu-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:10px}
+.edu-map,.edu-skill{display:flex;flex-direction:column;gap:10px}
+.edu-node{background:#12233a;border-left:3px solid #2ec5ff;padding:8px 12px;border-radius:8px}
+.edu-skill details{background:#0d1a2d;border:1px solid #1e3a5f;border-radius:10px;padding:8px 12px;margin-bottom:6px}
+.edu-skill summary{cursor:pointer;font-weight:600}
+.lab-vis{display:flex;gap:6px;flex-wrap:wrap;min-height:48px;align-items:flex-end;margin:12px 0}
+.lab-bar{width:28px;background:linear-gradient(180deg,#2ec5ff,#1560a8);border-radius:6px 6px 2px 2px;text-align:center;font-size:.7rem;color:#041018;font-weight:700;padding-top:4px}
+.lab-bar.active{outline:2px solid #ffd166}
+.lab-bar.swap{background:linear-gradient(180deg,#ff7b7b,#a81515);color:#fff}
+.tool-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:700px){.tool-grid{grid-template-columns:1fr}}
+.tool-grid textarea,.tool-grid input,.tool-grid select{width:100%;background:#071018;border:1px solid #1e3a5f;color:#e8f1ff;border-radius:10px;padding:10px;font-family:ui-monospace,monospace}
+label{display:block;margin:8px 0 4px;color:#9bb0cc;font-size:.85rem}
+.btn.ghost{background:transparent;border:1px solid #2a4a72;color:#c9d7ef}
+#lab-workspace,#tool-workspace{margin-top:14px}

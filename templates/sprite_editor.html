@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Editor de Sprites · JARVIS{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/sprite_editor.css') }}">
+{% endblock %}
+{% block content %}
+<div class="se-wrap">
+  <header class="se-hero">
+    <div>
+      <p class="se-kicker">Pixel Art</p>
+      <h1>🎨 Editor de Sprites</h1>
+      <p class="muted">Desenhe no grid, salve e use nos jogos.</p>
+    </div>
+    <a class="btn" href="/novas">← Novas features</a>
+  </header>
+
+  <div class="se-grid">
+    <div class="card se-canvas-card">
+      <div class="se-toolbar">
+        <label>Tamanho
+          <select id="se-size">
+            <option value="8">8×8</option>
+            <option value="16" selected>16×16</option>
+            <option value="32">32×32</option>
+          </select>
+        </label>
+        <input type="color" id="se-color" value="#3b82f6" title="Cor">
+        <button class="btn" id="se-eraser" title="Borracha">🧽</button>
+        <button class="btn" id="se-clear">Limpar</button>
+        <button class="btn" id="se-fill">Preencher</button>
+      </div>
+      <div class="se-canvas-wrap">
+        <canvas id="se-canvas" width="320" height="320"></canvas>
+      </div>
+      <div class="se-preview-row">
+        <span class="muted small">Preview:</span>
+        <canvas id="se-preview" width="64" height="64"></canvas>
+        <canvas id="se-preview2" width="32" height="32"></canvas>
+      </div>
+      <div class="se-save-row">
+        <input type="text" id="se-name" placeholder="Nome do sprite" maxlength="60">
+        <button class="btn primary" id="se-save">💾 Salvar</button>
+      </div>
+      <div id="se-status" class="muted small"></div>
+    </div>
+    <div class="card">
+      <h2>Meus sprites</h2>
+      <div id="se-list" class="se-list"></div>
+      <h2 style="margin-top:1.25rem">Paleta rápida</h2>
+      <div class="se-palette" id="se-palette"></div>
+    </div>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='js/sprite_editor.js') }}"></script>
+{% endblock %}

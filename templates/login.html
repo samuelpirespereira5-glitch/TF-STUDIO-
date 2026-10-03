@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="csrf-token" content="{{ csrf_token }}">
+<meta name="robots" content="noindex, nofollow">
+<title>Entrar · JARVIS · Secure Access</title>
+<link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/favicon.svg') }}">
+<link rel="stylesheet" href="{{ static_v('css/style.css') }}">
+</head>
+<body class="login-screen">
+<canvas id="neural-bg" aria-hidden="true"></canvas>
+<div class="scanlines" aria-hidden="true"></div>
+<div class="layout" style="justify-content:center;align-items:center;min-height:100vh">
+  <main class="content" style="max-width:420px;width:100%">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-stack">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    <div class="card login-card">
+      <div class="login-brand">J</div>
+      <div class="jarvis-eyebrow">JARVIS · THORNE CYBER PLATFORM</div>
+      <h1>🔒 Acesso protegido</h1>
+      <p class="muted">Autenticação obrigatória. Nenhuma ferramenta, Cyber Lab ou dado privado é carregado antes do login bem-sucedido.</p>
+      {% if request.args.get('next') %}<p class="small muted">Destino solicitado após autenticação.</p>{% endif %}
+
+      <form method="post" id="login-form" autocomplete="off">
+        <input type="hidden" name="_csrf" value="{{ csrf_token }}">
+        <input type="hidden" name="next" value="{{ next }}">
+
+        <label for="login-email">E-mail</label>
+        <input type="email" name="email" id="login-email" placeholder="seu@email.com" autocomplete="username" value="{{ owner_email or '' }}">
+
+        <label for="login-password" style="margin-top:12px">Senha mestre</label>
+        <div class="password-field">
+          <input type="password" name="password" id="login-password" placeholder="Senha mestre (mín. 12 caracteres)" autocomplete="current-password" autofocus>
+          <button type="button" class="password-toggle" id="login-password-toggle" aria-label="Mostrar senha" tabindex="-1">👁</button>
+        </div>
+
+        <label style="margin-top:12px">— ou — Token de uso único</label>
+        <input type="text" name="token" placeholder="Cole o token aqui" autocomplete="off">
+
+        <button type="submit" class="btn primary" id="login-submit" style="margin-top:14px;width:100%">Entrar com senha</button>
+      {% if webauthn_status.enabled %}
+      <button type="button" class="btn" id="passkey-login-btn" style="margin-top:10px;width:100%">🔑 Entrar com Passkey</button>
+      <p class="muted small" id="passkey-login-status" style="margin-top:8px;text-align:center"></p>
+      {% endif %}
+        {% if locked_seconds %}
+        <p class="muted small" id="login-lock-msg" style="margin-top:8px;text-align:center">Bloqueado por tentativas demais — libera em <span id="login-lock-count">{{ locked_seconds }}</span>s.</p>
+        {% endif %}
+      </form>
+
+      <div class="social-login" style="margin-top:18px">
+        <div class="social-divider"><span>ou entrar com sua conta</span></div>
+        <div class="social-grid">
+          <a class="btn social-btn" href="{{ url_for('auth_google_start', next=next) }}">🌐 Continuar com Google</a>
+          <a class="btn social-btn" href="{{ url_for('auth_github_start', next=next) }}">🐙 Continuar com GitHub</a>
+        </div>
+        <p class="muted small" style="margin-top:10px;text-align:center">
+          Cada pessoa usa sua própria conta. A senha mestre continua reservada ao proprietário.
+        </p>
+      </div>
+
+      <div style="margin-top:16px;text-align:center">
+        <p class="muted small" style="margin-top:8px">Senha e 2FA continuam disponíveis. Quando habilitada, a Passkey é validada criptograficamente no servidor antes de criar a sessão.</p>
+      </div>
+
+      <details class="login-recovery" style="margin-top:18px">
+        <summary class="muted small" style="cursor:pointer">Esqueceu a senha / recuperação</summary>
+        <div class="login-security-note" style="margin-top:10px;font-size:0.85rem">
+          <p><b>2FA ativo:</b> use um código de recuperação de uso único (mostrados uma vez ao ativar o TOTP).</p>
+          <p style="margin-top:8px"><b>Emergência (produção):</b> no painel do host defina temporariamente <code>MASTER_PASSWORD</code> (ou regenere <code>MASTER_PASSWORD_HASH</code>) e reinicie o serviço. Em seguida troque a senha em Configurações.</p>
+          <p style="margin-top:8px"><b>Local:</b> apague <code>data/auth.json</code> e reinicie → tela de criar senha em <code>/primeiro-acesso</code> (só na própria máquina).</p>
+          <p style="margin-top:8px;opacity:.85">A senha mestre nunca é armazenada em texto puro nem enviada ao frontend.</p>
+        </div>
+      </details>
+
+      <div class="login-security-note" style="margin-top:14px">
+        <b>🔐 Sessão segura:</b> cookies <code>HttpOnly</code> + <code>Secure</code> + <code>SameSite=Lax</code>.
+        Após logout a sessão é invalidada no servidor; o botão “voltar” do navegador não reabre páginas privadas.
+      </div>
+    </div>
+  </main>
+</div>
+<script src="{{ static_v('js/neural-bg.js') }}"></script>
+<script src="{{ static_v('js/main.js') }}"></script>
+<script src="{{ static_v('js/csrf.js') }}"></script>
+<script>
+(() => {
+  const toggle = document.getElementById('login-password-toggle');
+  const field = document.getElementById('login-password');
+  if (toggle && field) {
+    toggle.addEventListener('click', () => {
+      const showing = field.type === 'text';
+      field.type = showing ? 'password' : 'text';
+      toggle.textContent = showing ? '👁' : '🙈';
+      toggle.setAttribute('aria-label', showing ? 'Mostrar senha' : 'Esconder senha');
+    });
+  }
+  let remaining = {{ locked_seconds or 0 }};
+  const submitBtn = document.getElementById('login-submit');
+  const counter = document.getElementById('login-lock-count');
+  if (remaining > 0) {
+    if (submitBtn) submitBtn.disabled = true;
+    const tick = setInterval(() => {
+      remaining -= 1;
+      if (counter) counter.textContent = remaining;
+      if (remaining <= 0) {
+        clearInterval(tick);
+        if (submitBtn) submitBtn.disabled = false;
+        const msg = document.getElementById('login-lock-msg');
+        if (msg) msg.remove();
+      }
+    }, 1000);
+  }
+
+
+  const passkeyBtn = document.getElementById('passkey-login-btn');
+  const passkeyStatus = document.getElementById('passkey-login-status');
+  if (passkeyBtn && window.PublicKeyCredential && navigator.credentials) {
+    const csrf = document.querySelector('input[name="_csrf"]')?.value || '';
+    const toB64url = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+    const fromB64url = (s) => { const pad='='.repeat((4-s.length%4)%4); const b=atob((s+pad).replace(/-/g,'+').replace(/_/g,'/')); const a=new Uint8Array(b.length); for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i); return a; };
+    passkeyBtn.addEventListener('click', async () => {
+      passkeyBtn.disabled=true; passkeyBtn.textContent='🔐 Verificando…'; if(passkeyStatus)passkeyStatus.textContent='Aguardando seu dispositivo…';
+      try {
+        const optResp=await fetch('/login/webauthn/options',{method:'POST',headers:{'X-CSRF-Token':csrf},credentials:'same-origin'});
+        const options=await optResp.json().catch(()=>({}));
+        if(!optResp.ok) throw new Error(options.error||'Passkey indisponível');
+        options.challenge=fromB64url(options.challenge);
+        if(Array.isArray(options.allowCredentials)) options.allowCredentials=options.allowCredentials.map(c=>({...c,id:fromB64url(c.id)}));
+        const cred=await navigator.credentials.get({publicKey:options});
+        if(!cred) throw new Error('Autenticação cancelada');
+        const r=cred.response;
+        const payload={id:cred.id,rawId:toB64url(cred.rawId),type:cred.type,clientExtensionResults:cred.getClientExtensionResults?cred.getClientExtensionResults():{},response:{clientDataJSON:toB64url(r.clientDataJSON),authenticatorData:toB64url(r.authenticatorData),signature:toB64url(r.signature),userHandle:r.userHandle?toB64url(r.userHandle):null},next:document.querySelector('input[name="next"]')?.value||''};
+        const verify=await fetch('/login/webauthn/verify',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},credentials:'same-origin',body:JSON.stringify(payload)});
+        const result=await verify.json().catch(()=>({}));
+        if(!verify.ok||!result.ok) throw new Error(result.error||'Passkey rejeitada');
+        window.location.href=result.redirect||'/';
+      } catch(e) {
+        if(passkeyStatus)passkeyStatus.textContent=e.message||'Não foi possível autenticar com Passkey.';
+        passkeyBtn.disabled=false; passkeyBtn.textContent='🔑 Entrar com Passkey';
+      }
+    });
+  } else if (passkeyBtn) { passkeyBtn.disabled=true; passkeyBtn.title='WebAuthn não suportado neste navegador'; }
+})();
+</script>
+</body>
+</html>

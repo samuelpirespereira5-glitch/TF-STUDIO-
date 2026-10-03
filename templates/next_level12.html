@@ -1,0 +1,453 @@
+{% extends "base.html" %}
+{% block title %}Acessibilidade & Admin — JARVIS{% endblock %}
+{% block content %}
+<style>
+.nl12{max-width:1120px;margin:0 auto;padding:16px 20px}
+.nl12 h1{font-size:1.55rem;margin:0 0 4px}
+.nl12 .muted{opacity:.7;font-size:.9rem}
+.nl12 .tabs{display:flex;flex-wrap:wrap;gap:6px;margin:16px 0}
+.nl12 .tab{padding:8px 12px;border-radius:999px;border:1px solid rgba(0,229,255,.25);background:rgba(0,20,40,.4);cursor:pointer;font-size:.82rem}
+.nl12 .tab.active{background:rgba(0,229,255,.2);border-color:#00e5ff;color:#00e5ff}
+.nl12 .panel{display:none;padding:16px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(5,12,24,.6)}
+.nl12 .panel.active{display:block}
+.nl12 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.nl12 .card{padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.25)}
+.nl12 .card h3{margin:0 0 6px;font-size:.98rem}
+.nl12 button,.btn{padding:8px 14px;border-radius:8px;border:none;background:#00e5ff;color:#001018;font-weight:600;cursor:pointer;margin:2px 0}
+.nl12 button.ghost{background:transparent;border:1px solid rgba(0,229,255,.4);color:#00e5ff}
+.nl12 input,textarea,select{width:100%;padding:8px;margin:4px 0 10px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:#0a1520;color:#e0f7fa;box-sizing:border-box}
+.nl12 pre.out{background:#050a12;padding:10px;border-radius:8px;max-height:260px;overflow:auto;font-size:12px;white-space:pre-wrap}
+.nl12 .badge{display:inline-block;padding:2px 8px;border-radius:999px;background:rgba(0,229,255,.15);font-size:11px;margin-right:4px}
+.nl12 .warn{border-color:rgba(255,180,0,.4);background:rgba(40,30,0,.35)}
+.nl12 label.row{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:.9rem}
+.nl12 .swatch{display:inline-block;width:22px;height:22px;border-radius:4px;margin:2px;border:1px solid #333;vertical-align:middle}
+</style>
+<div class="nl12">
+  <h1>⚙️ Acessibilidade & Admin</h1>
+  <p class="muted">Acessibilidade, Admin, Sustentabilidade, Integrações, Insights, Conteúdo, Ferramentas, Engajamento, Uau, Visual, Inteligência real — e checklist de polimento.</p>
+
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-p="a11y">♿ Acessibilidade</div>
+    <div class="tab" data-p="admin">👥 Admin</div>
+    <div class="tab" data-p="sust">💰 Planos</div>
+    <div class="tab" data-p="integ">🔌 Integrações</div>
+    <div class="tab" data-p="data">📊 Insights</div>
+    <div class="tab" data-p="content">🧩 Conteúdo</div>
+    <div class="tab" data-p="tools">🛠️ Ferramentas</div>
+    <div class="tab" data-p="engage">🎁 Engajamento</div>
+    <div class="tab" data-p="wow">✨ Uau</div>
+    <div class="tab" data-p="visual">🎨 Visual</div>
+    <div class="tab" data-p="intel">🧠 Inteligência</div>
+    <div class="tab" data-p="polish">🔧 Polimento</div>
+  </div>
+
+  <!-- ACESSIBILIDADE -->
+  <div class="panel active" id="p-a11y">
+    <h2>Acessibilidade</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>🔊 Modo leitura por voz (TTS)</h3>
+        <label class="row"><input type="checkbox" id="tts-on"> Ativar TTS</label>
+        <input id="tts-text" placeholder="Texto para ler em voz alta">
+        <button onclick="ttsPreview()">Prévia TTS</button>
+        <button class="ghost" onclick="saveA11y()">Salvar prefs</button>
+        <pre class="out" id="a11y-out"></pre>
+      </div>
+      <div class="card">
+        <h3>👁 Alto contraste / fonte</h3>
+        <label class="row"><input type="checkbox" id="hc-on"> Alto contraste</label>
+        <label>Escala da fonte: <span id="fs-val">1.0</span></label>
+        <input type="range" id="font-scale" min="0.8" max="1.6" step="0.1" value="1" oninput="document.getElementById('fs-val').textContent=this.value">
+        <button onclick="saveA11y()">Aplicar</button>
+        <button class="ghost" onclick="loadA11y()">Carregar prefs</button>
+      </div>
+      <div class="card" style="grid-column:1/-1">
+        <h3>⌨️ Atalhos de teclado completos</h3>
+        <button class="ghost" onclick="showShortcuts()">Mostrar atalhos</button>
+        <pre class="out" id="shortcuts-out"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div class="panel" id="p-admin">
+    <h2>Controle / Admin</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>🏫 Modo sala de aula</h3>
+        <input id="class-name" placeholder="Nome da turma">
+        <textarea id="class-desc" rows="2" placeholder="Descrição"></textarea>
+        <button onclick="createClass()">Criar turma</button>
+        <button class="ghost" onclick="listClasses()">Minhas turmas</button>
+        <input id="class-id" placeholder="class_id">
+        <input id="student-id" placeholder="student_id para adicionar">
+        <button onclick="addStudent()">Adicionar aluno</button>
+        <input id="asg-title" placeholder="Título do exercício">
+        <button onclick="assignEx()">Atribuir exercício</button>
+        <button class="ghost" onclick="classReport()">Relatório da turma</button>
+        <pre class="out" id="admin-out"></pre>
+      </div>
+      <div class="card">
+        <h3>👨‍👩‍👧 Painel pais/professores</h3>
+        <input id="child-id" placeholder="ID da conta filha/aluno">
+        <button onclick="linkParent()">Vincular conta</button>
+        <button class="ghost" onclick="parentDash()">Ver progresso</button>
+        <pre class="out" id="parent-out"></pre>
+      </div>
+      <div class="card">
+        <h3>🛡 Moderação de conteúdo</h3>
+        <input id="mod-type" placeholder="tipo (jogo/comentário)" value="jogo">
+        <input id="mod-cid" placeholder="content_id">
+        <input id="mod-reason" placeholder="Motivo da denúncia">
+        <button onclick="reportContent()">Denunciar</button>
+        <button class="ghost" onclick="modQueue()">Fila de revisão</button>
+        <input id="mod-item" placeholder="ticket_id">
+        <select id="mod-action"><option>approve</option><option>remove</option><option>warn</option></select>
+        <button onclick="modAction()">Revisar</button>
+        <pre class="out" id="mod-out"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUSTENTABILIDADE -->
+  <div class="panel" id="p-sust">
+    <h2>Sustentabilidade do projeto</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>🆓 Plano gratuito × Premium</h3>
+        <button onclick="listPlans()">Ver planos</button>
+        <button onclick="myPlan()">Meu plano</button>
+        <select id="plan-sel"><option value="free">free</option><option value="premium">premium</option></select>
+        <button class="ghost" onclick="setPlan()">Definir plano (demo)</button>
+        <pre class="out" id="plan-out"></pre>
+      </div>
+      <div class="card">
+        <h3>🤝 Parceria escolas/cursos</h3>
+        <input id="ptn-org" placeholder="Nome da escola/org">
+        <input id="ptn-email" placeholder="E-mail de contato">
+        <select id="ptn-type"><option>school</option><option>course</option><option>ngo</option></select>
+        <button onclick="reqPartner()">Solicitar parceria</button>
+        <button class="ghost" onclick="listPartners()">Listar</button>
+        <pre class="out" id="ptn-out"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTEGRAÇÕES -->
+  <div class="panel" id="p-integ">
+    <h2>Integrações externas</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>🔑 API pública documentada</h3>
+        <input id="api-label" placeholder="Label da chave" value="default">
+        <button onclick="createApiKey()">Gerar API key</button>
+        <button class="ghost" onclick="listApiKeys()">Minhas keys</button>
+        <pre class="out" id="api-out"></pre>
+      </div>
+      <div class="card">
+        <h3>🔐 Login social</h3>
+        <select id="soc-provider"><option>google</option><option>github</option></select>
+        <button onclick="linkSocial()">Vincular (stub OAuth)</button>
+        <button class="ghost" onclick="listSocial()">Vínculos</button>
+        <pre class="out" id="soc-out"></pre>
+      </div>
+      <div class="card">
+        <h3>📤 Export JSON aberto</h3>
+        <button onclick="exportProgress()">Exportar progresso</button>
+        <pre class="out" id="exp-out"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- DADOS -->
+  <div class="panel" id="p-data">
+    <h2>Dados e insights</h2>
+    <div class="grid">
+      <div class="card" style="grid-column:span 2">
+        <h3>📄 Relatório mensal («seu mês em números»)</h3>
+        <button onclick="monthlyReport()">Gerar relatório</button>
+        <pre class="out" id="month-out"></pre>
+      </div>
+      <div class="card" style="grid-column:1/-1">
+        <h3>📈 Comparação de evolução</h3>
+        <button onclick="evoChart()">Gráfico de progresso</button>
+        <pre class="out" id="evo-out"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTEÚDO -->
+  <div class="panel" id="p-content">
+    <h2>Conteúdo extra</h2>
+    <div class="grid">
+      <div class="card" style="grid-column:1/-1">
+        <h3>📝 Quiz a partir de PDF/texto</h3>
+        <textarea id="pdf-text" rows="4" placeholder="Cole texto do PDF ou material de estudo..."></textarea>
+        <input id="pdf-n" type="number" value="5" min="1" max="15" style="width:80px"> perguntas
+        <button onclick="genQuiz()">Gerar quiz</button>
+        <pre class="out" id="quiz-out"></pre>
+      </div>
+      <div class="card">
+        <h3>🎯 Trilhas por interesse</h3>
+        <button onclick="listTracks()">Ver trilhas</button>
+        <select id="track-sel">
+          <option value="jogos_terror">jogos de terror</option>
+          <option value="site_loja">site de loja</option>
+          <option value="python_jogos">Python + jogo</option>
+          <option value="cyber_web">segurança web</option>
+        </select>
+        <button onclick="startTrack()">Iniciar trilha</button>
+        <pre class="out" id="track-out"></pre>
+      </div>
+      <div class="card">
+        <h3>📰 Notícias de tech resumidas</h3>
+        <button onclick="techNews()">Atualizar digest</button>
+        <pre class="out" id="news-out"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- FERRAMENTAS -->
+  <div class="panel" id="p-tools">
+    <h2>Ferramentas do dia a dia</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>🎨 Paleta de cores / ícones</h3>
+        <input id="pal-seed" placeholder="Seed (ex: meu-jogo)">
+        <button onclick="genPalette()">Gerar paleta</button>
+        <div id="pal-swatches"></div>
+        <pre class="out" id="pal-out"></pre>
+      </div>
+      <div class="card">
+        <h3>🔄 Conversor de formatos</h3>
+        <input id="conv-file" placeholder="arquivo.png">
+        <select id="conv-fmt"><option>webp</option><option>jpg</option><option>png</option><option>mp3</option><option>ogg</option></select>
+        <button onclick="convertMedia()">Converter (job)</button>
+        <pre class="out" id="conv-out"></pre>
+      </div>
+      <div class="card">
+        <h3>📋 Templates currículo/portfólio</h3>
+        <button onclick="listResumes()">Ver templates</button>
+        <select id="res-tpl"><option>dev_junior</option><option>game_creator</option><option>cyber_analyst</option></select>
+        <input id="res-name" placeholder="Seu nome">
+        <button onclick="genResume()">Gerar rascunho</button>
+        <pre class="out" id="res-out"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ENGAJAMENTO -->
+  <div class="panel" id="p-engage">
+    <h2>Engajamento extra</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>🎲 Recompensa surpresa</h3>
+        <input id="rw-task" placeholder="task_id (opcional)">
+        <button onclick="rollReward()">Sortear ao completar tarefa</button>
+        <pre class="out" id="rw-out"></pre>
+      </div>
+      <div class="card">
+        <h3>👥 Convite de amigos (+XP)</h3>
+        <button onclick="createInvite()">Gerar convite</button>
+        <input id="inv-code" placeholder="Código para resgatar">
+        <button class="ghost" onclick="redeemInvite()">Resgatar</button>
+        <pre class="out" id="inv-out"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- UAU -->
+  <div class="panel" id="p-wow">
+    <h2>«Uau» de verdade</h2>
+    <div class="grid">
+      <div class="card" style="grid-column:1/-1">
+        <h3>🤖 Assistente Jarvis (conecta tudo)</h3>
+        <input id="jarvis-intent" placeholder='Ex: "quero aprender Python fazendo um jogo"'>
+        <button onclick="jarvisPlan()">Montar roteiro</button>
+        <pre class="out" id="jarvis-out"></pre>
+      </div>
+      <div class="card">
+        <h3>🎬 Onboarding cinematográfico</h3>
+        <button onclick="onboardState()">Ver cenas</button>
+        <button class="ghost" onclick="onboardDone()">Marcar concluído</button>
+        <pre class="out" id="ob-out"></pre>
+      </div>
+      <div class="card">
+        <h3>⚡ Modo um clique</h3>
+        <input id="oc-idea" placeholder="Ideia do jogo">
+        <button onclick="oneClick()">Ideia → jogo publicado</button>
+        <pre class="out" id="oc-out"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- VISUAL -->
+  <div class="panel" id="p-visual">
+    <h2>Identidade visual</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>🌌 Tema sci-fi / holograma</h3>
+        <button onclick="getTheme()">Ver tema</button>
+        <label class="row"><input type="checkbox" id="snd-on" checked> Sons de interface</label>
+        <button class="ghost" onclick="setTheme()">Salvar</button>
+        <pre class="out" id="theme-out"></pre>
+      </div>
+      <div class="card">
+        <h3>👾 Mascote Jarvis</h3>
+        <input id="mascot-ctx" placeholder="Contexto (opcional)">
+        <button onclick="mascotTip()">Pedir dica</button>
+        <pre class="out" id="mascot-out"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTELIGÊNCIA -->
+  <div class="panel" id="p-intel">
+    <h2>Inteligência real</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>📊 Dashboard que aprende o padrão</h3>
+        <button onclick="recordPattern()">Registrar atividade agora</button>
+        <button class="ghost" onclick="suggestNext()">Sugerir próximo passo</button>
+        <pre class="out" id="intel-out"></pre>
+      </div>
+      <div class="card">
+        <h3>😤 Detecção de frustração</h3>
+        <input id="fail-ex" placeholder="exercise_id" value="ex_loops_01">
+        <button onclick="reportFail()">Simular erro no exercício</button>
+        <button class="ghost" onclick="resetFail()">Reset contagem</button>
+        <pre class="out" id="fail-out"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- POLIMENTO -->
+  <div class="panel" id="p-polish">
+    <h2>🔧 Nível de Polimento</h2>
+    <p class="muted">Antes de empilhar Nível 13+, consolidar navegação, deduplicar e testar fluxo do zero.</p>
+    <div class="card warn" style="margin-bottom:12px">
+      <strong>Riscos atuais (Claude):</strong> funções duplicadas, menu lateral gigante, performance (app.py enorme).
+    </div>
+    <button onclick="loadPolish()">Atualizar checklist</button>
+    <div id="polish-list" class="grid" style="margin-top:12px"></div>
+    <pre class="out" id="polish-out"></pre>
+  </div>
+</div>
+
+<script>
+const J = async (url, opts) => {
+  const r = await fetch(url, opts);
+  return r.json();
+};
+const show = (id, data) => { document.getElementById(id).textContent = JSON.stringify(data, null, 2); };
+
+document.querySelectorAll('.nl12 .tab').forEach(t => {
+  t.onclick = () => {
+    document.querySelectorAll('.nl12 .tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.nl12 .panel').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('p-' + t.dataset.p).classList.add('active');
+  };
+});
+
+// A11y
+async function loadA11y(){ const d = await J('/api/nl12/a11y'); show('a11y-out', d); if(d.prefs){ document.getElementById('tts-on').checked=!!d.prefs.tts_enabled; document.getElementById('hc-on').checked=!!d.prefs.high_contrast; document.getElementById('font-scale').value=d.prefs.font_scale||1; document.getElementById('fs-val').textContent=document.getElementById('font-scale').value; } }
+async function saveA11y(){
+  const body = { tts_enabled: document.getElementById('tts-on').checked, high_contrast: document.getElementById('hc-on').checked, font_scale: parseFloat(document.getElementById('font-scale').value) };
+  show('a11y-out', await J('/api/nl12/a11y', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)}));
+}
+async function ttsPreview(){
+  show('a11y-out', await J('/api/nl12/tts', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({text: document.getElementById('tts-text').value})}));
+  const t = document.getElementById('tts-text').value;
+  if(t && window.speechSynthesis){ const u = new SpeechSynthesisUtterance(t); u.lang='pt-BR'; speechSynthesis.speak(u); }
+}
+async function showShortcuts(){ const d = await J('/api/nl12/a11y'); show('shortcuts-out', d.shortcuts || d); }
+
+// Admin
+async function createClass(){ show('admin-out', await J('/api/nl12/classroom', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name: document.getElementById('class-name').value, description: document.getElementById('class-desc').value})})); }
+async function listClasses(){ show('admin-out', await J('/api/nl12/classroom')); }
+async function addStudent(){ const cid=document.getElementById('class-id').value; show('admin-out', await J('/api/nl12/classroom/'+cid+'/student', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({student_id: document.getElementById('student-id').value})})); }
+async function assignEx(){ const cid=document.getElementById('class-id').value; show('admin-out', await J('/api/nl12/classroom/'+cid+'/assign', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({title: document.getElementById('asg-title').value})})); }
+async function classReport(){ show('admin-out', await J('/api/nl12/classroom/'+document.getElementById('class-id').value+'/report')); }
+async function linkParent(){ show('parent-out', await J('/api/nl12/parent/link', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({child_id: document.getElementById('child-id').value})})); }
+async function parentDash(){ show('parent-out', await J('/api/nl12/parent/dashboard')); }
+async function reportContent(){ show('mod-out', await J('/api/nl12/moderation/report', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({content_type: document.getElementById('mod-type').value, content_id: document.getElementById('mod-cid').value, reason: document.getElementById('mod-reason').value})})); }
+async function modQueue(){ show('mod-out', await J('/api/nl12/moderation/queue')); }
+async function modAction(){ show('mod-out', await J('/api/nl12/moderation/'+document.getElementById('mod-item').value, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action: document.getElementById('mod-action').value})})); }
+
+// Plans
+async function listPlans(){ show('plan-out', await J('/api/nl12/plans')); }
+async function myPlan(){ show('plan-out', await J('/api/nl12/plan')); }
+async function setPlan(){ show('plan-out', await J('/api/nl12/plan', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({plan: document.getElementById('plan-sel').value})})); }
+async function reqPartner(){ show('ptn-out', await J('/api/nl12/partnership', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({org_name: document.getElementById('ptn-org').value, contact_email: document.getElementById('ptn-email').value, type: document.getElementById('ptn-type').value})})); }
+async function listPartners(){ show('ptn-out', await J('/api/nl12/partnership')); }
+
+// Integrations
+async function createApiKey(){ show('api-out', await J('/api/nl12/api-key', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({label: document.getElementById('api-label').value})})); }
+async function listApiKeys(){ show('api-out', await J('/api/nl12/api-key')); }
+async function linkSocial(){ show('soc-out', await J('/api/nl12/social', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({provider: document.getElementById('soc-provider').value})})); }
+async function listSocial(){ show('soc-out', await J('/api/nl12/social')); }
+async function exportProgress(){ show('exp-out', await J('/api/nl12/export/progress', {method:'POST'})); }
+
+// Data
+async function monthlyReport(){ show('month-out', await J('/api/nl12/report/monthly')); }
+async function evoChart(){ show('evo-out', await J('/api/nl12/report/evolution')); }
+
+// Content
+async function genQuiz(){ show('quiz-out', await J('/api/nl12/quiz/from-text', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({text: document.getElementById('pdf-text').value, n_questions: +document.getElementById('pdf-n').value})})); }
+async function listTracks(){ show('track-out', await J('/api/nl12/tracks')); }
+async function startTrack(){ show('track-out', await J('/api/nl12/tracks/start', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({track: document.getElementById('track-sel').value})})); }
+async function techNews(){ show('news-out', await J('/api/nl12/news')); }
+
+// Tools
+async function genPalette(){
+  const d = await J('/api/nl12/palette', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({seed: document.getElementById('pal-seed').value})});
+  show('pal-out', d);
+  const box = document.getElementById('pal-swatches'); box.innerHTML='';
+  (d.palette?.colors||[]).forEach(c => { const s=document.createElement('span'); s.className='swatch'; s.style.background=c.hex; s.title=c.hex+' '+c.role; box.appendChild(s); });
+}
+async function convertMedia(){ show('conv-out', await J('/api/nl12/convert', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({filename: document.getElementById('conv-file').value, target_format: document.getElementById('conv-fmt').value})})); }
+async function listResumes(){ show('res-out', await J('/api/nl12/resume/templates')); }
+async function genResume(){ show('res-out', await J('/api/nl12/resume/draft', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({template: document.getElementById('res-tpl').value, display_name: document.getElementById('res-name').value})})); }
+
+// Engage
+async function rollReward(){ show('rw-out', await J('/api/nl12/reward/surprise', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({task_id: document.getElementById('rw-task').value})})); }
+async function createInvite(){ show('inv-out', await J('/api/nl12/invite', {method:'POST'})); }
+async function redeemInvite(){ show('inv-out', await J('/api/nl12/invite/redeem', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({code: document.getElementById('inv-code').value})})); }
+
+// Wow
+async function jarvisPlan(){ show('jarvis-out', await J('/api/nl12/jarvis/plan', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({intent: document.getElementById('jarvis-intent').value})})); }
+async function onboardState(){ show('ob-out', await J('/api/nl12/onboarding')); }
+async function onboardDone(){ show('ob-out', await J('/api/nl12/onboarding/complete', {method:'POST'})); }
+async function oneClick(){ show('oc-out', await J('/api/nl12/one-click', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({idea: document.getElementById('oc-idea').value})})); }
+
+// Visual
+async function getTheme(){ show('theme-out', await J('/api/nl12/theme')); }
+async function setTheme(){ show('theme-out', await J('/api/nl12/theme', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({sounds_enabled: document.getElementById('snd-on').checked})})); }
+async function mascotTip(){ show('mascot-out', await J('/api/nl12/mascot/tip?context='+encodeURIComponent(document.getElementById('mascot-ctx').value))); }
+
+// Intel
+async function recordPattern(){ show('intel-out', await J('/api/nl12/intel/pattern', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action: 'hub_visit'})})); }
+async function suggestNext(){ show('intel-out', await J('/api/nl12/intel/suggest')); }
+async function reportFail(){ show('fail-out', await J('/api/nl12/intel/fail', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({exercise_id: document.getElementById('fail-ex').value})})); }
+async function resetFail(){ show('fail-out', await J('/api/nl12/intel/fail/reset', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({exercise_id: document.getElementById('fail-ex').value})})); }
+
+// Polish
+async function loadPolish(){
+  const d = await J('/api/nl12/polish');
+  show('polish-out', {progress: d.progress, recommendation: d.recommendation});
+  const box = document.getElementById('polish-list'); box.innerHTML='';
+  (d.items||[]).forEach(it => {
+    const c = document.createElement('div'); c.className='card';
+    c.innerHTML = `<label class="row"><input type="checkbox" ${it.done?'checked':''} onchange="togglePolish('${it.id}', this.checked)"> ${it.label}</label>`;
+    box.appendChild(c);
+  });
+}
+async function togglePolish(id, done){
+  const d = await J('/api/nl12/polish/toggle', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({item_id: id, done})});
+  show('polish-out', {progress: d.progress});
+}
+
+loadA11y();
+</script>
+{% endblock %}

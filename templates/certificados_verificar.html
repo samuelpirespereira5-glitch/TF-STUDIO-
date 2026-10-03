@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Verificar certificado JARVIS{% endblock %}
+{% block content %}
+<div class="edu-wrap" style="max-width:640px;margin:0 auto;padding:20px">
+  <h1>🔍 Verificar certificado</h1>
+  <p class="muted">Informe o código no formato <code>JARVIS-ANO-XXXXXX</code>.</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0">
+    <input id="v-code" type="text" value="{{ code or '' }}" placeholder="JARVIS-2026-ABC123" style="flex:1;min-width:200px;padding:10px">
+    <button type="button" class="btn primary" id="v-btn">Verificar</button>
+  </div>
+  <div id="v-result" class="card" style="padding:16px;border-radius:12px;border:1px solid rgba(255,255,255,.1)"></div>
+  <p style="margin-top:16px"><a href="/certificados">Emitir certificado</a> · <a href="/educacao">Educação</a></p>
+</div>
+<script>
+async function verify(){
+  const code = (document.getElementById('v-code').value||'').trim();
+  const box = document.getElementById('v-result');
+  if(!code){ box.textContent='Informe o código.'; return; }
+  box.textContent = 'Consultando…';
+  try{
+    const r = await fetch('/api/cyber/phase12/certificates/verify/'+encodeURIComponent(code));
+    const d = await r.json();
+    if(d.valido){
+      box.innerHTML = '<p style="color:#22c55e"><strong>✓ Certificado válido</strong></p>'+
+        '<p><b>Título:</b> '+(d.titulo||'Certificado de conclusão — JARVIS')+'</p>'+
+        '<p><b>Nome:</b> '+(d.nome||'')+'</p>'+
+        '<p><b>Trilha:</b> '+(d.trilha||'')+'</p>'+
+        '<p><b>Data:</b> '+(d.data||'')+'</p>'+
+        '<p><b>ID:</b> '+(d.codigo||'')+'</p>'+
+        '<p><b>Status:</b> '+(d.status||'')+'</p>'+
+        '<p class="muted small">'+(d.aviso||'')+'</p>';
+    } else {
+      box.innerHTML = '<p style="color:#f59e0b"><strong>✗ Inválido</strong></p><p>'+(d.mensagem||'')+'</p><p>Status: '+(d.status||'')+'</p>';
+    }
+  }catch(e){ box.textContent = 'Falha de conexão.'; }
+}
+document.getElementById('v-btn').onclick = verify;
+if((document.getElementById('v-code').value||'').trim()) verify();
+</script>
+{% endblock %}

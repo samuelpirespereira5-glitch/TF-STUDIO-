@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Cyber Hub · Tristan Thorne{% endblock %}
+{% block head %}<style>
+.cyber-tool-card{min-height:190px;padding:18px!important}
+[id="hub-grid"] .tools-grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.cyber-tool-card h3{font-size:1.08rem;line-height:1.35;margin-bottom:9px}.cyber-tool-card p{font-size:.92rem;line-height:1.5;min-height:44px}.cyber-tool-card .tool-chips{margin-top:auto}.cyber-tool-card .card-actions .btn{min-height:42px}
+@media(max-width:650px){[id="hub-grid"] .tools-grid{grid-template-columns:1fr}.cyber-tool-card{min-height:170px}}
+</style>
+{% endblock %}
+{% block content %}
+<div class="cyber-page-head">
+  <div>
+    <div class="muted small">JARVIS SECURITY PLATFORM</div>
+    <h1>🧭 Cyber Hub</h1>
+    <p class="muted">Central de ferramentas para reconhecimento, AppSec, Network, Blue Team, forense e CTF. Ferramentas integradas executam análise real quando o alvo está dentro do escopo autorizado.</p>
+  </div>
+  <div class="inline" style="gap:8px;flex-wrap:wrap">
+    <a class="btn primary" href="{{ url_for('cyber_lab') }}">🛡 Abrir Cyber Lab</a>
+    <a class="btn" href="{{ url_for('cyber_dashboard_page') }}">📊 Dashboard</a>
+    <a class="btn" href="{{ url_for('cyber_security_policies_page') }}">📋 Políticas</a>
+    <a class="btn" href="{{ url_for('desafios_page') }}">🏁 Desafios</a>
+    <a class="btn" href="/cyber/phase4">🚀 Fase 4</a>
+    <a class="btn primary" href="/cyber/operations">🛰 Security Operations</a>
+  </div>
+</div>
+
+<div class="cyber-status-grid">
+  <div class="cyber-status-card"><span>Ferramentas integradas</span><b id="hub-integrated">—</b></div>
+  <div class="cyber-status-card"><span>Categorias</span><b id="hub-categories">—</b></div>
+  <div class="cyber-status-card"><span>Escopo</span><b>AUTHORIZED</b></div>
+  <div class="cyber-status-card"><span>Modo</span><b>SAFE / CONTROLLED</b></div>
+</div>
+
+<div class="card">
+  <div class="inline" style="align-items:center;justify-content:space-between;flex-wrap:wrap">
+    <div>
+      <strong>🔎 Catálogo inteligente</strong>
+      <div class="muted small">Pesquise pelo nome, categoria ou finalidade.</div>
+    </div>
+    <span class="cyber-scope-badge">● SSRF Guard + Scope ativo</span>
+  </div>
+  <input type="search" id="hub-filter" placeholder="Buscar: TLS, DNS, API, JWT, logs, headers, dependências..." class="tool-filter" aria-label="Buscar ferramenta">
+  <div class="cyber-tool-meta" id="hub-tags"></div>
+</div>
+
+<div style="margin:12px 0;padding:14px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.03)"><strong>JARVIS Cyber Lab Ultra</strong><div class="muted small" style="margin:5px 0 10px">Catálogo reorganizado, favoritos, detalhes, Security Score, baseline, timeline e análise defensiva.</div><a class="btn primary" href="/cyber/ultra">Abrir Ultra Expansion</a></div>
+<div id="hub-grid"></div>
+<div id="hub-empty" class="cyber-empty" style="display:none">Nenhuma ferramenta corresponde à busca.</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(async function(){
+  const grid=document.getElementById("hub-grid"), empty=document.getElementById("hub-empty");
+  const filter=document.getElementById("hub-filter"), tags=document.getElementById("hub-tags");
+  let catalog={}, registry=[];
+  const escapeHtml=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const categoryInfo={
+    "cyber":"Análise defensiva e auditoria autorizada",
+    "central":"Utilidades gerais do laboratório",
+    "pentest":"Testes controlados e não destrutivos",
+    "external":"Ferramentas externas detectadas no servidor",
+    "basic":"Diagnóstico básico",
+    "ai":"Análise assistida por IA"
+  };
+  try{
+    const [hubRes, toolRes]=await Promise.all([fetch("/api/cyber/hub"),fetch("/api/jarvis/tools")]);
+    const hub=await hubRes.json(), toolData=await toolRes.json();
+    catalog=hub.catalog||{};
+    registry=toolData.tools||[];
+    document.getElementById("hub-integrated").textContent=registry.length;
+    document.getElementById("hub-categories").textContent=new Set(registry.map(x=>x.category)).size;
+  }catch(e){
+    grid.innerHTML='<div class="cyber-empty">Não foi possível carregar o catálogo.</div>'; return;
+  }
+
+  // Tags de busca rápida sem criar novas chamadas.
+  const tagNames=["Reconhecimento","Web","Rede","Blue Team","Forense","OSINT","Criptografia","Malware","API","CTF"];
+  tags.innerHTML=tagNames.map(t=>`<button class="btn small" type="button" data-tag="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join("");
+  tags.querySelectorAll("[data-tag]").forEach(b=>b.onclick=()=>{filter.value=b.dataset.tag;render()});
+
+  function render(){
+    const q=filter.value.trim().toLowerCase(); grid.innerHTML=""; let visible=0;
+    const groups={};
+    registry.forEach(it=>{
+      const hay=[it.name,it.description,it.category,(it.keywords||[]).join(" ")].join(" ").toLowerCase();
+      if(!q||hay.includes(q)) (groups[it.category]??=[]).push(it);
+    });
+    // Registry first: these are the tools that can actually execute through the existing router.
+    Object.entries(groups).forEach(([cat,items])=>{
+      const sec=document.createElement("section");
+      sec.innerHTML=`<div class="cyber-category-title"><h2>${escapeHtml(cat)}</h2><small>${escapeHtml(categoryInfo[cat]||"Ferramenta registrada no JARVIS")}</small></div>`;
+      const g=document.createElement("div"); g.className="grid tools-grid";
+      items.forEach(it=>{
+        const c=document.createElement("article"); c.className="card tool cyber-tool-card";
+        c.innerHTML=`<h3>${escapeHtml(it.name)}</h3><p class="muted small">${escapeHtml(it.description||"")}</p>
+          <div class="tool-chips"><span class="tool-chip">${escapeHtml(it.category||"tool")}</span><span class="tool-chip">disponível</span></div>
+          <div class="card-actions"><button class="btn" type="button" data-tool="${escapeHtml(it.id)}">Abrir detalhes</button></div>`;
+        g.appendChild(c);
+      });
+      sec.appendChild(g); grid.appendChild(sec); visible+=items.length;
+    });
+    // Existing external catalog remains available as reference, without pretending those binaries are installed.
+    if(!q){
+      const h=document.createElement("section");
+      h.innerHTML='<div class="cyber-category-title"><h2>Ecossistema externo</h2><small>referências e status; execução depende da instalação</small></div>';
+      const g=document.createElement("div");g.className="grid tools-grid";
+      Object.entries(catalog).forEach(([cat,items])=>items.forEach(it=>{
+        const c=document.createElement("article");c.className="card tool cyber-tool-card";
+        c.innerHTML=`<h3>${escapeHtml(it.name)}</h3><p class="muted small">${escapeHtml(it.desc||"")}</p>
+          <div class="tool-chips"><span class="tool-chip">${escapeHtml(cat)}</span><span class="tool-chip">${it.integrated?"integrado":"referência"}</span></div>
+          <div class="card-actions">${it.integrated?'<a class="btn" href="/cyber">Abrir no Cyber Lab</a>':(it.url?`<a class="btn" href="${escapeHtml(it.url)}" target="_blank" rel="noopener">Site oficial</a>`:"")}</div>`;
+        g.appendChild(c);
+      }));
+      h.appendChild(g);grid.appendChild(h);
+    }
+    empty.style.display=visible?"none":"block";
+    grid.querySelectorAll("[data-tool]").forEach(btn=>btn.onclick=()=>{
+      const id=btn.dataset.tool, target=registry.find(x=>x.id===id)?.needs_target;
+      location.href="/cyber#exec-analise";
+      sessionStorage.setItem("jarvis_selected_tool",id);
+      if(target) sessionStorage.setItem("jarvis_selected_tool_needs_target","1");
+    });
+  }
+  filter.addEventListener("input",render); render();
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,567 @@
+{% extends "base.html" %}
+{% block title %}Configurações · Tristan Thorne{% endblock %}
+{% block content %}
+<h1>⚙ Configurações</h1>
+
+<div class="card" style="border-color: var(--accent2); box-shadow: 0 0 26px rgba(176, 38, 255, 0.15);">
+  <h2>💳 Provedor de IA personalizado (pago ou próprio)</h2>
+  <p class="muted">Este projeto <strong>não é limitado a provedores grátis</strong>. Aponte aqui para
+  qualquer serviço compatível com o formato de API da OpenAI — OpenAI, Azure OpenAI, Anthropic (endpoint
+  compatível), Together, Fireworks, DeepSeek, um servidor próprio com vLLM/Ollama etc. — usando sua própria
+  chave, inclusive paga. Quando preenchido, este provedor é tentado <strong>primeiro</strong>, antes de
+  qualquer camada grátis abaixo.</p>
+
+<div class="card settings-command-card">
+  <div class="settings-command-head"><div><span class="jarvis-eyebrow">COMMAND CENTER</span><h2>🧠 Jarvis & Sistema</h2><p class="muted small">Atalhos que ficam fora da tela principal do Jarvis para deixar o celular mais limpo.</p></div></div>
+  <div class="settings-command-grid">
+    <a href="{{ url_for('dashboard') }}" class="settings-command-link">🤖 <b>Jarvis</b><small>Voltar ao assistente</small></a>
+    <a href="{{ url_for('painel') }}" class="settings-command-link">📊 <b>Painel</b><small>Sites e visão geral</small></a>
+    <a href="{{ url_for('holograma') }}" class="settings-command-link">🛰 <b>Holograma</b><small>Performance e 3D</small></a>
+    {% if has_cap('cyber') %}<a href="{{ url_for('cyber_lab') }}" class="settings-command-link">🛡 <b>Cyber Lab</b><small>Ferramentas e scans</small></a>{% endif %}
+    {% if has_cap('cyber') and has_cap('cyber_advanced') %}<a href="{{ url_for('kali_page') }}" class="settings-command-link">🐉 <b>Kali Linux</b><small>Catálogo e ferramentas</small></a>{% endif %}
+    <a href="{{ url_for('desafios_page') }}" class="settings-command-link">🎯 <b>Desafios</b><small>Treino e progresso</small></a>
+  </div>
+</div>
+  {% if custom_from_env %}
+  <p class="muted small">✅ Configuração ativa vem das variáveis de ambiente <code>AI_PROVIDER</code> /
+  <code>AI_API_KEY</code> / <code>AI_BASE_URL</code> / <code>AI_MODEL</code> do servidor — forma recomendada em
+  produção, pois não some quando o serviço reinicia.</p>
+  {% elif has_custom_provider %}
+  <p class="muted small" style="color:#f0ad4e">⚠ Configuração ativa vem do arquivo salvo aqui pela tela de
+  Configurações. Em hospedagens com disco não-persistente, prefira definir <code>AI_PROVIDER</code> /
+  <code>AI_API_KEY</code> / <code>AI_BASE_URL</code> / <code>AI_MODEL</code> nas variáveis de ambiente.</p>
+  {% else %}
+  <p class="muted small">ℹ Nenhum provedor personalizado configurado — opcional. Sem ele, o sistema usa a
+  OpenRouter/camadas grátis abaixo, se configuradas.</p>
+  {% endif %}
+  <p class="muted small">🔒 Esta chave nunca é enviada ao navegador — fica só no backend/config, como todas as
+  outras chaves desta página.</p>
+  <form method="post">
+    <label>Nome do provedor (livre, só pra identificação)</label>
+    <input type="text" name="ai_provider" value="{{ config.ai_provider }}" placeholder="ex: openai, anthropic, azure, meu-servidor">
+    <label style="margin-top:12px">Base URL da API (endpoint compatível com OpenAI)</label>
+    <input type="text" name="ai_base_url" value="{{ config.ai_base_url }}" placeholder="ex: https://api.openai.com/v1">
+    <label style="margin-top:12px">Chave da API</label>
+    <input type="password" name="ai_api_key" autocomplete="new-password" placeholder="{{ (secret_hints.get('ai_api_key') ~ ' — deixe vazio para manter') if secret_hints.get('ai_api_key') else 'sua chave paga/própria' }}">
+    {% if secret_hints.get('ai_api_key') %}<label class="small muted"><input type="checkbox" name="clear_ai_api_key" value="1"> remover esta chave</label>{% endif %}
+    <label style="margin-top:12px">Modelo</label>
+    <input type="text" name="ai_model" value="{{ config.ai_model }}" placeholder="ex: gpt-4o-mini">
+    <button type="submit" class="btn primary" style="margin-top:14px">💾 Salvar provedor personalizado</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>🔑 OpenRouter (motor de IA)</h2>
+  <p class="muted">Essa chave é usada pelo servidor para todas as gerações de site, edições e o Jarvis.
+  Crie uma gratuitamente em <a href="https://openrouter.ai/keys" target="_blank">openrouter.ai/keys</a>.</p>
+  <p class="muted small">💡 Se o modelo escolhido acima falhar ou devolver uma resposta vazia, o sistema tenta
+  automaticamente alguns modelos gratuitos de reserva (Llama, Gemini, Qwen, Mistral) antes de mostrar erro — isso
+  reduz bastante o "a IA não retornou conteúdo".</p>
+  <p class="muted small">⏳ Erro "Rate limit exceeded: free-mode" (429)? Esse limite é da sua <strong>chave/conta</strong>
+  da OpenRouter como um todo, não de um modelo específico — trocar de modelo não resolve. Espere cerca de 1 minuto
+  e tente de novo, ou adicione ao menos US$ 10 em créditos em
+  <a href="https://openrouter.ai/settings/credits" target="_blank">openrouter.ai/settings/credits</a> (os modelos
+  grátis continuam grátis, isso só aumenta sua cota diária de ~50 para ~1000 mensagens).</p>
+  {% if key_from_env %}
+  <p class="muted small">✅ Chave ativa vem da variável de ambiente <code>OPENROUTER_API_KEY</code> do servidor — essa é a
+  forma que <strong>não se perde</strong> quando o serviço reinicia (ex: Render, Railway).</p>
+  {% elif has_key %}
+  <p class="muted small" style="color:#f0ad4e">⚠ Chave ativa vem do arquivo salvo aqui pela tela de Configurações. Em
+  hospedagens com disco não-persistente (ex: plano free do Render), esse arquivo <strong>é apagado quando o serviço
+  reinicia/dorme</strong> e a chave some — é por isso que às vezes volta a pedir a chave. Para resolver de vez, defina
+  <code>OPENROUTER_API_KEY</code> nas variáveis de ambiente do painel do Render/Railway em vez de só salvar aqui.</p>
+  {% else %}
+  <p class="muted small">ℹ Nenhuma chave da OpenRouter configurada — sem problema, você pode deixar em branco e usar
+  só as chaves grátis da Groq / Google AI Studio / Cerebras / GitHub Models / Hugging Face no card abaixo (ou combinar várias),
+  ou o provedor personalizado no card acima.</p>
+  {% endif %}
+  <form method="post">
+    <label>Chave da API</label>
+    <input type="password" name="openrouter_api_key" autocomplete="new-password" placeholder="{{ (secret_hints.get('openrouter_api_key') ~ ' — deixe vazio para manter') if secret_hints.get('openrouter_api_key') else 'sk-or-...' }}">
+    {% if secret_hints.get('openrouter_api_key') %}<label class="small muted"><input type="checkbox" name="clear_openrouter_api_key" value="1"> remover esta chave</label>{% endif %}
+    <label style="margin-top:12px">Modelo</label>
+    <input type="text" name="openrouter_model" value="{{ config.openrouter_model }}">
+    <button type="submit" class="btn primary" style="margin-top:14px">💾 Salvar</button>
+  </form>
+  <button class="btn" id="test-key-btn" style="margin-top:10px">🧪 Testar chave</button>
+  <div id="test-key-status" class="muted" style="margin-top:10px"></div>
+</div>
+
+<div class="card">
+  <h2>🆓 Camadas extra grátis (sem cartão de crédito)</h2>
+  <p class="muted">A cota grátis da OpenRouter é curta (~50 mensagens/dia sem créditos). Se você não pode/não quer
+  pagar nada, cole aqui uma ou mais chaves <strong>100% grátis</strong> de outros provedores — todas dão pra criar
+  sem cartão de crédito, só com um cadastro. Quando a OpenRouter esgotar a cota do dia, o Jarvis e o criador de
+  sites passam para a próxima camada preenchida <strong>sozinhos</strong>, sem você precisar fazer nada. Cada
+  provedor abaixo é opcional: deixe em branco o que não for usar.</p>
+  <form method="post">
+    <label>Chave da Groq (grátis, bem rápida) — crie em
+      <a href="https://console.groq.com/keys" target="_blank">console.groq.com/keys</a></label>
+    <input type="password" name="groq_api_key" autocomplete="new-password" placeholder="{{ (secret_hints.get('groq_api_key') ~ ' — deixe vazio para manter') if secret_hints.get('groq_api_key') else 'gsk_...' }}">
+    {% if secret_hints.get('groq_api_key') %}<label class="small muted"><input type="checkbox" name="clear_groq_api_key" value="1"> remover esta chave</label>{% endif %}
+
+    <label style="margin-top:12px">Chave do Google AI Studio (Gemini, cota grátis generosa) — crie em
+      <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a></label>
+    <input type="password" name="google_api_key" autocomplete="new-password" placeholder="{{ (secret_hints.get('google_api_key') ~ ' — deixe vazio para manter') if secret_hints.get('google_api_key') else 'AIza...' }}">
+    {% if secret_hints.get('google_api_key') %}<label class="small muted"><input type="checkbox" name="clear_google_api_key" value="1"> remover esta chave</label>{% endif %}
+
+    <label style="margin-top:12px">Chave da Cerebras (grátis, também bem rápida) — crie em
+      <a href="https://cloud.cerebras.ai" target="_blank">cloud.cerebras.ai</a></label>
+    <input type="password" name="cerebras_api_key" autocomplete="new-password" placeholder="{{ (secret_hints.get('cerebras_api_key') ~ ' — deixe vazio para manter') if secret_hints.get('cerebras_api_key') else 'csk-...' }}">
+    {% if secret_hints.get('cerebras_api_key') %}<label class="small muted"><input type="checkbox" name="clear_cerebras_api_key" value="1"> remover esta chave</label>{% endif %}
+
+    <label style="margin-top:12px">Token do GitHub Models (grátis, catálogo com GPT-4o, Llama, Phi, Mistral) — crie um
+      Personal Access Token em <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a>
+      (não precisa marcar nenhuma permissão especial)</label>
+    <input type="password" name="github_api_key" autocomplete="new-password" placeholder="{{ (secret_hints.get('github_api_key') ~ ' — deixe vazio para manter') if secret_hints.get('github_api_key') else 'ghp_...' }}">
+    {% if secret_hints.get('github_api_key') %}<label class="small muted"><input type="checkbox" name="clear_github_api_key" value="1"> remover esta chave</label>{% endif %}
+
+    <label style="margin-top:12px">Token da Hugging Face (grátis, roteador de vários modelos abertos) — crie um token de
+      leitura em <a href="https://huggingface.co/settings/tokens" target="_blank">huggingface.co/settings/tokens</a></label>
+    <input type="password" name="huggingface_api_key" autocomplete="new-password" placeholder="{{ (secret_hints.get('huggingface_api_key') ~ ' — deixe vazio para manter') if secret_hints.get('huggingface_api_key') else 'hf_...' }}">
+    {% if secret_hints.get('huggingface_api_key') %}<label class="small muted"><input type="checkbox" name="clear_huggingface_api_key" value="1"> remover esta chave</label>{% endif %}
+
+    <label style="margin-top:12px">Chave da Cohere (grátis, plano trial permanente) — crie em
+      <a href="https://dashboard.cohere.com/api-keys" target="_blank">dashboard.cohere.com/api-keys</a></label>
+    <input type="password" name="cohere_api_key" autocomplete="new-password" placeholder="{{ (secret_hints.get('cohere_api_key') ~ ' — deixe vazio para manter') if secret_hints.get('cohere_api_key') else 'co-...' }}">
+    {% if secret_hints.get('cohere_api_key') %}<label class="small muted"><input type="checkbox" name="clear_cohere_api_key" value="1"> remover esta chave</label>{% endif %}
+
+    <label style="margin-top:12px">Chave da SambaNova Cloud (grátis, cota diária generosa e bem rápida) — crie em
+      <a href="https://cloud.sambanova.ai/apis" target="_blank">cloud.sambanova.ai/apis</a></label>
+    <input type="password" name="sambanova_api_key" autocomplete="new-password" placeholder="{{ (secret_hints.get('sambanova_api_key') ~ ' — deixe vazio para manter') if secret_hints.get('sambanova_api_key') else 'sk-...' }}">
+    {% if secret_hints.get('sambanova_api_key') %}<label class="small muted"><input type="checkbox" name="clear_sambanova_api_key" value="1"> remover esta chave</label>{% endif %}
+
+    <button type="submit" class="btn primary" style="margin-top:14px">💾 Salvar chaves extras</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>🗺 OpenStreetMap (holograma de lugar real)</h2>
+  <p class="muted">O holograma de "lugar real" (Ferramentas → Holograma 3D, ou pedindo pro Jarvis
+  "coloca X no holograma real") roda 100% em cima do <strong>OpenStreetMap</strong> — o mapa colaborativo
+  e de código aberto mantido pela comunidade. Ele busca coordenadas reais (Nominatim), relevo real
+  (Open-Meteo Elevation) e o mosaico de mapa real do OSM (tile.openstreetmap.org) do lugar pedido.</p>
+  <p class="muted small">✅ Já funciona sozinho: <strong>nenhuma chave, cadastro ou cartão de crédito é
+  necessário</strong> — diferente da versão antiga que dependia do Google Maps Platform (pago). O campo
+  abaixo não é mais usado, fica só por compatibilidade com configurações antigas salvas.</p>
+  <form method="post">
+  </form>
+</div>
+
+<div class="card">
+  <h2>☁ Netlify</h2>
+  <p class="muted">A publicação usa o Netlify CLI instalado no servidor. Faça login uma vez no servidor com
+  <code>netlify login</code> (ou defina a variável <code>NETLIFY_AUTH_TOKEN</code>) — não é preciso colocar token aqui.</p>
+  <a class="btn" href="https://app.netlify.com/" target="_blank">Abrir Netlify</a>
+</div>
+
+<div class="card">
+  <h2>🔑 Saúde dos segredos</h2>
+  <p class="muted small">As chaves de API nunca são exibidas aqui (só os 4 últimos caracteres). Em produção,
+  guarde-as em variáveis de ambiente da hospedagem — veja <code>.env.example</code>.</p>
+  <ul style="margin:8px 0 0 18px">
+  {% for level, text in secret_audit %}
+    <li class="small" style="color:{{ {'ok':'#3ddc97','warn':'#f0ad4e','bad':'#ff5c5c'}[level] }}">{{ {'ok':'✅','warn':'⚠','bad':'⛔'}[level] }} {{ text }}</li>
+  {% endfor %}
+  </ul>
+</div>
+
+<div class="card auth-config-card">
+  <h2>🛡 Estado do acesso do proprietário</h2>
+  {% if auth_config_state.ambiguous_environment %}
+    <div class="flash flash-warning">⚠ <code>MASTER_PASSWORD</code> e <code>MASTER_PASSWORD_HASH</code> estão definidos. A senha direta tem prioridade para compatibilidade; prefira o hash quando possível.</div>
+  {% endif %}
+  <div class="security-mini-grid">
+    <div><span>Fonte</span><b>{{ auth_config_state.source }}</b></div>
+    <div><span>Hash</span><b>{{ 'CONFIGURADO' if auth_config_state.hash_configured else 'AUSENTE' }}</b></div>
+    <div><span>Texto puro</span><b>{{ 'DEFINIDO' if auth_config_state.plaintext_configured else 'NÃO DEFINIDO' }}</b></div>
+    <div><span>Produção</span><b>{{ 'SIM' if auth_config_state.production else 'NÃO' }}</b></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>🛡 Senha Mestre</h2>
+  <p class="muted">
+    {% if has_master_password %}
+      ✅ Ativa — o painel agora exige login (senha mestre ou token de uso único).
+    {% else %}
+      Ainda não definida — o painel está aberto para qualquer um com acesso ao endereço.
+    {% endif %}
+  </p>
+  <form method="post" action="{{ url_for('set_master_password') }}" autocomplete="off">
+    {% if has_master_password %}
+    <label>Senha atual</label>
+    <input type="password" name="current_password" autocomplete="current-password" required>
+    {% endif %}
+    <label>Nova senha mestre (mín. 12 caracteres — uma frase longa é melhor que símbolos)</label>
+    <input type="password" name="master_password" autocomplete="new-password" minlength="12" required
+           placeholder="Ex.: quatro palavras soltas que só você lembra">
+    <button type="submit" class="btn primary" style="margin-top:14px">💾 Salvar senha mestre</button>
+  </form>
+  <p class="muted small" style="margin-top:8px">Ao trocar a senha, todas as outras sessões são encerradas.
+  Em produção você pode usar <code>MASTER_PASSWORD</code> para acesso direto; o hash <code>MASTER_PASSWORD_HASH</code> continua recomendado para reduzir exposição do segredo.
+  Para gerar: <code>python -c "import getpass;from werkzeug.security import generate_password_hash as g;print(g(getpass.getpass()))"</code>
+  (coloque o valor entre aspas simples ao exportar). <code>MASTER_PASSWORD</code> em texto puro ainda funciona, mas não é recomendado.</p>
+</div>
+
+<div class="card">
+  <h2>📱 Verificação em duas etapas (2FA)</h2>
+  {% if totp_enabled %}
+    <p class="muted">✅ Ativa — depois da senha mestre, o login também pede um código de 6 dígitos do seu app autenticador.
+    <span class="small">({{ totp_recovery_remaining }} código(s) de recuperação ainda não usados)</span></p>
+    <form method="post" action="{{ url_for('totp_disable') }}" autocomplete="off" style="margin-top:10px">
+      <label>Senha atual (confirmar para desativar)</label>
+      <input type="password" name="current_password" autocomplete="current-password" required>
+      <button type="submit" class="btn" style="margin-top:14px">🚫 Desativar 2FA</button>
+    </form>
+  {% elif totp_setup_pending %}
+    <p class="muted">⏳ Ativação pendente — gere o código no seu app autenticador e confirme abaixo, ou cancele.</p>
+    <form method="post" action="{{ url_for('totp_confirm') }}" class="inline">
+      <input type="text" name="code" placeholder="Código de 6 dígitos" inputmode="numeric" maxlength="8" required>
+      <button type="submit" class="btn primary">✅ Confirmar e ativar</button>
+    </form>
+    <form method="post" action="{{ url_for('totp_cancel') }}" style="margin-top:8px">
+      <button type="submit" class="btn small">Cancelar ativação</button>
+    </form>
+  {% else %}
+    <p class="muted">Desativada. Com o 2FA ativo, mesmo quem descobrir a senha mestre não entra sem o código do seu
+    celular (Google Authenticator, Authy, Aegis, Bitwarden, 1Password, etc. — qualquer um que aceite cadastro manual
+    por "segredo" serve, sem precisar ler QR code).</p>
+    {% if has_master_password %}
+    <form method="post" action="{{ url_for('totp_start') }}" autocomplete="off">
+      <label>Senha atual (confirmar para começar a ativar)</label>
+      <input type="password" name="current_password" autocomplete="current-password" required>
+      <button type="submit" class="btn primary" style="margin-top:14px">🔐 Ativar 2FA</button>
+    </form>
+    {% else %}
+    <p class="muted small">Defina a senha mestre primeiro.</p>
+    {% endif %}
+  {% endif %}
+  <p class="muted small" style="margin-top:8px">O 2FA vale só para o login com senha mestre. Tokens de uso único e
+  chaves de acesso (admin/user) continuam de fator único, já que já são segredos pontuais e revogáveis.</p>
+</div>
+
+<div class="card">
+  <h2>🔑 Passkeys (WebAuthn)</h2>
+  <p class="muted">A Passkey só pode ser cadastrada quando o servidor estiver com WebAuthn habilitado e configurado. A validação é feita no backend com a biblioteca WebAuthn; a chave privada permanece no autenticador.</p>
+  {% if webauthn_status.enabled %}
+    {% if has_webauthn %}
+    <p class="muted">✅ {{ webauthn_credentials|length }} Passkey(s) registrada(s).</p>
+    <ul class="small" style="margin:8px 0 12px 18px">
+      {% for c in webauthn_credentials %}
+      <li><strong>{{ c.name }}</strong> · {{ c.status }} · {{ c.created[:10] if c.created else '—' }}</li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="muted">Nenhuma Passkey validada ainda.</p>
+    {% endif %}
+    {% if has_master_password %}
+    <button type="button" class="btn primary" id="register-passkey-btn" style="margin-top:8px">➕ Cadastrar Passkey neste dispositivo</button>
+    <p class="muted small" style="margin-top:8px">A cerimônia exige challenge emitido pelo servidor, origin/RP ID corretos, user verification e validação criptográfica da attestation.</p>
+    <script>
+    (function(){
+      const btn = document.getElementById('register-passkey-btn');
+      if (!btn || !window.PublicKeyCredential || !navigator.credentials) { if(btn){ btn.disabled=true; btn.title='WebAuthn não suportado'; } return; }
+      const csrf = document.querySelector('input[name="_csrf"]')?.value || document.querySelector('meta[name="csrf-token"]')?.content || '';
+      const toB64url = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+      btn.addEventListener('click', async () => {
+        btn.disabled = true; btn.textContent = 'Aguardando dispositivo…';
+        try {
+          const optResp = await fetch('/api/settings/webauthn/register/options', { method:'POST', headers:{'X-CSRF-Token':csrf}, credentials:'same-origin' });
+          const options = await optResp.json().catch(()=>({}));
+          if (!optResp.ok) throw new Error(options.error || 'WebAuthn indisponível');
+          options.challenge = Uint8Array.from(atob(options.challenge.replace(/-/g,'+').replace(/_/g,'/') + '='.repeat((4-options.challenge.length%4)%4)), c=>c.charCodeAt(0));
+          options.user.id = Uint8Array.from(atob(options.user.id.replace(/-/g,'+').replace(/_/g,'/') + '='.repeat((4-options.user.id.length%4)%4)), c=>c.charCodeAt(0));
+          if (Array.isArray(options.excludeCredentials)) options.excludeCredentials = options.excludeCredentials.map(c=>({...c,id:Uint8Array.from(atob(c.id.replace(/-/g,'+').replace(/_/g,'/') + '='.repeat((4-c.id.length%4)%4)), x=>x.charCodeAt(0))}));
+          const cred = await navigator.credentials.create({publicKey:options});
+          if (!cred) throw new Error('Criação cancelada');
+          const response = cred.response;
+          const payload = {
+            id: cred.id,
+            rawId: toB64url(cred.rawId),
+            type: cred.type,
+            authenticatorAttachment: cred.authenticatorAttachment || null,
+            clientExtensionResults: cred.getClientExtensionResults ? cred.getClientExtensionResults() : {},
+            response: {
+              attestationObject: toB64url(response.attestationObject),
+              clientDataJSON: toB64url(response.clientDataJSON),
+              transports: response.getTransports ? response.getTransports() : []
+            },
+            name: /Mobile|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'Dispositivo móvel' : 'Este dispositivo'
+          };
+          const resp = await fetch('/api/settings/webauthn/register', { method:'POST', headers:{'Content-Type':'application/json','X-CSRF-Token':csrf}, credentials:'same-origin', body:JSON.stringify(payload) });
+          const data = await resp.json().catch(()=>({}));
+          if (!resp.ok || !data.ok) throw new Error(data.error || 'A validação criptográfica falhou');
+          location.reload();
+        } catch (e) {
+          alert(e.message || 'Não foi possível cadastrar a Passkey.');
+          btn.disabled = false; btn.textContent = '➕ Cadastrar Passkey neste dispositivo';
+        }
+      });
+    })();
+    </script>
+    {% endif %}
+  {% else %}
+    <div class="flash flash-warning" style="margin-top:10px">Passkey permanece desativada até a validação de produção. Dependência, RP ID, Origin e testes criptográficos precisam estar OK.</div>
+    <p class="muted small">Dependência: {{ 'OK' if webauthn_status.dependency else 'AUSENTE NO AMBIENTE ATUAL' }} · Configuração: {{ 'OK' if webauthn_status.configured else 'PENDENTE' }} · Habilitada: {{ 'SIM' if webauthn_status.enabled else 'NÃO' }}</p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>🎟 Tokens de uso único</h2>
+  <p class="muted">Cada token abaixo dá acesso <strong>uma única vez</strong> e só serve para criar <strong>um site</strong>.
+  Assim que a pessoa usa o token para gerar o site dela, o acesso é encerrado automaticamente — mesmo que ela tente
+  voltar com o mesmo link/token. Útil para dar acesso pontual a um cliente sem compartilhar a senha mestre.</p>
+  <form method="post" action="{{ url_for('new_token') }}" class="inline">
+    <input type="text" name="label" placeholder="Rótulo (opcional, ex: 'cliente X')">
+    <button type="submit" class="btn primary">➕ Gerar token</button>
+  </form>
+  {% if tokens %}
+  <table class="table" style="margin-top:14px">
+    <thead><tr><th>ID do token</th><th>Rótulo</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {% for tok, info in tokens.items() %}
+      <tr>
+        <td><code>{{ tok }}</code><br><span class="muted small">segredo não é armazenado nem exibido</span></td>
+        <td>{{ info.label or '—' }}</td>
+        <td>{{ '✅ usado' if info.used else '🟢 disponível' }}</td>
+        <td style="white-space:nowrap">
+          <form method="post" action="{{ url_for('revoke_token', token=tok) }}" style="display:inline">
+            <button type="submit" class="btn small">Revogar</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted small" style="margin-top:10px">Nenhum token gerado ainda.</p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>🔑 Chaves de acesso (admin / user)</h2>
+  <p class="muted">Diferente do token acima (uso único, só cria 1 site), estas chaves são <strong>reutilizáveis</strong>:
+  dão login permanente com o papel escolhido até serem revogadas. Use para dar acesso contínuo a alguém da equipe.</p>
+  <div class="inline">
+    <input type="text" id="role-key-label" placeholder="Rótulo (ex: 'dev João')">
+    <select id="role-key-role">
+      <option value="admin">admin (Cyber Lab, Creator, diagnósticos)</option>
+      <option value="user">user (só ferramentas básicas)</option>
+    </select>
+    <button type="button" class="btn primary" id="role-key-create">➕ Gerar chave</button>
+  </div>
+  <div id="role-key-new-box" class="hidden" style="margin-top:10px">
+    <p class="muted small">Guarde agora — a chave não será mostrada de novo:</p>
+    <code id="role-key-new-value" class="copyable-token"></code>
+    <button type="button" class="btn small" id="role-key-new-copy">📋 Copiar</button>
+  </div>
+  <table class="table" style="margin-top:14px" id="role-key-table">
+    <thead><tr><th>Papel</th><th>Rótulo</th><th>Criada em</th><th></th></tr></thead>
+    <tbody id="role-key-tbody">
+      <tr><td colspan="4" class="muted small">Carregando…</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>🟢 Quem está online agora</h2>
+  <p class="muted">Sessões com atividade nos últimos 5 minutos. Atualiza sozinho a cada 15s.
+  {% if online_now|length > 1 %}Isto roda em um único processo — com vários workers, cada um só vê quem bateu nele.{% endif %}</p>
+  <table class="table" id="online-table">
+    <thead><tr><th>Papel</th><th>IP</th><th>Navegador/app</th><th>Visto há</th></tr></thead>
+    <tbody id="online-tbody">
+    {% for o in online_now %}
+      <tr>
+        <td>{{ o.role or '—' }}</td>
+        <td>{{ o.ip }}</td>
+        <td class="small">{{ o.user_agent }}</td>
+        <td>{{ o.seconds_ago }}s</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="4" class="muted small">Ninguém online no momento (além de você, se acabou de entrar).</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>📋 Acessos recentes</h2>
+  <p class="muted">Histórico de logins no painel (senha mestre ou token), com data, IP e navegador/app usado — assim
+  você consegue ver quem entrou e quando.</p>
+  <form method="post" action="{{ url_for('end_all_sessions') }}" onsubmit="return confirm('Isso vai deslogar todo mundo (menos você agora). Continuar?')">
+    <button type="submit" class="btn">🚪 Encerrar todas as outras sessões</button>
+  </form>
+  {% if access_log %}
+  <table class="table" style="margin-top:14px">
+    <thead><tr><th>Quando</th><th>Como entrou</th><th>IP</th><th>Navegador/app</th></tr></thead>
+    <tbody>
+    {% for entry in access_log %}
+      <tr>
+        <td>{{ entry.time }}</td>
+        <td>{{ entry.method }}</td>
+        <td>{{ entry.ip }}</td>
+        <td class="small">{{ entry.user_agent }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted small" style="margin-top:10px">Nenhum acesso registrado ainda.</p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>🌐 Todos os acessos (IP)</h2>
+  <p class="muted">Cada visita ao site (login ou não), com o IP real do visitante. Guardado por tempo limitado
+  (padrão 90 dias, variável <code>ACCESS_LOG_RETENTION_DAYS</code>).
+  {% if proxy_hops == 0 %}<br><b>Atenção:</b> sem proxy configurado o IP mostrado é o da conexão direta. Se o site roda
+  atrás de proxy/hospedagem e todos aparecem com o mesmo IP, defina <code>TRUSTED_PROXY_HOPS=1</code>.{% endif %}</p>
+  <h3 style="margin-top:12px">Mais ativos nas últimas 24h</h3>
+  <table class="table">
+    <thead><tr><th>IP</th><th>Requisições</th><th>Negadas (401/403/404)</th><th>Último acesso</th></tr></thead>
+    <tbody>
+    {% for r in top_ips %}
+      <tr><td>{{ r.ip }}</td><td>{{ r.total }}</td><td>{{ r.denied }}</td><td class="small">{{ r.last_seen }}</td></tr>
+    {% else %}
+      <tr><td colspan="4" class="muted small">Sem acessos registrados ainda.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <h3 style="margin-top:12px">Últimas 100 requisições</h3>
+  <table class="table">
+    <thead><tr><th>Quando</th><th>IP</th><th>Rota</th><th>Status</th><th>Papel</th></tr></thead>
+    <tbody>
+    {% for v in visits %}
+      <tr><td class="small">{{ v.ts }}</td><td>{{ v.ip }}</td><td class="small">{{ v.method }} {{ v.path }}</td><td>{{ v.status }}</td><td>{{ v.role }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>🤖 Jarvis / Voz</h2>
+  <p class="muted">A voz do Jarvis usa a síntese de voz do próprio navegador (gratuita, sem chave). Escolha a voz
+  preferida direto na página do Jarvis, no seletor "🗣 Voz" — a escolha fica salva neste navegador. Ative o
+  microfone na página do Jarvis para falar com ele por voz.</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('test-key-btn').addEventListener('click', async () => {
+  const status = document.getElementById('test-key-status');
+  status.textContent = 'Testando...';
+  try {
+    const res = await fetch('/api/settings/test', { method: 'POST' });
+    const data = await res.json();
+    status.textContent = data.error ? ('❌ ' + data.error) : ('✅ Funcionando! Resposta: ' + data.result);
+  } catch (e) {
+    status.textContent = '❌ ' + e;
+  }
+});
+
+// ---- Copiar tokens / chaves (clipboard API com fallback) ----
+async function copyToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (e) {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (e2) { /* sem sorte */ }
+    document.body.removeChild(ta);
+    return true;
+  }
+}
+function flashCopied(btn) {
+  const original = btn.textContent;
+  btn.textContent = '✅ Copiado!';
+  btn.disabled = true;
+  setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 1500);
+}
+document.querySelectorAll('[data-copy]').forEach((btn) => {
+  btn.addEventListener('click', async () => {
+    await copyToClipboard(btn.getAttribute('data-copy'));
+    flashCopied(btn);
+  });
+});
+
+// ---- Chaves de acesso reutilizáveis (admin/user) ----
+const roleKeyTbody = document.getElementById('role-key-tbody');
+const roleLabels = { admin: 'admin', user: 'user' };
+
+async function loadRoleKeys() {
+  try {
+    const res = await fetch('/api/admin/keys');
+    const data = await res.json();
+    const keys = data.keys || [];
+    if (!keys.length) {
+      roleKeyTbody.innerHTML = '<tr><td colspan="4" class="muted small">Nenhuma chave criada ainda.</td></tr>';
+      return;
+    }
+    roleKeyTbody.innerHTML = keys.map((k) => `
+      <tr>
+        <td>${roleLabels[k.role] || k.role}</td>
+        <td>${k.label || '—'}</td>
+        <td class="small">${k.created || '—'}</td>
+        <td><button type="button" class="btn small" data-revoke-key="${k.id}">Revogar</button></td>
+      </tr>
+    `).join('');
+    roleKeyTbody.querySelectorAll('[data-revoke-key]').forEach((b) => {
+      b.addEventListener('click', async () => {
+        if (!confirm('Revogar esta chave? Quem a usa perde o acesso no próximo login.')) return;
+        await fetch('/api/admin/keys?id=' + encodeURIComponent(b.getAttribute('data-revoke-key')), { method: 'DELETE' });
+        loadRoleKeys();
+      });
+    });
+  } catch (e) {
+    roleKeyTbody.innerHTML = '<tr><td colspan="4" class="muted small">Não consegui carregar as chaves.</td></tr>';
+  }
+}
+
+document.getElementById('role-key-create').addEventListener('click', async () => {
+  const label = document.getElementById('role-key-label').value.trim();
+  const role = document.getElementById('role-key-role').value;
+  const res = await fetch('/api/admin/keys', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ role, label }),
+  });
+  const data = await res.json();
+  if (data.error) { alert(data.error); return; }
+  const box = document.getElementById('role-key-new-box');
+  const val = document.getElementById('role-key-new-value');
+  val.textContent = data.key;
+  box.classList.remove('hidden');
+  document.getElementById('role-key-label').value = '';
+  loadRoleKeys();
+});
+document.getElementById('role-key-new-copy').addEventListener('click', async (ev) => {
+  await copyToClipboard(document.getElementById('role-key-new-value').textContent);
+  flashCopied(ev.target);
+});
+loadRoleKeys();
+
+// ---- Quem está online agora (auto-refresh) ----
+const onlineTbody = document.getElementById('online-tbody');
+async function refreshOnline() {
+  try {
+    const res = await fetch('/api/admin/online');
+    const data = await res.json();
+    const rows = data.online || [];
+    onlineTbody.innerHTML = rows.length
+      ? rows.map((o) => `
+          <tr>
+            <td>${o.role || '—'}</td>
+            <td>${o.ip || '—'}</td>
+            <td class="small">${o.user_agent || '—'}</td>
+            <td>${o.seconds_ago}s</td>
+          </tr>
+        `).join('')
+      : '<tr><td colspan="4" class="muted small">Ninguém online no momento.</td></tr>';
+  } catch (e) { /* mantém a última lista renderizada em caso de falha pontual */ }
+}
+setInterval(refreshOnline, 15000);
+</script>
+{% endblock %}

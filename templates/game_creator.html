@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Criar jogo · JARVIS{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/game_creator.css') }}">
+{% endblock %}
+{% block content %}
+<div class="gc-wrap">
+  <header class="gc-hero">
+    <div>
+      <p class="gc-kicker">Game Studio</p>
+      <h1>🎮 Criar jogo</h1>
+      <p class="muted">Igual ao criador de sites: descreva numa frase, ajuste as opções e jogue a prévia na hora.</p>
+    </div>
+  </header>
+
+  <div class="gc-grid">
+    <section class="card gc-form-card">
+      <h2>💬 Descreva seu jogo</h2>
+      <p class="muted small">Ex: "plataforma no espaço com ninja que pega gemas, fácil para criança"</p>
+      <textarea id="gc-desc" rows="3" placeholder="Conte como é o jogo..."></textarea>
+      <button type="button" class="btn primary" id="gc-fill">✨ Preencher opções</button>
+      <div id="gc-fill-status" class="muted small" style="margin-top:8px"></div>
+      <ul id="gc-tips" class="gc-tips muted small"></ul>
+
+      <form id="gc-form" class="gc-fields">
+        <div class="field">
+          <label>Título</label>
+          <input type="text" id="gc-title" name="title" required maxlength="80" placeholder="Meu jogo incrível">
+        </div>
+        <div class="field">
+          <label>Tipo de jogo</label>
+          <select id="gc-type" name="type"></select>
+        </div>
+        <div class="field">
+          <label>Cenário</label>
+          <select id="gc-scenario" name="scenario"></select>
+        </div>
+        <div class="field">
+          <label>Herói</label>
+          <select id="gc-hero" name="hero"></select>
+        </div>
+        <div class="field">
+          <label>Itens</label>
+          <select id="gc-item" name="item"></select>
+        </div>
+        <div class="field">
+          <label>Monstros</label>
+          <select id="gc-monster" name="monster"></select>
+        </div>
+        <div class="field">
+          <label>Dificuldade</label>
+          <select id="gc-difficulty" name="difficulty"></select>
+        </div>
+        <div class="field">
+          <label>Fases</label>
+          <select id="gc-levels" name="levels">
+            <option value="1">1 fase</option>
+            <option value="2" selected>2 fases</option>
+            <option value="3">3 fases</option>
+            <option value="4">4 fases</option>
+            <option value="5">5 fases</option>
+          </select>
+        </div>
+        <div class="gc-actions">
+          <button type="button" class="btn primary" id="gc-preview">▶ Prévia jogável</button>
+          <button type="button" class="btn" id="gc-save">💾 Salvar em Meus jogos</button>
+        </div>
+      </form>
+      <div id="gc-status" class="muted small" style="margin-top:10px"></div>
+    </section>
+
+    <section class="card gc-studio-card">
+      <h2>🧠 Game Studio 2.0</h2>
+      <p class="muted small">Agora você pode definir regras do jogo, progressão e montar partes da fase visualmente.</p>
+      <div class="gc-advanced-grid">
+        <label>Tema<select id="gc-theme"><option value="cyber">Cyber</option><option value="arcade">Arcade</option><option value="fantasy">Fantasia</option><option value="space">Espaço</option><option value="kids">Kids</option></select></label>
+        <label>Câmera<select id="gc-camera"><option value="follow">Seguir jogador</option><option value="fixed">Fixa</option><option value="side">Lateral</option></select></label>
+        <label>Tempo limite (s)<input id="gc-time" type="number" min="0" max="3600" value="0"></label>
+        <label>Meta de pontos<input id="gc-score-goal" type="number" min="0" max="1000000" value="0"></label>
+        <label>Boss<select id="gc-boss"><option value="none">Sem boss</option><option value="dragon">Dragão</option><option value="robot">Mega Robô</option><option value="guardian">Guardião</option></select></label>
+        <label>Música<select id="gc-music"><option value="none">Sem música</option><option value="action">Ação</option><option value="chill">Chill</option><option value="cyber">Cyber</option></select></label>
+      </div>
+      <div class="gc-checks"><label><input id="gc-checkpoints" type="checkbox" checked> Checkpoints</label><label><input id="gc-scaling" type="checkbox"> Dificuldade progressiva</label><label><input id="gc-save-progress" type="checkbox" checked> Salvar progresso</label></div>
+      <textarea id="gc-story" rows="3" placeholder="História / objetivo do jogo..."></textarea>
+      <h3>🧱 Editor de fase</h3>
+      <div class="gc-palette" id="gc-palette"><button data-tool="platform" class="active">🧱 Bloco</button><button data-tool="item">⭐ Item</button><button data-tool="enemy">👾 Inimigo</button><button data-tool="powerup">⚡ Power-up</button><button data-tool="goal">🏁 Objetivo</button><button data-tool="erase">🧽 Apagar</button></div>
+      <div id="gc-level-grid" class="gc-level-grid" aria-label="Editor visual de fase"></div>
+      <div class="gc-editor-actions"><button type="button" class="btn" id="gc-clear-level">Limpar fase</button><button type="button" class="btn" id="gc-export-spec">Ver projeto</button></div>
+      <pre id="gc-spec-out" class="out gc-spec-out"></pre>
+    </section>
+
+    <section class="card gc-preview-card">
+      <h2>Prévia</h2>
+      <p class="muted small">Setas / WASD · Espaço = pular (ou atirar no modo tiro) · Toque nos botões no celular</p>
+      <div class="gc-canvas-wrap">
+        <canvas id="gc-canvas" width="800" height="480"></canvas>
+        <div class="gc-hud" id="gc-hud">❤️ 3 · ⭐ 0 · Fase 1/1</div>
+        <div class="gc-touch" id="gc-touch">
+          <button type="button" data-dir="left">◀</button>
+          <button type="button" data-dir="jump">⬆</button>
+          <button type="button" data-dir="right">▶</button>
+        </div>
+      </div>
+      <div class="gc-preview-actions">
+        <button type="button" class="btn small" id="gc-restart">Reiniciar</button>
+        <button type="button" class="btn small" id="gc-pause">Pausar</button>
+      </div>
+      <div id="gc-msg" class="gc-msg"></div>
+    </section>
+  </div>
+
+  <section class="card" style="margin-top:16px">
+    <h2>📁 Meus jogos</h2>
+    <div id="gc-my-games" class="gc-my-games muted">Carregando…</div>
+  </section>
+</div>
+<script src="{{ url_for('static', filename='js/game_creator.js') }}"></script>
+{% endblock %}

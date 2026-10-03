@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Painel · Tristan Thorne{% endblock %}
+{% block content %}
+<h1>📊 Painel</h1>
+<p class="muted">Crie sites profissionais com inteligência artificial, direto do navegador.</p>
+
+{% if not has_key %}
+<div class="card warning-card">
+  ⚠ Nenhuma chave de IA configurada ainda (OpenRouter, Groq, Google AI Studio ou Cerebras — todas têm plano grátis).
+  <a href="{{ url_for('settings') }}">Configure agora</a> para poder gerar sites com IA.
+</div>
+{% endif %}
+
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-value">{{ total_sites }}</div>
+    <div class="stat-label">Sites criados</div>
+  </div>
+  <a class="stat-card stat-cta" href="{{ url_for('creator') }}">
+    <div class="stat-value">✨</div>
+    <div class="stat-label">Criar novo site</div>
+  </a>
+</div>
+
+<h2>Sites recentes</h2>
+{% if recent_sites %}
+<div class="grid">
+  {% for site in recent_sites %}
+  <div class="card site-card">
+    <h3>{{ site.name }}</h3>
+    <p class="muted">Atualizado em {{ site.updated_at }}</p>
+    <div class="card-actions">
+      <a class="btn" href="{{ url_for('preview_site', slug=site.slug) }}" target="_blank">👁 Ver</a>
+      <a class="btn" href="{{ url_for('editor', slug=site.slug) }}">✏ Editar</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p class="muted">Você ainda não criou nenhum site. <a href="{{ url_for('creator') }}">Comece agora</a>.</p>
+{% endif %}
+{% endblock %}

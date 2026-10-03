@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Comunidades & Clãs — JARVIS{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ static_v('css/community-space.css') }}">{% endblock %}
+{% block content %}
+<div class="community-shell">
+  <section class="community-hero compact"><div><div class="eyebrow">SPACE BUILDER</div><h1>Crie seu espaço</h1><p>Comunidade é para pessoas e projetos. Clã é para times e jogos. Os dois têm membros, canais, convites e feed próprios.</p></div></section>
+  <div class="space-tabs"><button class="active" data-kind="community">🌐 Comunidades</button><button data-kind="clan">⚔️ Clãs</button><button data-kind="discover">🔎 Descobrir</button></div>
+  <section id="createCommunity" class="community-grid two">
+    <div class="community-card"><h2>🌐 Criar comunidade</h2><p class="muted">Para estudo, programação, projetos, conteúdo, IA, jogos e interesses em geral.</p><form id="communityForm"><label>Nome<input id="communityName" required maxlength="70" placeholder="Ex: Comunidade Python Brasil"></label><label>Descrição<textarea id="communityDesc" maxlength="500"></textarea></label><label>Tags<input id="communityTags" placeholder="python, flask, estudos"></label><label>Visibilidade<select id="communityVisibility"><option value="public">Pública</option><option value="private">Privada</option></select></label><button class="btn primary">Criar comunidade</button></form></div>
+    <div class="community-card"><h2>⚔️ Criar clã</h2><p class="muted">Para equipes, guildas, desafios e projetos competitivos.</p><form id="clanForm"><label>Nome<input id="clanName" required maxlength="70" placeholder="Ex: JARVIS Guardians"></label><label>Descrição<textarea id="clanDesc" maxlength="500"></textarea></label><label>Tags<input id="clanTags" placeholder="jogos, programação, cyber"></label><label>Visibilidade<select id="clanVisibility"><option value="public">Pública</option><option value="private">Privada</option></select></label><button class="btn primary">Criar clã</button></form></div>
+  </section>
+  <section class="community-card"><div class="section-head"><div><h2 id="spaceListTitle">Minhas comunidades</h2><p>Entre em espaços públicos ou use um convite para espaços privados.</p></div><input id="spaceSearch" class="search" placeholder="Pesquisar..."></div><div id="spaceList" class="space-list"></div></section>
+  <section id="managePanel" class="community-card hidden"><div class="section-head"><h2>📣 Publicar no espaço</h2><button id="closeManage" class="btn ghost">Fechar</button></div><input type="hidden" id="postSpaceId"><input id="postTitle" placeholder="Título"><textarea id="postBody" placeholder="Escreva uma publicação..."></textarea><select id="postKind"><option value="discussion">Discussão</option><option value="announcement">Aviso</option><option value="project">Projeto</option><option value="event">Evento</option></select><button id="postBtn" class="btn primary">Publicar</button><pre id="manageOut" class="out"></pre></section>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ static_v('js/community-space.js') }}"></script>{% endblock %}

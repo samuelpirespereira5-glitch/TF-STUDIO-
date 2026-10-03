@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}JARVIS Ultra Command Center{% endblock %}
+{% block head %}
+<style>
+.mega{max-width:1500px;margin:auto;padding:16px}.mega-hero{display:flex;justify-content:space-between;gap:16px;align-items:center;padding:24px;border:1px solid rgba(120,180,255,.16);border-radius:22px;background:linear-gradient(135deg,rgba(20,34,54,.92),rgba(8,13,22,.88));box-shadow:0 20px 70px rgba(0,0,0,.18)}
+.mega h1{margin:0;font-size:clamp(1.6rem,4vw,2.8rem)}.mega p{line-height:1.55}.mega-actions{display:flex;gap:8px;flex-wrap:wrap}.mega-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px;margin-top:14px}.mega-card{grid-column:span 4;min-width:0;padding:18px;border-radius:18px;border:1px solid rgba(255,255,255,.08);background:rgba(10,17,28,.78)}.mega-wide{grid-column:span 8}.mega-full{grid-column:1/-1}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.kpi{padding:13px;border-radius:13px;background:rgba(255,255,255,.045)}.kpi b{display:block;font-size:1.45rem;margin-top:4px}.status{display:inline-block;padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.07);font-size:.76rem}.row{padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07)}.row:last-child{border-bottom:0}.muted{opacity:.7}.mono{font-family:ui-monospace,monospace;white-space:pre-wrap;overflow:auto}.search{width:100%;min-height:44px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:inherit;padding:10px 12px}.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{padding:8px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);cursor:pointer}.gamegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}.game{padding:13px;border:1px solid rgba(255,255,255,.08);border-radius:13px}.node{padding:10px;border:1px solid rgba(255,255,255,.07);border-radius:12px;margin:7px 0}.sim{border-left:3px solid #5ab2ff}.unknown{opacity:.65}.good{border-left:3px solid #45d483}.warn{border-left:3px solid #f0b64a}.bad{border-left:3px solid #ff5f6d}
+@media(max-width:1000px){.mega-card,.mega-wide{grid-column:1/-1}.kpis{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.mega{padding:9px}.mega-hero{padding:16px;display:block}.mega-card{padding:14px}.kpis{grid-template-columns:1fr}.gamegrid{grid-template-columns:1fr 1fr}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+{% endblock %}
+{% block content %}
+<div class="mega">
+ <section class="mega-hero"><div><div class="muted">JARVIS ULTRA PLATFORM</div><h1>Centro de Comando</h1><p class="muted">Dashboard integrado sobre os módulos existentes. Estados desconhecidos continuam UNKNOWN — nenhuma métrica é inventada.</p></div><div class="mega-actions"><a class="btn" href="/">JARVIS</a><a class="btn" href="/security-center">Security</a><a class="btn" href="/holograma">Hologram</a><button class="btn primary" id="refresh">Atualizar</button></div></section>
+ <div class="mega-grid">
+  <section class="mega-card mega-full"><div class="kpis" id="kpis"></div></section>
+  <section class="mega-card mega-wide"><h2>Command Center</h2><input id="cmd" class="search" placeholder="Ex.: abra o mapa · abrir arcade · abrir security center"><div class="chips" id="commands" style="margin-top:10px"></div><pre id="cmdOut" class="mono"></pre></section>
+  <section class="mega-card"><h2>System Status</h2><div id="services"></div></section>
+  <section class="mega-card"><h2>Security</h2><div id="security"></div></section>
+  <section class="mega-card"><h2>Progression</h2><div id="progress"></div></section>
+  <section class="mega-card mega-wide"><h2>Activity Center</h2><div class="chips"><button class="chip" onclick="activity('')">TODOS</button><button class="chip" onclick="activity('SECURITY')">SEGURANÇA</button><button class="chip" onclick="activity('GAMES')">JOGOS</button><button class="chip" onclick="activity('ACTIVITY')">ATIVIDADE</button></div><div id="activity" style="margin-top:8px"></div></section>
+  <section class="mega-card" id="maps"><h2>JARVIS Maps · Lab</h2><div class="node sim"><b>SIMULATION / LAB</b><br><span class="muted">Nós fictícios para treinamento</span></div><div id="nodes"></div><a class="btn small" href="/holograma">Abrir holograma/mapa real</a></section>
+  <section class="mega-card mega-wide" id="arcade"><h2>Arcade</h2><div class="gamegrid" id="games"></div></section>
+  <section class="mega-card"><h2>Knowledge Center</h2><div id="knowledge"></div></section>
+  <section class="mega-card"><h2>Privacy Center</h2><div id="privacy"></div></section>
+  <section class="mega-card mega-wide"><h2>Projects & Sites</h2><div id="projects"></div></section>
+  <section class="mega-card mega-wide" id="tools"><h2>JARVIS Tools</h2><div id="tools"></div></section>
+ </div>
+</div>
+<div id="gameModal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.78);align-items:center;justify-content:center;padding:12px">
+ <div style="width:min(720px,100%);max-height:92vh;overflow:auto;border:1px solid rgba(255,255,255,.12);border-radius:18px;background:#0c1420;padding:18px">
+  <div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><h2 id="gameTitle">Arcade</h2><button class="btn" onclick="closeGame()">Fechar</button></div>
+  <div id="gameStage"></div>
+ </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+const $=s=>document.querySelector(s);const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function api(u,o={}){const r=await fetch(u,o);const d=await r.json().catch(()=>({error:'Resposta inválida'}));if(!r.ok)throw Error(d.error||('HTTP '+r.status));return d}
+function statusClass(s){s=String(s||'').toUpperCase();return s==='HEALTHY'||s==='PASS'?'good':s==='WARNING'||s==='UNKNOWN'?'warn':'bad'}
+async function load(){const d=await api('/api/cyber/mega/overview');$('#kpis').innerHTML=[['JARVIS',d.jarvis.status],['Ferramentas',d.tools.available],['Desafios',d.challenges.available],['Jogos',d.games.available],['Sites',d.projects.sites],['Workspaces',d.projects.workspaces],['Sessões',d.sessions],['WebAuthn',d.web_authn.enabled?'ATIVO':'DESATIVADO']].map(x=>`<div class="kpi"><span class="muted">${esc(x[0])}</span><b>${esc(x[1])}</b></div>`).join('');
+ $('#services').innerHTML=d.services.map(s=>`<div class="row ${statusClass(s.status)}"><b>${esc(s.name)}</b> <span class="status">${esc(s.status)}</span><div class="muted">${esc(s.evidence)}</div></div>`).join('');
+ $('#security').innerHTML=`<div class="row"><b>Score</b>: ${esc(d.security.score??'NOT TESTED')}</div><div class="row">WebAuthn: <span class="status">${esc(d.web_authn.enabled?'ENABLED':(d.web_authn.reason||'UNKNOWN'))}</span></div><div class="row">Notificações: ${esc(d.notifications.length)}</div>`;
+ const p=d.progression||{};$('#progress').innerHTML=`<div class="row"><b>Nível ${esc(p.level||1)}</b> · XP ${esc(p.xp||0)}</div><div class="row">Conquistas: ${esc((p.achievements||[]).length)}</div>`;
+ $('#activity').innerHTML=(d.activity||[]).map(x=>`<div class="row"><b>${esc(x.title)}</b><div class="muted">${esc(x.ts)} · ${esc(x.event_type)}</div></div>`).join('')||'<span class="muted">Sem atividade recente.</span>';
+ await Promise.all([loadMaps(),loadGames(),loadKnowledge(),loadPrivacy(),loadProjects(),loadTools(),loadCommands()]);}
+async function loadMaps(){const d=await api('/api/cyber/mega/maps');$('#nodes').innerHTML=d.nodes.map(n=>`<div class="node sim"><b>${esc(n.label)}</b><div>${esc(n.kind)} · ${esc(n.status)}</div><div class="muted">${esc(n.lat)}, ${esc(n.lng)}</div></div>`).join('')}
+async function loadGames(){const d=await api('/api/cyber/mega/arcade');$('#games').innerHTML=d.games.map(g=>`<div class="game"><b>${esc(g.name)}</b><div class="muted">${esc(g.type)}</div><button class="btn small" style="margin-top:8px" onclick="startGame('${esc(g.id)}')">Jogar</button></div>`).join('')}
+async function loadKnowledge(){const d=await api('/api/cyber/mega/knowledge');$('#knowledge').innerHTML=d.topics.slice(0,10).map(x=>`<div class="row"><b>${esc(x.title)}</b><div class="muted">${esc(x.category||'')}</div></div>`).join('')}
+async function loadPrivacy(){const d=await api('/api/cyber/mega/privacy');$('#privacy').innerHTML=`<div class="row">Dados: <b>${esc(d.stored_data.length)} categorias</b></div><div class="row">Rastreamento contínuo: <b>não</b></div><div class="row">Segredos exibidos: <b>não</b></div><div class="muted">${esc(d.note)}</div>`}
+async function loadProjects(){const d=await api('/api/cyber/mega/projects');$('#projects').innerHTML=`<div class="row"><b>${d.workspaces.length}</b> workspaces</div>`+(d.sites||[]).slice(0,8).map(x=>`<div class="row"><b>${esc(x.name)}</b><div class="muted">${esc(x.slug)} · ${esc(x.updated_at)}</div></div>`).join('')}
+async function loadTools(){const d=await api('/api/cyber/ultra/catalog');$('#tools').innerHTML=(d.tools||[]).slice(0,18).map(x=>`<span class="chip">${esc(x.name)}</span>`).join('')}
+async function loadCommands(){const d=await api('/api/cyber/mega/commands');$('#commands').innerHTML=d.commands.map(x=>`<button class="chip" onclick="runCommand('${esc(x.command)}')">${esc(x.label)}</button>`).join('')}
+async function runCommand(q){const d=await api('/api/cyber/mega/command',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':'{{ csrf_token }}'},body:JSON.stringify({text:q})});$('#cmdOut').textContent=d.matched?`${d.label}: ${d.route}`:d.message;if(d.matched) setTimeout(()=>location.href=d.route,250)}
+$('#cmd').addEventListener('keydown',e=>{if(e.key==='Enter')runCommand(e.target.value)});async function activity(c){const d=await api('/api/cyber/mega/activity?category='+encodeURIComponent(c));$('#activity').innerHTML=d.events.map(x=>`<div class="row"><b>${esc(x.title)}</b><div class="muted">${esc(x.ts)} · ${esc(x.category)} · ${esc(x.type)}</div></div>`).join('')||'<span class="muted">Sem registros.</span>'}
+let snakeTimer=null;
+function openGame(){ $('#gameModal').style.display='flex'; }
+function closeGame(){ if(snakeTimer)clearInterval(snakeTimer); snakeTimer=null; $('#gameModal').style.display='none'; }
+function startGame(id){
+ openGame(); $('#gameTitle').textContent=id.toUpperCase(); const st=$('#gameStage');
+ if(id==='tictactoe'){ let b=Array(9).fill(''),turn='X'; st.innerHTML='<div id="ttt" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:360px;margin:auto"></div><p id="tttmsg" class="muted">Sua vez: X</p><button class="btn" onclick="startGame(\'tictactoe\')">Reiniciar</button>'; const g=$('#ttt'); b.forEach((_,i)=>{const x=document.createElement('button');x.className='btn';x.style.minHeight='90px';x.style.fontSize='2rem';x.onclick=()=>{if(b[i])return;b[i]=turn;x.textContent=turn;const w=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]].find(a=>b[a[0]]&&b[a[0]]===b[a[1]]&&b[a[1]]===b[a[2]]);if(w){$('#tttmsg').textContent=turn+' venceu';g.querySelectorAll('button').forEach(q=>q.disabled=true);return}if(b.every(Boolean)){ $('#tttmsg').textContent='Empate';return}turn=turn==='X'?'O':'X';$('#tttmsg').textContent='Sua vez: '+turn};g.appendChild(x)});return }
+ if(id==='reaction'){st.innerHTML='<p id="rxmsg">Aguarde…</p><button id="rx" class="btn primary" style="min-height:90px;width:100%" disabled>ESPERANDO</button>';const delay=700+Math.random()*2200;setTimeout(()=>{const start=performance.now();$('#rx').disabled=false;$('#rx').textContent='CLIQUE!';$('#rxmsg').textContent='Agora!';$('#rx').onclick=()=>{$('#rxmsg').textContent='Tempo: '+Math.round(performance.now()-start)+' ms';$('#rx').disabled=true}},delay);return}
+ if(id==='snake'){st.innerHTML='<canvas id="snake" width="360" height="360" style="display:block;max-width:100%;margin:auto;background:#07101a;border:1px solid rgba(255,255,255,.12)"></canvas><p class="muted">Use as setas do teclado. Toque não é necessário.</p>';const c=$('#snake'),x=c.getContext('2d'),size=18,cols=20;let body=[{x:9,y:9}],dir={x:1,y:0},food={x:14,y:9},score=0;const place=()=>{food={x:Math.floor(Math.random()*cols),y:Math.floor(Math.random()*cols)}};document.onkeydown=e=>{const m={ArrowUp:{x:0,y:-1},ArrowDown:{x:0,y:1},ArrowLeft:{x:-1,y:0},ArrowRight:{x:1,y:0}}[e.key];if(m&&!(m.x===-dir.x&&m.y===-dir.y))dir=m};snakeTimer=setInterval(()=>{const h={x:body[0].x+dir.x,y:body[0].y+dir.y};if(h.x<0||h.y<0||h.x>=cols||h.y>=cols||body.some(p=>p.x===h.x&&p.y===h.y)){clearInterval(snakeTimer);$('#gameStage').insertAdjacentHTML('beforeend','<p>Fim de jogo. Pontuação: <b>'+score+'</b></p>');return}body.unshift(h);if(h.x===food.x&&h.y===food.y){score+=10;place()}else body.pop();x.clearRect(0,0,c.width,c.height);x.fillStyle='rgba(80,180,255,.9)';body.forEach(p=>x.fillRect(p.x*size+1,p.y*size+1,size-2,size-2));x.fillStyle='rgba(255,110,120,.9)';x.fillRect(food.x*size+1,food.y*size+1,size-2,size-2)},110);return}
+ st.innerHTML='<div class="notice">Este jogo é executado localmente no navegador. Nenhum código remoto é executado.</div><button class="btn primary" onclick="closeGame()">OK</button>';
+}
+$('#refresh').onclick=()=>load().catch(e=>alert(e.message));load().catch(e=>console.error(e));
+</script>
+{% endblock %}

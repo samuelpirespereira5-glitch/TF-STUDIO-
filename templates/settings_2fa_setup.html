@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Ativar 2FA · Tristan Thorne{% endblock %}
+{% block content %}
+<h1>📱 Ativar verificação em duas etapas</h1>
+<div class="card">
+  <h2>1. Cadastre no seu app autenticador</h2>
+  <p class="muted">Abra o Google Authenticator, Authy, Aegis, Bitwarden, 1Password (ou qualquer app TOTP) e escolha
+  "adicionar conta manualmente" / "inserir chave de configuração". Cole o segredo abaixo:</p>
+  <div class="security-mini-grid" style="margin-top:10px">
+    <div style="grid-column:1/-1"><span>Segredo (Base32)</span><b style="font-family:monospace;word-break:break-all;font-size:15px">{{ secret }}</b></div>
+    <div><span>Conta</span><b>dono</b></div>
+    <div><span>Emissor</span><b>Tristan Thorne</b></div>
+  </div>
+  <p class="muted small" style="margin-top:10px">Se o seu app aceita colar uma URI direto, use:
+  <code style="word-break:break-all">{{ uri }}</code></p>
+</div>
+<div class="card">
+  <h2>2. Confirme com o código gerado</h2>
+  <p class="muted">Digite o código de 6 dígitos que o app está mostrando agora, para confirmar que o cadastro
+  funcionou antes de exigir isso em todo login.</p>
+  <form method="post" action="{{ url_for('totp_confirm') }}" autocomplete="off">
+    <label>Código de 6 dígitos</label>
+    <input type="text" name="code" placeholder="000000" inputmode="numeric" pattern="[0-9]{6,8}" maxlength="8" autofocus required>
+    <button type="submit" class="btn primary" style="margin-top:14px">✅ Confirmar e ativar</button>
+  </form>
+  <form method="post" action="{{ url_for('totp_cancel') }}" style="margin-top:10px">
+    <button type="submit" class="btn small">Cancelar</button>
+  </form>
+</div>
+{% endblock %}

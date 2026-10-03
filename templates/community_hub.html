@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Community Center — JARVIS{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ static_v('css/community-social.css') }}">{% endblock %}
+{% block content %}
+<div class="social-shell">
+  <header class="social-hero"><div><div class="eyebrow">JARVIS COMMUNITY CENTER</div><h1>🌐 Comunidade</h1><p>Uma área social completa: canais, chat, eventos ao vivo, vídeo, workshops, clãs e rankings.</p></div><div class="social-actions"><a class="btn primary" href="/comunidade/espacos">🧩 Comunidades & Clãs</a><a class="btn" href="/rankings">🏆 Rankings</a></div></header>
+  <section class="social-stats" id="communityStats"></section>
+  <section class="social-grid two">
+    <div class="social-card"><div class="section-head"><h2>💬 Meus espaços</h2><a href="/comunidade/espacos">Ver todos</a></div><div id="mySpaces" class="mini-list">Carregando…</div></div>
+    <div class="social-card"><div class="section-head"><h2>🔴 Ao vivo / próximos</h2><a href="/comunidade/espacos">Criar evento</a></div><div id="events" class="event-list">Carregando…</div></div>
+  </section>
+  <section class="social-card"><div class="section-head"><div><h2>🏆 Ranking da comunidade</h2><p class="muted">XP, jogos, participação e atividade. O ranking não altera permissões.</p></div><a class="btn ghost" href="/rankings">Abrir ranking completo</a></div><div id="topRank" class="rank-list"></div></section>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ static_v('js/community-hub.js') }}"></script>{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Security Scan · Tristan Thorne{% endblock %}
+{% block content %}
+<h1>🔐 Security Scan</h1>
+<p class="muted">Análise determinística do próprio Tristan Thorne. O scanner lê os arquivos do projeto, não executa o código analisado e não testa terceiros.</p>
+
+<div class="grid" id="scan-summary">
+  <div class="card"><h3>PASS</h3><div class="result" id="scan-pass">—</div></div>
+  <div class="card"><h3>WARNING</h3><div class="result" id="scan-warning">—</div></div>
+  <div class="card"><h3>ERROR</h3><div class="result" id="scan-error">—</div></div>
+  <div class="card"><h3>NEEDS REVIEW</h3><div class="result" id="scan-review">—</div></div>
+</div>
+
+<div class="card tool">
+  <button class="btn primary" id="scan-btn" onclick="runSecurityScan()">Executar Security Scan</button>
+  <span class="muted small" id="scan-meta"></span>
+</div>
+
+<div class="card tool">
+  <div class="inline">
+    <select id="scan-status-filter" onchange="renderSecurityScan()">
+      <option value="">Todos</option>
+      <option value="ERROR">ERROR</option>
+      <option value="WARNING">WARNING</option>
+      <option value="NEEDS REVIEW">NEEDS REVIEW</option>
+      <option value="PASS">PASS</option>
+    </select>
+  </div>
+  <div style="overflow:auto">
+    <table class="table">
+      <thead><tr><th>Status</th><th>Problema</th><th>Arquivo/localização</th><th>Descrição/impacto</th><th>Evidência</th><th>Correção sugerida</th></tr></thead>
+      <tbody id="scan-results"></tbody>
+    </table>
+  </div>
+</div>
+
+<p class="muted small">⚠️ <strong>NEEDS REVIEW</strong> significa que há algo que merece revisão humana; não significa vulnerabilidade confirmada. Nenhuma correção é aplicada automaticamente.</p>
+<script>
+let _securityFindings = [];
+function esc(v) {
+  return String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+}
+function renderSecurityScan() {
+  const filter = document.getElementById("scan-status-filter").value;
+  const rows = _securityFindings.filter(x => !filter || x.status === filter);
+  document.getElementById("scan-results").innerHTML = rows.map(x =>
+    `<tr><td><strong>${esc(x.status)}</strong></td><td>${esc(x.problem)}</td><td><code>${esc(x.location)}</code></td>` +
+    `<td>${esc(x.description || x.impact)}</td><td><code>${esc(x.evidence)}</code></td><td>${esc(x.fix)}</td></tr>`
+  ).join("") || `<tr><td colspan="6" class="muted">Nenhum item para este filtro.</td></tr>`;
+}
+async function runSecurityScan() {
+  const btn=document.getElementById("scan-btn"), meta=document.getElementById("scan-meta");
+  btn.disabled=true; meta.textContent=" Analisando...";
+  try {
+    const r=await fetch("/api/security/scan-project",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
+    const data=await r.json();
+    if(!r.ok) throw new Error(data.error || "Falha no scan");
+    _securityFindings=data.findings||[];
+    const c=data.counts||{};
+    document.getElementById("scan-pass").textContent=c.PASS||0;
+    document.getElementById("scan-warning").textContent=c.WARNING||0;
+    document.getElementById("scan-error").textContent=c.ERROR||0;
+    document.getElementById("scan-review").textContent=c["NEEDS REVIEW"]||0;
+    meta.textContent=` ${data.files_scanned||0} arquivo(s) analisado(s) · ${data.scope}`;
+    renderSecurityScan();
+  } catch(e) { meta.textContent=" Erro: "+e.message; }
+  finally { btn.disabled=false; }
+}
+runSecurityScan();
+</script>
+{% endblock %}

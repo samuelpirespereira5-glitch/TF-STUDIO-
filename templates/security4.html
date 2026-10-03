@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}JARVIS Security Center 4.0{% endblock %}
+{% block content %}
+<div class="security4-page">
+  <div class="s4-head"><div><span class="eyebrow">JARVIS SECURITY + AUTHENTICATION 4.0</span><h1>Central de Segurança</h1><p>Autenticação, sessões, integridade, privacidade e observabilidade usando o backend existente.</p></div><button class="s4-btn" onclick="S4.refresh()">Atualizar</button></div>
+  <div id="s4-summary" class="s4-grid"></div>
+  <div class="s4-tabs"><button data-tab="checkup">Security Checkup</button><button data-tab="account">Authentication Center</button><button data-tab="alerts">Alertas</button><button data-tab="health">System Health</button><button data-tab="audit">Auditoria</button><button data-tab="privacy">Privacidade</button></div>
+  <section id="s4-checkup" class="s4-panel"></section>
+  <section id="s4-account" class="s4-panel hidden"></section>
+  <section id="s4-alerts" class="s4-panel hidden"></section>
+  <section id="s4-health" class="s4-panel hidden"></section>
+  <section id="s4-audit" class="s4-panel hidden"></section>
+  <section id="s4-privacy" class="s4-panel hidden"></section>
+</div>
+<script src="{{ static_v('js/security4.js') }}"></script>
+<link rel="stylesheet" href="{{ static_v('css/security4.css') }}">
+{% endblock %}

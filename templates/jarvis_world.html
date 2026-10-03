@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}JARVIS WORLD · Ultra Platform{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ static_v('css/jarvis-world.css') }}">
+<div class="world-page" id="jarvis-world">
+<header class="world-hero"><div><div class="eyebrow">🌐 JARVIS WORLD</div><h1>Um mundo digital conectado</h1><p>Aprenda, experimente, crie e transforme ideias em projetos — com módulos independentes e seguros.</p></div><div class="world-status"><span class="dot"></span><strong>WORLD ONLINE</strong><small id="world-time">carregando...</small></div></header>
+<section class="world-grid" id="world-grid">
+<button data-tab="home">🤖<b>JARVIS</b><small>Central</small></button><button data-tab="learn">📚<b>LEARNING PATH</b><small>Jornada</small></button><button data-tab="skills">🌳<b>SKILL TREE</b><small>Habilidades</small></button><button data-tab="projects">🚀<b>PROJECT CENTER</b><small>Projetos</small></button><button data-tab="ideas">💡<b>IDEA LAB</b><small>Ideias</small></button><button data-tab="code">💻<b>CODE LAB</b><small>HTML · JS · Python</small></button><button data-tab="algorithms">🧠<b>ALGORITHM LAB</b><small>Algoritmos</small></button><button data-tab="experiments">🔬<b>EXPERIMENT LAB</b><small>Ciência</small></button><button data-tab="robot">🤖<b>ROBOT LAB</b><small>Robô + Maze</small></button><button data-tab="network">🌐<b>INTERNET SIMULATOR</b><small>HTTP · API</small></button><button data-tab="cyber">🛡️<b>CYBER DEFENSE</b><small>Fictício</small></button><button data-tab="creative">🎨<b>CREATIVE LAB</b><small>Story · RPG · World</small></button><button data-tab="challenges">🔥<b>CHALLENGES</b><small>Diário · Jam</small></button><button data-tab="portfolio">📁<b>PORTFOLIO</b><small>Apresentação</small></button><button data-tab="observatory">🔭<b>OBSERVATORY</b><small>Status real</small></button><button data-tab="maps">🗺️<b>MAP EXPLORER</b><small>Mapas existentes</small></button><button data-tab="museum">🏛️<b>VIRTUAL MUSEUM</b><small>Computação · IA</small></button><button data-tab="kids">🧒<b>SAFE KIDS</b><small>Experiência protegida</small></button><button data-tab="command">⌘<b>COMMAND CENTER</b><small>Busca global</small></button>
+</section><main id="world-panel" class="world-panel"></main></div>
+{% endblock %}
+{% block scripts %}<script src="{{ static_v('js/jarvis-world.js') }}"></script>{% endblock %}

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="csrf-token" content="{{ csrf_token }}">
+<title>Verificação em duas etapas · Tristan Thorne</title>
+<link rel="stylesheet" href="{{ static_v('css/style.css') }}">
+</head>
+<body class="login-screen">
+<canvas id="neural-bg" aria-hidden="true"></canvas>
+<div class="scanlines" aria-hidden="true"></div>
+<div class="layout" style="justify-content:center;align-items:center;min-height:100vh">
+  <main class="content" style="max-width:380px;width:100%">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-stack">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    <div class="card login-card">
+      <div class="login-brand">TT</div>
+      <div class="jarvis-eyebrow">TRISTAN THORNE · SECURE ACCESS</div>
+      <h1>📱 Código de verificação</h1>
+      <p class="muted">Senha confirmada. Agora digite o código de 6 dígitos do seu app autenticador (ou um código de recuperação).</p>
+      <form method="post" autocomplete="off">
+        <input type="hidden" name="_csrf" value="{{ csrf_token }}">
+        <label>Código</label>
+        <input type="text" name="code" placeholder="000000" inputmode="numeric" pattern="[0-9a-zA-Z-]{6,16}" maxlength="16" autofocus autocomplete="one-time-code" required>
+        <button type="submit" class="btn primary" id="login2fa-submit" style="margin-top:14px;width:100%">Entrar</button>
+        {% if locked_seconds %}
+        <p class="muted small" id="login2fa-lock-msg" style="margin-top:8px;text-align:center">Bloqueado por tentativas demais — libera em <span id="login2fa-lock-count">{{ locked_seconds }}</span>s.</p>
+        {% endif %}
+      </form>
+      <form method="get" action="{{ url_for('login') }}" style="margin-top:10px">
+        <button type="submit" class="btn small">↩ Voltar ao login</button>
+      </form>
+    </div>
+  </main>
+</div>
+<script src="{{ static_v('js/neural-bg.js') }}"></script>
+<script src="{{ static_v('js/main.js') }}"></script>
+<script src="{{ static_v('js/csrf.js') }}"></script>
+<script>
+(() => {
+  let remaining = {{ locked_seconds or 0 }};
+  const submitBtn = document.getElementById('login2fa-submit');
+  const counter = document.getElementById('login2fa-lock-count');
+  if (remaining > 0) {
+    if (submitBtn) submitBtn.disabled = true;
+    const tick = setInterval(() => {
+      remaining -= 1;
+      if (counter) counter.textContent = remaining;
+      if (remaining <= 0) {
+        clearInterval(tick);
+        if (submitBtn) submitBtn.disabled = false;
+        const msg = document.getElementById('login2fa-lock-msg');
+        if (msg) msg.textContent = 'Pode tentar de novo agora.';
+      }
+    }, 1000);
+  }
+})();
+</script>
+</body>
+</html>

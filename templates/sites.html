@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Meus sites · Tristan Thorne{% endblock %}
+{% block content %}
+<h1>🗂 Meus sites</h1>
+
+{% if not sites %}
+<p class="muted">Nenhum site ainda. <a href="{{ url_for('creator') }}">Criar o primeiro</a>.</p>
+{% endif %}
+
+<div class="grid">
+  {% for site in sites %}
+  <div class="card site-card">
+    <h3>{{ site.name }}</h3>
+    <p class="muted">{{ site.country }} · {{ site.style }} · atualizado em {{ site.updated_at }}</p>
+    {% if site.netlify_url %}
+      <p><a href="{{ site.netlify_url }}" target="_blank">🌐 {{ site.netlify_url }}</a></p>
+    {% endif %}
+    <div class="card-actions">
+      <a class="btn" href="{{ url_for('preview_site', slug=site.slug) }}" target="_blank">👁 Ver</a>
+      <a class="btn" href="{{ url_for('editor', slug=site.slug) }}">✏ Editor</a>
+      <a class="btn" href="{{ url_for('download_site', slug=site.slug) }}">⬇ Baixar .zip</a>
+      <form method="post" action="{{ url_for('duplicate_site', slug=site.slug) }}" style="display:inline">
+        <button class="btn" type="submit">📄 Duplicar</button>
+      </form>
+      <button class="btn danger" data-delete="{{ site.slug }}">🗑 Excluir</button>
+    </div>
+    <form class="delete-form" id="delete-form-{{ site.slug }}" method="post" action="{{ url_for('delete_site', slug=site.slug) }}" style="display:none"></form>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.querySelectorAll('[data-delete]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (confirm('Tem certeza que deseja excluir este site? Essa ação não pode ser desfeita.')) {
+      document.getElementById('delete-form-' + btn.dataset.delete).submit();
+    }
+  });
+});
+</script>
+{% endblock %}

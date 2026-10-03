@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% block title %}Kali Linux · Tristan Thorne{% endblock %}
+{% block content %}
+<h1>🐉 Kali Linux — Catálogo completo</h1>
+<p class="muted small">
+  {{ counts.total }} ferramentas em {{ counts.categories }} categorias oficiais do Kali (Information Gathering,
+  Vulnerability Analysis, Web Application Analysis, Database Assessment, Password Attacks, Wireless Attacks,
+  Reverse Engineering, Exploitation Tools, Sniffing &amp; Spoofing, Post Exploitation, Forensics, Reporting Tools
+  e Social Engineering Tools). {{ counts.integrated }} já rodam de verdade aqui dentro, contra alvos em escopo
+  autorizado, através do Cyber Lab. As demais são detectadas por instalação real no servidor (sem simular
+  resultado); quando não é possível detectar (ferramenta gráfica ou comercial), aparecem como referência com o
+  pacote oficial do Kali para instalar no seu próprio laboratório.
+</p>
+<p class="muted small">⚠ Uso restrito a laboratório, CTF e sistemas próprios/autorizados — nada aqui automatiza
+  ataque contra terceiros.</p>
+
+<div class="card kali-terminal-card">
+  <div class="kali-terminal-head">
+    <div><h2>⌨ Kali Lab Terminal</h2><p class="muted small">Terminal web seguro: os comandos passam pelo Tool Registry, permissões, escopo autorizado, SSRF Guard e Tool Adapter. Não há shell arbitrário no servidor.</p></div>
+    <span class="tool-chip sev-low">OWNER / LAB</span>
+  </div>
+  <div id="kali-terminal-output" class="kali-terminal-output" aria-live="polite">TRISTAN THORNE KALI LAB
+Digite <b>help</b> para ver os comandos.</div>
+  <form id="kali-terminal-form" class="kali-terminal-form" autocomplete="off">
+    <span class="kali-terminal-prompt">jarvis@kali-lab:~$</span>
+    <input id="kali-terminal-input" name="command" type="text" placeholder="help" spellcheck="false" maxlength="500">
+    <button class="btn primary" type="submit">Executar</button>
+  </form>
+  <div class="inline kali-terminal-shortcuts">
+    <button type="button" class="btn small" data-kcmd="status">status</button>
+    <button type="button" class="btn small" data-kcmd="tools">tools</button>
+    <button type="button" class="btn small" data-kcmd="help">help</button>
+  </div>
+</div>
+
+<div class="kali-command-grid">
+  <div class="card kali-stat"><span>🐉</span><b id="kali-total">{{ counts.total }}</b><small>ferramentas catalogadas</small></div>
+  <div class="card kali-stat"><span>⚡</span><b id="kali-integrated">{{ counts.integrated }}</b><small>integradas no Cyber Lab</small></div>
+  <div class="card kali-stat"><span>🧭</span><b>{{ counts.categories }}</b><small>categorias</small></div>
+</div>
+
+<div class="card kali-launcher">
+  <div class="kali-launcher-head"><div><h2>⚡ Executar ferramenta integrada</h2><p class="muted small">Use somente contra alvos cadastrados/autorizados. A execução reaproveita o Tool Registry, permissões e controles de escopo existentes.</p></div><span class="tool-chip sev-low">BACKEND PROTEGIDO</span></div>
+  <div class="inline kali-launcher-row">
+    <select id="kali-run-tool"><option value="">Carregando ferramentas integradas...</option></select>
+    <input id="kali-run-target" type="text" placeholder="alvo autorizado (ex.: exemplo.com)">
+    <button id="kali-run-btn" class="btn primary" type="button">▶ Executar</button>
+  </div>
+  <div id="kali-run-result" class="result"></div>
+</div>
+
+<input type="text" id="kali-filter" placeholder="🔍 Buscar ferramenta, categoria ou descrição..." class="tool-filter">
+<div class="inline" id="kali-legend" style="margin:8px 0 16px">
+  <span class="tool-chip sev-low">integrada no Cyber Lab</span>
+  <span class="tool-chip sev-med">instalada no servidor</span>
+  <span class="tool-chip sev-high">não instalada</span>
+  <span class="tool-chip">referência</span>
+</div>
+
+<div id="kali-grid"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let kaliCatalog = {};
+
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","\'":"&#39;"}[c]));
+}
+
+function populateKaliLauncher() {
+  const select = document.getElementById("kali-run-tool");
+  if (!select) return;
+  const items = Object.values(kaliCatalog).flat().filter(it => it.integrated && it.runnable);
+  select.innerHTML = items.length
+    ? items.map(it => `<option value="${esc(it.tool_id)}">${esc(it.name)} — ${esc(it.desc || "")}</option>`).join("")
+    : '<option value="">Nenhuma ferramenta integrada disponível neste servidor</option>';
+}
+
+async function runKaliTool() {
+  const select = document.getElementById("kali-run-tool");
+  const target = document.getElementById("kali-run-target").value.trim();
+  const out = document.getElementById("kali-run-result");
+  const tool = select.value;
+  if (!tool) { out.textContent = "Nenhuma ferramenta integrada disponível."; return; }
+  if (!target) { out.textContent = "Informe um alvo autorizado."; return; }
+  out.textContent = "Executando com os controles de permissão e escopo...";
+  try {
+    const res = await fetch(`/api/jarvis/tool/${encodeURIComponent(tool)}`, {
+      method: "POST", headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({params:{target, domain:target, url:target}})
+    });
+    const data = await res.json();
+    out.textContent = data.ok
+      ? `${data.name || tool}: ${data.summary || "execução concluída"}\nRisco: ${data.risk || "—"}`
+      : `Bloqueado/erro: ${data.error || "não foi possível executar"}${data.diagnostic ? "\n" + data.diagnostic.advice : ""}`;
+  } catch (e) { out.textContent = "Falha ao comunicar com o Tool Registry: " + e.message; }
+}
+
+async function loadKali() {
+  const grid = document.getElementById("kali-grid");
+  grid.innerHTML = '<p class="muted small">Verificando ferramentas instaladas...</p>';
+  try {
+    const res = await fetch("/api/kali/status");
+    kaliCatalog = (await res.json()).catalog || {};
+    grid.innerHTML = "";
+    for (const [cat, items] of Object.entries(kaliCatalog)) {
+      const h = document.createElement("h2");
+      h.className = "tools-category";
+      h.textContent = `${cat} (${items.length})`;
+      grid.appendChild(h);
+      const row = document.createElement("div");
+      row.className = "grid tools-grid";
+      for (const it of items) {
+        const card = document.createElement("div");
+        card.className = "card tool";
+        card.dataset.name = (cat + " " + it.name + " " + (it.desc || "") + " " + (it.package || "")).toLowerCase();
+        let badge;
+        if (it.integrated) badge = '<span class="tool-chip sev-low">integrada no Cyber Lab</span>';
+        else if (it.status === "installed") badge = '<span class="tool-chip sev-med">instalada no servidor</span>';
+        else if (it.status === "not_installed") badge = '<span class="tool-chip sev-high">não instalada</span>';
+        else if (it.status === "config_required") badge = '<span class="tool-chip sev-med">instalada · configuração</span>';
+        else badge = '<span class="tool-chip">referência</span>';
+        const version = it.version ? `<div class="small muted">Versão: ${esc(it.version)}</div>` : "";
+        let action = "";
+        if (it.integrated && it.runnable) action = `<button class="btn small kali-use-btn" data-tool="${esc(it.tool_id)}">⚡ Usar aqui</button>`;
+        else if (it.integrated) action = `<span class="muted small">${esc(it.install_hint || "Configuração necessária no servidor.")}</span>`;
+        else if (it.install_hint) action = `<code class="small">${esc(it.install_hint)}</code>`;
+        card.innerHTML = `<h3>${esc(it.name)}</h3><p class="muted small">${esc(it.desc || "")}</p><div class="tool-chips">${badge}</div>${version}<div class="inline">${action}</div>`;
+        row.appendChild(card);
+      }
+      grid.appendChild(row);
+    }
+    populateKaliLauncher();
+    grid.querySelectorAll(".kali-use-btn").forEach(btn => btn.addEventListener("click", () => {
+      document.getElementById("kali-run-tool").value = btn.dataset.tool;
+      document.getElementById("kali-run-target").focus();
+      document.querySelector(".kali-launcher").scrollIntoView({behavior:"smooth", block:"center"});
+    }));
+  } catch (e) {
+    grid.innerHTML = `<p class="muted">Não foi possível carregar o catálogo: ${esc(e.message)}</p>`;
+  }
+}
+
+const kaliTerminalHistory = [];
+let kaliTerminalIndex = -1;
+function kaliTerminalWrite(text, append=true) {
+  const out = document.getElementById("kali-terminal-output");
+  if (!out) return;
+  const safe = String(text ?? "");
+  out.textContent = append ? (out.textContent + "\n" + safe) : safe;
+  out.scrollTop = out.scrollHeight;
+}
+async function runKaliTerminal(command) {
+  const cmd = String(command || "").trim();
+  if (!cmd) return;
+  kaliTerminalHistory.push(cmd); kaliTerminalIndex = kaliTerminalHistory.length;
+  kaliTerminalWrite("\njarvis@kali-lab:~$ " + cmd);
+  try {
+    const res = await fetch("/api/kali/terminal", {
+      method: "POST", headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({command: cmd})
+    });
+    const data = await res.json();
+    if (data.clear) { document.getElementById("kali-terminal-output").textContent = ""; return; }
+    kaliTerminalWrite(data.text || data.error || "Sem saída.");
+  } catch (e) { kaliTerminalWrite("[ERRO] Falha ao comunicar com o terminal: " + e.message); }
+}
+const kaliTerminalForm = document.getElementById("kali-terminal-form");
+kaliTerminalForm?.addEventListener("submit", (e) => { e.preventDefault(); const input = document.getElementById("kali-terminal-input"); const cmd = input.value; input.value=""; runKaliTerminal(cmd); });
+document.querySelectorAll("[data-kcmd]").forEach(btn => btn.addEventListener("click", () => runKaliTerminal(btn.dataset.kcmd)));
+document.getElementById("kali-terminal-input")?.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowUp") { e.preventDefault(); if (kaliTerminalHistory.length) { kaliTerminalIndex=Math.max(0,kaliTerminalIndex-1); e.target.value=kaliTerminalHistory[kaliTerminalIndex] || ""; } }
+  if (e.key === "ArrowDown") { e.preventDefault(); if (kaliTerminalHistory.length) { kaliTerminalIndex=Math.min(kaliTerminalHistory.length,kaliTerminalIndex+1); e.target.value=kaliTerminalHistory[kaliTerminalIndex] || ""; } }
+});
+
+document.getElementById("kali-run-btn")?.addEventListener("click", runKaliTool);
+document.getElementById("kali-filter")?.addEventListener("input", (e) => {
+  const q = e.target.value.toLowerCase();
+  document.querySelectorAll("#kali-grid .card.tool").forEach(c => c.style.display = c.dataset.name.includes(q) ? "" : "none");
+});
+loadKali();
+</script>
+{% endblock %}

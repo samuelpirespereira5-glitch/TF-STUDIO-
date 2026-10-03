@@ -1,0 +1,42 @@
+.gc-wrap { max-width: 1100px; margin: 0 auto; padding: 12px 16px 40px; }
+.gc-hero { margin-bottom: 18px; }
+.gc-kicker { text-transform: uppercase; letter-spacing: .08em; font-size: .75rem; opacity: .7; margin: 0; }
+.gc-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 16px; }
+@media (max-width: 900px) { .gc-grid { grid-template-columns: 1fr; } }
+.gc-form-card textarea { width: 100%; min-height: 72px; border-radius: 10px; padding: 10px; border: 1px solid var(--border, #1e3a5f); background: var(--card-bg, #0b1628); color: inherit; }
+.gc-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.gc-fields .field { display: flex; flex-direction: column; gap: 4px; }
+.gc-fields .field label { font-size: .85rem; opacity: .85; }
+.gc-fields input, .gc-fields select {
+  border-radius: 8px; padding: 8px 10px; border: 1px solid var(--border, #1e3a5f);
+  background: var(--card-bg, #0b1628); color: inherit;
+}
+.gc-actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.gc-canvas-wrap { position: relative; background: #071018; border-radius: 12px; overflow: hidden; border: 1px solid #1e3a5f; }
+#gc-canvas { width: 100%; height: auto; display: block; touch-action: none; }
+.gc-hud {
+  position: absolute; top: 8px; left: 10px; background: rgba(0,0,0,.55);
+  padding: 4px 10px; border-radius: 8px; font-size: .85rem;
+}
+.gc-touch {
+  display: none; position: absolute; bottom: 10px; left: 0; right: 0;
+  justify-content: center; gap: 12px;
+}
+.gc-touch button {
+  width: 56px; height: 56px; border-radius: 50%; border: none;
+  background: rgba(255,255,255,.15); color: #fff; font-size: 1.2rem;
+}
+@media (max-width: 700px) { .gc-touch { display: flex; } }
+.gc-preview-actions { margin-top: 8px; display: flex; gap: 8px; }
+.gc-msg { margin-top: 8px; min-height: 1.2em; font-weight: 600; }
+.gc-my-games { display: flex; flex-wrap: wrap; gap: 8px; }
+.gc-game-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 12px; border-radius: 999px; border: 1px solid #1e3a5f;
+  background: #0b1628; cursor: pointer; font-size: .9rem;
+}
+.gc-game-chip:hover { border-color: #3b82f6; }
+
+.gc-tips { margin: 10px 0 0; padding-left: 18px; }
+.gc-tips li { margin: 2px 0; }
+.gc-studio-card{grid-column:1/-1}.gc-advanced-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}.gc-advanced-grid label{display:grid;gap:5px;font-size:.82rem}.gc-advanced-grid input,.gc-advanced-grid select,.gc-studio-card textarea{border-radius:8px;padding:9px 10px;border:1px solid var(--border,#1e3a5f);background:var(--card-bg,#0b1628);color:inherit}.gc-checks{display:flex;gap:16px;flex-wrap:wrap;margin:10px 0}.gc-checks label{display:flex;gap:6px;align-items:center;font-size:.85rem}.gc-palette{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}.gc-palette button{border:1px solid #1e3a5f;background:#0b1628;color:inherit;border-radius:8px;padding:7px 10px;cursor:pointer}.gc-palette button.active{border-color:#00e5ff;box-shadow:0 0 12px rgba(0,229,255,.12)}.gc-level-grid{display:grid;grid-template-columns:repeat(32,20px);grid-auto-rows:20px;gap:1px;overflow:auto;padding:8px;background:#050b14;border:1px solid #1e3a5f;border-radius:10px}.gc-cell{width:20px;height:20px;border:0;background:rgba(255,255,255,.025);padding:0;font-size:12px;cursor:pointer}.gc-cell:hover{background:rgba(0,229,255,.18)}.gc-editor-actions{display:flex;gap:8px;margin-top:8px}.gc-spec-out{max-height:220px;overflow:auto;margin-top:8px}@media(max-width:800px){.gc-advanced-grid{grid-template-columns:1fr 1fr}.gc-level-grid{grid-template-columns:repeat(32,20px)}}@media(max-width:520px){.gc-advanced-grid{grid-template-columns:1fr}}

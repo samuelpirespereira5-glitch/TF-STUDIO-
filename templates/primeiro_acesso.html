@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="csrf-token" content="{{ csrf_token }}">
+<title>Primeiro acesso · Tristan Thorne</title>
+<link rel="stylesheet" href="{{ static_v('css/style.css') }}">
+</head>
+<body class="login-screen">
+<canvas id="neural-bg" aria-hidden="true"></canvas>
+<div class="scanlines" aria-hidden="true"></div>
+<div class="layout" style="justify-content:center;align-items:center;min-height:100vh">
+  <main class="content" style="max-width:440px;width:100%">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-stack">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    <div class="card login-card">
+      <div class="login-brand">TT</div>
+      <div class="jarvis-eyebrow">TRISTAN THORNE · PRIMEIRO ACESSO</div>
+      <h1>🔑 Crie a senha mestre</h1>
+      {% if remote %}
+        <p class="muted">A senha mestre ainda não foi criada. Por segurança, ela só pode ser criada <b>no próprio computador onde o servidor roda</b> (endereço <code>127.0.0.1</code>). Abra o site por lá, ou defina <code>MASTER_PASSWORD_HASH</code> no servidor.</p>
+      {% else %}
+        <p class="muted">Ainda não existe senha. Crie uma agora: a partir daqui o site passa a pedir essa senha para entrar. Guarde-a em um gerenciador de senhas — não há recuperação automática.</p>
+        <ul class="small muted" style="margin:8px 0 14px 18px">
+          <li>Pelo menos <b>{{ min_len }} caracteres</b> — uma frase longa serve (ex.: quatro palavras soltas).</li>
+          <li>Evite senhas comuns, só números ou sequências.</li>
+        </ul>
+        <form method="post" autocomplete="off">
+          <input type="hidden" name="_csrf" value="{{ csrf_token }}">
+          <label for="email">Seu e-mail (opcional, para identificação)</label>
+          <input id="email" type="email" name="email" placeholder="seu@email.com" autocomplete="username">
+          <label for="pw1" style="margin-top:12px">Nova senha mestre</label>
+          <input id="pw1" type="password" name="master_password" minlength="{{ min_len }}" required autofocus>
+          <label for="pw2" style="margin-top:12px">Repita a senha</label>
+          <input id="pw2" type="password" name="confirm_password" minlength="{{ min_len }}" required>
+          <label class="small" style="display:flex;gap:8px;align-items:center;margin-top:10px">
+            <input type="checkbox" onclick="document.getElementById('pw1').type=document.getElementById('pw2').type=this.checked?'text':'password'"> Mostrar senha
+          </label>
+          <button type="submit" class="btn primary" style="margin-top:14px;width:100%">Criar senha e entrar</button>
+        </form>
+      {% endif %}
+    </div>
+  </main>
+</div>
+<script src="{{ static_v('js/neural-bg.js') }}"></script>
+<script src="{{ static_v('js/main.js') }}"></script>
+<script src="{{ static_v('js/csrf.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Desafios · Tristan Thorne{% endblock %}
+{% block content %}
+<h1>🎯 Desafios práticos</h1>
+<p class="muted">Sites (e bots) com problemas colocados de propósito. Investigue, corrija o código e valide sua solução.</p>
+
+<div class="card" style="margin-bottom:18px">
+  <div class="inline" style="justify-content:space-between;flex-wrap:wrap;gap:12px">
+    <div>
+      <p class="muted small" style="margin:0">Nível {{ level }} · {{ resolvidos }}/{{ total_desafios }} desafios resolvidos</p>
+      <p style="margin:4px 0;font-size:20px;font-weight:700">🏆 {{ earned_xp }} XP <span class="muted small" style="font-weight:400">de {{ total_xp }} possíveis</span></p>
+    </div>
+    <div style="min-width:220px;flex:1">
+      <div style="background:#0b1220;border-radius:8px;height:10px;overflow:hidden">
+        <div style="background:linear-gradient(90deg,#00e5ff,#7CFFB2);height:100%;width:{{ (xp_into_level / xp_per_level * 100) | round(1) }}%"></div>
+      </div>
+      <p class="muted small" style="margin:4px 0 0">{{ xp_into_level }}/{{ xp_per_level }} XP para o nível {{ level + 1 }}</p>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="gam-panel" style="margin-bottom:18px">
+  <h2 style="margin-top:0">🏅 Conquistas e ranking local</h2>
+  <div id="achievements-list" class="muted small">Carregando conquistas…</div>
+  <ol id="local-rank" class="muted small" style="margin-top:10px"></ol>
+</div>
+<script>
+(async function(){
+  try {
+    const r = await fetch("/api/cyber/gamification");
+    const j = await r.json();
+    const list = document.getElementById("achievements-list");
+    const ach = (j.user && j.user.achievements) || [];
+    list.innerHTML = ach.map(a => {
+      const op = a.unlocked ? "1" : "0.35";
+      return `<span style="opacity:${op};margin-right:12px" title="${(a.description||"").replace(/"/g,"&quot;")}">${a.icon||"•"} ${a.name}${a.unlocked?"":" (bloqueada)"}</span>`;
+    }).join("") || "Nenhuma conquista cadastrada.";
+    const ol = document.getElementById("local-rank");
+    ol.innerHTML = (j.leaderboard||[]).map(x => `<li>#${x.rank} ${x.user_id} — ${x.xp} XP</li>`).join("") || "<li>Ranking vazio</li>";
+  } catch(e) {
+    const el = document.getElementById("achievements-list");
+    if (el) el.textContent = "Gamificação indisponível no momento.";
+  }
+})();
+</script>
+
+<div class="card" id="desafios-filtros" style="margin-bottom:18px">
+  <div class="inline" style="flex-wrap:wrap;gap:10px">
+    <input type="text" id="filtro-busca" placeholder="🔎 Buscar por título..." style="flex:2;min-width:180px">
+    <select id="filtro-categoria" style="flex:1;min-width:160px">
+      <option value="">Todas as categorias</option>
+      {% for cid, cname in categories.items() %}
+      <option value="{{ cid }}">{{ cname }}</option>
+      {% endfor %}
+    </select>
+    <select id="filtro-dificuldade" style="flex:1;min-width:140px">
+      <option value="">Todas as dificuldades</option>
+      {% for d in difficulties %}
+      <option value="{{ d }}">{{ d | capitalize }}</option>
+      {% endfor %}
+    </select>
+    <select id="filtro-status" style="flex:1;min-width:140px">
+      <option value="">Qualquer status</option>
+      <option value="concluido">✅ Resolvidos</option>
+      <option value="em_andamento">🚧 Em andamento</option>
+      <option value="novo">⚪ Não iniciados</option>
+    </select>
+  </div>
+  <p class="muted small" id="filtro-contagem" style="margin:10px 0 0"></p>
+</div>
+
+<div class="grid" id="desafios-grid">
+  {% for c in catalog %}
+  <div class="card site-card desafio-card"
+       data-title="{{ c.title | lower }}"
+       data-category="{{ c.category }}"
+       data-difficulty="{{ c.difficulty }}"
+       data-status="{{ c.status or 'novo' }}">
+    <p class="muted small">{{ categories.get(c.category, c.category) }} · <span class="badge">{{ c.difficulty }}</span> · <span class="badge">⭐ {{ c.xp }} XP</span></p>
+    <h3>{{ c.title }}</h3>
+    <p class="muted">{{ c.summary }}</p>
+    {% if c.status == "concluido" %}
+      <p style="color:#7CFFB2">✅ Resolvido ({{ c.attempts }} tentativa{{ "s" if c.attempts != 1 else "" }}) · +{{ c.xp }} XP</p>
+    {% elif c.status == "em_andamento" %}
+      <p class="muted small">🚧 Em andamento ({{ c.attempts }} tentativa{{ "s" if c.attempts != 1 else "" }})</p>
+    {% endif %}
+    <div class="card-actions">
+      {% if c.status == "concluido" %}
+        <a class="btn" href="{{ url_for('editor', slug=c.slug) }}">✏ Rever solução</a>
+        <form method="post" action="{{ url_for('desafio_iniciar', challenge_id=c.id) }}" style="display:inline" onsubmit="return confirm('Isso cria uma nova tentativa deste desafio do zero. Continuar?')">
+          <button class="btn small" type="submit">🔁 Tentar de novo</button>
+        </form>
+      {% elif c.status == "em_andamento" %}
+        <a class="btn primary" href="{{ url_for('editor', slug=c.slug) }}">▶ Continuar</a>
+      {% else %}
+        <form method="post" action="{{ url_for('desafio_iniciar', challenge_id=c.id) }}">
+          <button class="btn primary" type="submit">🚀 Iniciar desafio</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+<p class="muted" id="desafios-vazio" style="display:none">Nenhum desafio bate com esses filtros.</p>
+
+<script>
+// Filtro 100% no navegador: os cards já vêm todos renderizados pelo
+// Flask (mesmo endpoint /desafios de sempre) — isto só mostra/esconde,
+// não faz nenhuma requisição nova nem muda a lógica de progresso.
+(function () {
+  const cards = Array.from(document.querySelectorAll(".desafio-card"));
+  const busca = document.getElementById("filtro-busca");
+  const catSel = document.getElementById("filtro-categoria");
+  const difSel = document.getElementById("filtro-dificuldade");
+  const statusSel = document.getElementById("filtro-status");
+  const contagem = document.getElementById("filtro-contagem");
+  const vazio = document.getElementById("desafios-vazio");
+
+  function aplicar() {
+    const termo = busca.value.trim().toLowerCase();
+    const cat = catSel.value, dif = difSel.value, status = statusSel.value;
+    let visiveis = 0;
+    cards.forEach((card) => {
+      const bate = (!termo || card.dataset.title.includes(termo))
+        && (!cat || card.dataset.category === cat)
+        && (!dif || card.dataset.difficulty === dif)
+        && (!status || card.dataset.status === status);
+      card.style.display = bate ? "" : "none";
+      if (bate) visiveis++;
+    });
+    contagem.textContent = `${visiveis} de ${cards.length} desafio(s)`;
+    vazio.style.display = visiveis === 0 ? "" : "none";
+  }
+  [busca, catSel, difSel, statusSel].forEach((el) => {
+    el.addEventListener("input", aplicar);
+    el.addEventListener("change", aplicar);
+  });
+  aplicar();
+})();
+</script>
+{% endblock %}

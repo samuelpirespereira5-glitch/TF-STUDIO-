@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% block title %}Criar site · Tristan Thorne{% endblock %}
+{% block content %}
+<h1>✨ Criar site com IA</h1>
+<p class="muted">Preencha os dados do negócio. A IA gera um site completo — normalmente em menos de um minuto e meio, e você acompanha o tempo em tempo real abaixo do botão. Agora com mais estilos (incluindo <strong>Futurista/Cyberpunk</strong>), mais seções, fontes personalizadas e recursos extras.</p>
+
+{% if not has_key %}
+<div class="card warning-card">
+  ⚠ Configure ao menos uma chave de IA grátis (OpenRouter, Groq, Google AI Studio ou Cerebras) em
+  <a href="{{ url_for('settings') }}">Configurações</a> antes de gerar.
+</div>
+{% endif %}
+
+<div class="card chat-creator-card">
+  <h3>💬 Descreva seu negócio e deixe a IA preencher</h3>
+  <p class="muted small">Escreva numa frase como se estivesse contando pra um amigo. Ex: "Salão de beleza feminino em Curitiba, estilo elegante, com botão de WhatsApp e depoimentos de clientes".</p>
+  <textarea id="chat-creator-input" rows="3" placeholder="Conte sobre o seu negócio aqui..."></textarea>
+  <button type="button" class="btn primary" id="chat-creator-btn">✨ Preencher formulário com IA</button>
+  <div id="chat-creator-status" class="muted small" style="margin-top:8px"></div>
+</div>
+
+<form id="creator-form" class="card form-grid" enctype="multipart/form-data">
+  <div class="field">
+    <label>Nome do negócio *</label>
+    <div class="inline">
+      <input type="text" name="name" id="f-name" required>
+      <button type="button" class="btn small" data-ai="business-name">🎲 Sugerir</button>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Tipo de negócio</label>
+    <input type="text" name="type" placeholder="Ex: Salão de beleza, Restaurante, Loja de roupas...">
+  </div>
+
+  <div class="field">
+    <label>País / idioma do site</label>
+    <select name="country">
+      {% for c in countries %}<option value="{{ c }}" {{ 'selected' if c=='Brasil' }}>{{ c }}</option>{% endfor %}
+    </select>
+  </div>
+
+  <div class="field">
+    <label>WhatsApp (com DDI+DDD)</label>
+    <input type="text" name="whatsapp" placeholder="5511999999999">
+  </div>
+
+  <div class="field">
+    <label>Cidade / região</label>
+    <input type="text" name="city">
+  </div>
+
+  <div class="field">
+    <label>Instagram</label>
+    <input type="text" name="instagram" placeholder="https://instagram.com/seuusuario">
+  </div>
+
+  <div class="field">
+    <label>TikTok</label>
+    <input type="text" name="tiktok" placeholder="https://tiktok.com/@seuusuario">
+  </div>
+
+  <div class="field">
+    <label>Email</label>
+    <input type="email" name="email">
+  </div>
+
+  <div class="field">
+    <label>Endereço / Google Maps</label>
+    <input type="text" name="maps">
+  </div>
+
+  <div class="field full">
+    <label>Slogan</label>
+    <div class="inline">
+      <input type="text" name="slogan" id="f-slogan">
+      <button type="button" class="btn small" data-ai="slogan">🎲 Sugerir</button>
+    </div>
+  </div>
+
+  <div class="field full">
+    <label>Descrição do negócio</label>
+    <textarea name="description" id="f-description" rows="4"></textarea>
+    <button type="button" class="btn small" data-ai="improve-description" style="margin-top:6px">✨ Melhorar com IA</button>
+  </div>
+
+  <div class="field">
+    <label>Estilo visual</label>
+    <select name="style">{% for s in styles %}<option>{{ s }}</option>{% endfor %}</select>
+  </div>
+
+  <div class="field">
+    <label>Tema</label>
+    <select name="theme">{% for t in themes %}<option>{{ t }}</option>{% endfor %}</select>
+  </div>
+
+  <div class="field">
+    <label>Cor principal</label>
+    <input type="color" name="primary" value="#2563eb">
+  </div>
+
+  <div class="field">
+    <label>Cor secundária</label>
+    <input type="color" name="secondary" value="#06b6d4">
+  </div>
+
+  <div class="field">
+    <label>Cor de destaque (opcional)</label>
+    <input type="color" name="accent" value="#b026ff">
+    <p class="muted small" style="margin-top:2px">Usada só em detalhes, tipo estilos futuristas com efeito neon.</p>
+  </div>
+
+  <div class="field">
+    <label>Fonte</label>
+    <select name="font">{% for f in fonts %}<option>{{ f }}</option>{% endfor %}</select>
+  </div>
+
+  <div class="field full">
+    <label>Recursos extras</label>
+    <div class="checkbox-grid">
+      {% for value, label in extras %}
+      <label class="checkbox"><input type="checkbox" name="extras" value="{{ value }}"> {{ label }}</label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="field full">
+    <label>Seções do site</label>
+    <div class="checkbox-grid">
+      {% for s in sections %}
+      <label class="checkbox"><input type="checkbox" name="sections" value="{{ s }}" {{ 'checked' if loop.index<=5 }}> {{ s }}</label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Logo (opcional)</label>
+    <input type="file" name="logo" accept="image/*">
+  </div>
+
+  <div class="field">
+    <label>Imagem de capa (opcional)</label>
+    <input type="file" name="cover" accept="image/*">
+  </div>
+
+  <div class="field full">
+    <label>Galeria (opcional, até 8 imagens)</label>
+    <input type="file" name="gallery" accept="image/*" multiple>
+  </div>
+
+  <div class="field full">
+    <button type="submit" class="btn primary big" id="generate-btn">🤖 Gerar site com IA</button>
+    <div id="generate-progress-wrap" class="progress-wrap" style="display:none">
+      <div id="generate-progress-bar" class="progress-bar"></div>
+    </div>
+    <div id="generate-status" class="muted" style="margin-top:10px"></div>
+  </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ static_v('js/creator.js') }}"></script>
+{% endblock %}

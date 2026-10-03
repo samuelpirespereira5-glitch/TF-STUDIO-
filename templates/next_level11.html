@@ -1,0 +1,493 @@
+{% extends "base.html" %}
+{% block title %}IA & Temporadas — JARVIS{% endblock %}
+{% block content %}
+<style>
+.nl11{max-width:1100px;margin:0 auto;padding:16px 20px}
+.nl11 h1{font-size:1.6rem;margin:0 0 4px}
+.nl11 .muted{opacity:.7;font-size:.9rem}
+.nl11 .tabs{display:flex;flex-wrap:wrap;gap:6px;margin:16px 0}
+.nl11 .tab{padding:8px 14px;border-radius:999px;border:1px solid rgba(0,229,255,.25);background:rgba(0,20,40,.4);cursor:pointer;font-size:.85rem}
+.nl11 .tab.active{background:rgba(0,229,255,.2);border-color:#00e5ff;color:#00e5ff}
+.nl11 .panel{display:none;padding:16px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(5,12,24,.6)}
+.nl11 .panel.active{display:block}
+.nl11 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.nl11 .card{padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.25)}
+.nl11 .card h3{margin:0 0 6px;font-size:1rem}
+.nl11 button,.btn{padding:8px 14px;border-radius:8px;border:none;background:#00e5ff;color:#001018;font-weight:600;cursor:pointer;margin:2px 0}
+.nl11 button.ghost{background:transparent;border:1px solid rgba(0,229,255,.4);color:#00e5ff}
+.nl11 input,textarea,select{width:100%;padding:8px;margin:4px 0 10px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:#0a1520;color:#e0f7fa;box-sizing:border-box}
+.nl11 pre.out{background:#050a12;padding:10px;border-radius:8px;max-height:280px;overflow:auto;font-size:12px;white-space:pre-wrap}
+.nl11 .badge{display:inline-block;padding:2px 8px;border-radius:999px;background:rgba(0,229,255,.15);font-size:11px;margin-right:4px}
+.nl11 .algo-bar{display:inline-block;width:28px;margin:2px;background:#00e5ff;text-align:center;color:#001;font-size:11px;border-radius:4px 4px 0 0}
+</style>
+<div class="nl11">
+  <h1>🤖 IA & Temporadas</h1>
+  <p class="muted">Features da lista Claude (screenshots): Editor IA, co-op, mods, temporadas, tutor IA, simulados, portfólio, PWA e mais.</p>
+
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-p="jogos">🎮 Jogos</div>
+    <div class="tab" data-p="prog">💻 Programação</div>
+    <div class="tab" data-p="gami">🏆 Gamificação</div>
+    <div class="tab" data-p="cert">📜 Certificados</div>
+    <div class="tab" data-p="estudos">📚 Estudos</div>
+    <div class="tab" data-p="comu">🌐 Comunidade</div>
+    <div class="tab" data-p="infra">⚙️ Infra</div>
+    <div class="tab" data-p="mobile">📱 Mobile</div>
+  </div>
+
+  <!-- JOGOS -->
+  <div class="panel active" id="p-jogos">
+    <h2>Jogos</h2>
+    <div class="grid">
+      <div class="card" style="grid-column:1/-1">
+        <h3>🤖 Editor de IA — texto → jogo</h3>
+        <p class="muted">Ex: "crie um platformer com 3 fases de gelo"</p>
+        <textarea id="ai-desc" rows="3" placeholder="Descreva o jogo..."></textarea>
+        <button onclick="aiGen()">Gerar jogo</button>
+        <button class="ghost" onclick="aiList()">Meus jogos IA</button>
+        <pre class="out" id="ai-out"></pre>
+      </div>
+      <div class="card">
+        <h3>🤝 Co-op online (WebSocket)</h3>
+        <input id="coop-game" placeholder="game_id">
+        <button onclick="coopCreate()">Criar sala</button>
+        <input id="coop-room" placeholder="room_id para entrar">
+        <button class="ghost" onclick="coopJoin()">Entrar</button>
+        <button class="ghost" onclick="coopList()">Listar salas</button>
+        <pre class="out" id="coop-out"></pre>
+      </div>
+      <div class="card">
+        <h3>🧩 Sistema de Mods</h3>
+        <input id="mod-game" placeholder="game_id">
+        <input id="mod-title" placeholder="Título do mod">
+        <textarea id="mod-desc" rows="2" placeholder="Descrição"></textarea>
+        <button onclick="modPub()">Publicar mod</button>
+        <button class="ghost" onclick="modList()">Listar mods</button>
+        <pre class="out" id="mod-out"></pre>
+      </div>
+      <div class="card">
+        <h3>🌍 Ranking global cross-jogos</h3>
+        <input id="gr-game" placeholder="game_id" value="demo">
+        <input id="gr-score" type="number" placeholder="Score" value="100">
+        <button onclick="grAdd()">Registrar score</button>
+        <button class="ghost" onclick="grList()">Top ranking</button>
+        <pre class="out" id="gr-out"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROGRAMAÇÃO -->
+  <div class="panel" id="p-prog">
+    <h2>Programação</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>📅 Projeto do mês (hackathon)</h3>
+        <input id="pm-title" placeholder="Título do projeto">
+        <textarea id="pm-desc" rows="2" placeholder="Descrição"></textarea>
+        <button onclick="pmCreate()">Criar projeto</button>
+        <button class="ghost" onclick="pmList()">Listar</button>
+        <pre class="out" id="pm-out"></pre>
+      </div>
+      <div class="card" style="grid-column:span 2">
+        <h3>✨ Linter / boas práticas em tempo real</h3>
+        <textarea id="lint-code" rows="6" placeholder="Cole código Python..."></textarea>
+        <button onclick="doLint()">Analisar</button>
+        <pre class="out" id="lint-out"></pre>
+      </div>
+      <div class="card">
+        <h3>🎤 Entrevista técnica simulada</h3>
+        <select id="int-level">
+          <option value="junior">Junior</option>
+          <option value="pleno">Pleno</option>
+          <option value="senior">Senior</option>
+        </select>
+        <button onclick="intStart()">Iniciar</button>
+        <input id="int-sid" placeholder="session_id">
+        <input id="int-qid" placeholder="question_id">
+        <textarea id="int-ans" rows="2" placeholder="Sua resposta"></textarea>
+        <button class="ghost" onclick="intAnswer()">Enviar resposta</button>
+        <pre class="out" id="int-out"></pre>
+      </div>
+      <div class="card" style="grid-column:1/-1">
+        <h3>📊 Visualização de algoritmos (passo a passo)</h3>
+        <select id="algo-type">
+          <option value="bubble">Bubble Sort</option>
+          <option value="selection">Selection Sort</option>
+          <option value="binary">Binary Search</option>
+        </select>
+        <input id="algo-data" placeholder="Array (ex: 5,2,8,1,9)" value="5,2,8,1,9,3">
+        <button onclick="algoViz()">Gerar passos</button>
+        <button class="ghost" onclick="algoPlay()">▶ Animar</button>
+        <div id="algo-bars" style="margin:10px 0;min-height:80px"></div>
+        <pre class="out" id="algo-out"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAMIFICAÇÃO -->
+  <div class="panel" id="p-gami">
+    <h2>Gamificação</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>🏆 Temporadas (season pass)</h3>
+        <button onclick="seasonInfo()">Ver temporada atual</button>
+        <input id="sx-xp" type="number" value="50" placeholder="XP">
+        <button class="ghost" onclick="seasonXp()">Adicionar XP</button>
+        <pre class="out" id="season-out"></pre>
+      </div>
+      <div class="card">
+        <h3>🎯 Missões diárias / semanais</h3>
+        <button onclick="missionsLoad()">Carregar missões</button>
+        <input id="mis-id" placeholder="mission_id">
+        <select id="mis-scope"><option value="daily">daily</option><option value="weekly">weekly</option></select>
+        <button class="ghost" onclick="missionDone()">Completar</button>
+        <pre class="out" id="mis-out"></pre>
+      </div>
+      <div class="card">
+        <h3>💰 Apostas XP entre clãs</h3>
+        <input id="bet-clan" placeholder="clan_id">
+        <input id="bet-tn" placeholder="tournament_id">
+        <input id="bet-xp" type="number" value="50">
+        <button onclick="betPlace()">Apostar</button>
+        <button class="ghost" onclick="betList()">Listar apostas</button>
+        <pre class="out" id="bet-out"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- CERTIFICADOS -->
+  <div class="panel" id="p-cert">
+    <h2>Certificados</h2>
+    <div class="grid">
+      <div class="card" style="grid-column:1/-1">
+        <h3>📜 Certificado com competências + LinkedIn</h3>
+        <input id="cert-name" placeholder="Seu nome">
+        <input id="cert-track" placeholder="Trilha (ex: Python Avançado)">
+        <input id="cert-skills" placeholder="Skills separadas por vírgula (ex: OOP, Flask, Algoritmos)">
+        <input id="cert-score" type="number" value="85">
+        <button onclick="certIssue()">Emitir certificado</button>
+        <button class="ghost" onclick="certMine()">Meus certificados</button>
+        <pre class="out" id="cert-out"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ESTUDOS -->
+  <div class="panel" id="p-estudos">
+    <h2>Estudos</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>🧠 Tutor IA — plano personalizado</h3>
+        <input id="plan-known" placeholder="O que você já sabe (vírgula)">
+        <input id="plan-goal" placeholder="Objetivo">
+        <button onclick="planGen()">Gerar plano</button>
+        <pre class="out" id="plan-out"></pre>
+      </div>
+      <div class="card">
+        <h3>⏱️ Simulado cronometrado</h3>
+        <input id="sim-topic" placeholder="Tópico (python, algoritmos, geral)" value="python">
+        <input id="sim-min" type="number" value="20">
+        <button onclick="simCreate()">Criar simulado</button>
+        <input id="sim-id" placeholder="sim_id">
+        <input id="sim-ans" placeholder="Respostas (ex: 1,2,0,1)">
+        <button class="ghost" onclick="simGrade()">Corrigir</button>
+        <pre class="out" id="sim-out"></pre>
+      </div>
+      <div class="card">
+        <h3>🗣️ Ensine para aprender</h3>
+        <input id="teach-topic" placeholder="Tópico explicado">
+        <textarea id="teach-tr" rows="2" placeholder="Transcrição ou resumo"></textarea>
+        <button onclick="teachSub()">Enviar gravação</button>
+        <button class="ghost" onclick="teachList()">Listar</button>
+        <pre class="out" id="teach-out"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMUNIDADE -->
+  <div class="panel" id="p-comu">
+    <h2>Comunidade</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>📡 Eventos ao vivo</h3>
+        <input id="ev-title" placeholder="Título do evento">
+        <select id="ev-kind"><option value="chat">Chat</option><option value="video">Vídeo</option><option value="workshop">Workshop</option></select>
+        <button onclick="evCreate()">Agendar</button>
+        <button class="ghost" onclick="evList()">Listar</button>
+        <pre class="out" id="ev-out"></pre>
+      </div>
+      <div class="card">
+        <h3>⭐ Reputação na comunidade</h3>
+        <button onclick="repGet()">Minha reputação</button>
+        <input id="rep-pts" type="number" value="10">
+        <input id="rep-reason" placeholder="Motivo">
+        <button class="ghost" onclick="repAdd()">Adicionar pts</button>
+        <pre class="out" id="rep-out"></pre>
+      </div>
+      <div class="card">
+        <h3>🔗 Portfólio público</h3>
+        <input id="port-name" placeholder="Nome de exibição">
+        <button onclick="portExport()">Gerar link público</button>
+        <input id="port-slug" placeholder="slug para ver">
+        <button class="ghost" onclick="portGet()">Ver portfólio</button>
+        <pre class="out" id="port-out"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- INFRA -->
+  <div class="panel" id="p-infra">
+    <h2>Infra / Qualidade</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>💾 Backup export/import</h3>
+        <button onclick="bakExport()">Exportar conta</button>
+        <input id="bak-token" placeholder="token do backup">
+        <button class="ghost" onclick="bakImport()">Importar</button>
+        <pre class="out" id="bak-out"></pre>
+      </div>
+      <div class="card">
+        <h3>🎨 Temas / dark mode</h3>
+        <select id="theme-sel">
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+          <option value="neon">Neon</option>
+          <option value="cyber">Cyber</option>
+        </select>
+        <button onclick="themeSet()">Aplicar tema</button>
+        <button class="ghost" onclick="themeGet()">Ver tema</button>
+        <pre class="out" id="theme-out"></pre>
+      </div>
+      <div class="card">
+        <h3>📈 Analytics admin</h3>
+        <button onclick="analyticsLoad()">Painel</button>
+        <pre class="out" id="analytics-out"></pre>
+      </div>
+      <div class="card">
+        <h3>🌐 i18n PT/EN</h3>
+        <select id="i18n-lang"><option value="pt">Português</option><option value="en">English</option></select>
+        <button onclick="i18nLoad()">Carregar strings</button>
+        <pre class="out" id="i18n-out"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOBILE -->
+  <div class="panel" id="p-mobile">
+    <h2>Mobile / PWA</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>🔔 Notificações push</h3>
+        <p class="muted">Registra subscription para lembretes de streak / nova missão.</p>
+        <input id="push-ep" placeholder="endpoint (opcional)">
+        <button onclick="pushReg()">Registrar push</button>
+        <button class="ghost" onclick="pushList()">Ver targets</button>
+        <pre class="out" id="push-out"></pre>
+      </div>
+      <div class="card">
+        <h3>📱 PWA</h3>
+        <p class="muted">O projeto já possui manifest.webmanifest e service worker. Este nível adiciona hooks de push e tema para mobile.</p>
+        <button onclick="overview()">Overview Nível 11</button>
+        <pre class="out" id="ov-out"></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const tabs=document.querySelectorAll('.nl11 .tab');
+tabs.forEach(t=>t.onclick=()=>{
+  tabs.forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  document.querySelectorAll('.nl11 .panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('p-'+t.dataset.p).classList.add('active');
+});
+
+async function j(url, opts){
+  const r=await fetch(url, opts||{});
+  return r.json();
+}
+function show(id, data){ document.getElementById(id).textContent = JSON.stringify(data, null, 2); }
+
+// Jogos
+async function aiGen(){
+  const body={description:document.getElementById('ai-desc').value};
+  show('ai-out', await j('/api/nl11/ai-game',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}));
+}
+async function aiList(){ show('ai-out', await j('/api/nl11/ai-game')); }
+async function coopCreate(){
+  show('coop-out', await j('/api/nl11/coop',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({game_id:document.getElementById('coop-game').value})}));
+}
+async function coopJoin(){
+  const rid=document.getElementById('coop-room').value;
+  show('coop-out', await j('/api/nl11/coop/'+rid+'/join',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}));
+}
+async function coopList(){ show('coop-out', await j('/api/nl11/coop')); }
+async function modPub(){
+  show('mod-out', await j('/api/nl11/mods',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    game_id:document.getElementById('mod-game').value,
+    title:document.getElementById('mod-title').value,
+    description:document.getElementById('mod-desc').value
+  })}));
+}
+async function modList(){ show('mod-out', await j('/api/nl11/mods')); }
+async function grAdd(){
+  show('gr-out', await j('/api/nl11/global-rank',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    game_id:document.getElementById('gr-game').value,
+    score:parseInt(document.getElementById('gr-score').value||0)
+  })}));
+}
+async function grList(){ show('gr-out', await j('/api/nl11/global-rank')); }
+
+// Prog
+async function pmCreate(){
+  show('pm-out', await j('/api/nl11/month-project',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    title:document.getElementById('pm-title').value,
+    description:document.getElementById('pm-desc').value
+  })}));
+}
+async function pmList(){ show('pm-out', await j('/api/nl11/month-project')); }
+async function doLint(){
+  show('lint-out', await j('/api/nl11/lint',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:document.getElementById('lint-code').value})}));
+}
+async function intStart(){
+  show('int-out', await j('/api/nl11/interview',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({level:document.getElementById('int-level').value})}));
+}
+async function intAnswer(){
+  show('int-out', await j('/api/nl11/interview/answer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    session_id:document.getElementById('int-sid').value,
+    question_id:document.getElementById('int-qid').value,
+    answer:document.getElementById('int-ans').value
+  })}));
+}
+let _algoSteps=[], _algoIdx=0;
+async function algoViz(){
+  const raw=document.getElementById('algo-data').value.split(',').map(x=>parseInt(x.trim())).filter(x=>!isNaN(x));
+  const res=await j('/api/nl11/algo-viz',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    algo:document.getElementById('algo-type').value, data:raw
+  })});
+  _algoSteps=res.steps||[]; _algoIdx=0;
+  show('algo-out', res);
+  renderAlgoBars(res.initial||raw);
+}
+function renderAlgoBars(arr){
+  const max=Math.max(...arr,1);
+  document.getElementById('algo-bars').innerHTML=arr.map(v=>`<span class="algo-bar" style="height:${20+v/max*60}px">${v}</span>`).join('');
+}
+function algoPlay(){
+  if(!_algoSteps.length) return;
+  _algoIdx=0;
+  const tick=()=>{
+    if(_algoIdx>=_algoSteps.length) return;
+    const s=_algoSteps[_algoIdx++];
+    if(s.array) renderAlgoBars(s.array);
+    document.getElementById('algo-out').textContent=JSON.stringify(s,null,2);
+    setTimeout(tick, 350);
+  };
+  tick();
+}
+
+// Gami
+async function seasonInfo(){ show('season-out', await j('/api/nl11/season')); }
+async function seasonXp(){
+  show('season-out', await j('/api/nl11/season/xp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({xp:parseInt(document.getElementById('sx-xp').value||0)})}));
+}
+async function missionsLoad(){ show('mis-out', await j('/api/nl11/missions')); }
+async function missionDone(){
+  show('mis-out', await j('/api/nl11/missions/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    mission_id:document.getElementById('mis-id').value,
+    scope:document.getElementById('mis-scope').value
+  })}));
+}
+async function betPlace(){
+  show('bet-out', await j('/api/nl11/clan-bet',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    clan_id:document.getElementById('bet-clan').value,
+    tournament_id:document.getElementById('bet-tn').value,
+    amount_xp:parseInt(document.getElementById('bet-xp').value||0)
+  })}));
+}
+async function betList(){ show('bet-out', await j('/api/nl11/clan-bet')); }
+
+// Cert
+async function certIssue(){
+  const skills=document.getElementById('cert-skills').value.split(',').map(s=>s.trim()).filter(Boolean);
+  show('cert-out', await j('/api/nl11/cert/issue',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    user_name:document.getElementById('cert-name').value,
+    track:document.getElementById('cert-track').value,
+    skills, score:parseFloat(document.getElementById('cert-score').value||80)
+  })}));
+}
+async function certMine(){ show('cert-out', await j('/api/nl11/cert/mine')); }
+
+// Estudos
+async function planGen(){
+  const known=document.getElementById('plan-known').value.split(',').map(s=>s.trim()).filter(Boolean);
+  show('plan-out', await j('/api/nl11/study-plan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    known_topics:known, goal:document.getElementById('plan-goal').value
+  })}));
+}
+async function simCreate(){
+  show('sim-out', await j('/api/nl11/simulado',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    topic:document.getElementById('sim-topic').value,
+    minutes:parseInt(document.getElementById('sim-min').value||20)
+  })}));
+}
+async function simGrade(){
+  const answers=document.getElementById('sim-ans').value.split(',').map(x=>parseInt(x.trim()));
+  show('sim-out', await j('/api/nl11/simulado/grade',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    sim_id:document.getElementById('sim-id').value, answers
+  })}));
+}
+async function teachSub(){
+  show('teach-out', await j('/api/nl11/teach',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    topic:document.getElementById('teach-topic').value,
+    transcript:document.getElementById('teach-tr').value
+  })}));
+}
+async function teachList(){ show('teach-out', await j('/api/nl11/teach')); }
+
+// Comu
+async function evCreate(){
+  show('ev-out', await j('/api/nl11/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    title:document.getElementById('ev-title').value,
+    kind:document.getElementById('ev-kind').value
+  })}));
+}
+async function evList(){ show('ev-out', await j('/api/nl11/events')); }
+async function repGet(){ show('rep-out', await j('/api/nl11/reputation')); }
+async function repAdd(){
+  show('rep-out', await j('/api/nl11/reputation',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    points:parseInt(document.getElementById('rep-pts').value||0),
+    reason:document.getElementById('rep-reason').value
+  })}));
+}
+async function portExport(){
+  show('port-out', await j('/api/nl11/portfolio',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    display_name:document.getElementById('port-name').value
+  })}));
+}
+async function portGet(){
+  const slug=document.getElementById('port-slug').value;
+  show('port-out', await j('/api/nl11/portfolio/'+slug));
+}
+
+// Infra
+async function bakExport(){ show('bak-out', await j('/api/nl11/backup/export',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'})); }
+async function bakImport(){
+  show('bak-out', await j('/api/nl11/backup/import',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:document.getElementById('bak-token').value})}));
+}
+async function themeSet(){
+  show('theme-out', await j('/api/nl11/theme',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({theme:document.getElementById('theme-sel').value})}));
+}
+async function themeGet(){ show('theme-out', await j('/api/nl11/theme')); }
+async function analyticsLoad(){ show('analytics-out', await j('/api/nl11/analytics')); }
+async function i18nLoad(){ show('i18n-out', await j('/api/nl11/i18n?lang='+document.getElementById('i18n-lang').value)); }
+
+// Mobile
+async function pushReg(){
+  show('push-out', await j('/api/nl11/push',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({endpoint:document.getElementById('push-ep').value})}));
+}
+async function pushList(){ show('push-out', await j('/api/nl11/push')); }
+async function overview(){ show('ov-out', await j('/api/nl11/overview')); }
+</script>
+{% endblock %}

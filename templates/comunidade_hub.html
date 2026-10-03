@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Comunidade — JARVIS{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ static_v('css/community-space.css') }}">{% endblock %}
+{% block content %}
+<div class="community-shell">
+  <section class="community-hero">
+    <div><div class="eyebrow">JARVIS COMMUNITY SPACE</div><h1>Comunidade, grupos e clãs</h1><p>Uma área social separada do Game Lab. Crie seu espaço, monte seu clã, compartilhe projetos e encontre pessoas com os mesmos interesses.</p></div>
+    <div class="hero-actions"><a class="btn primary" href="{{ url_for('community_spaces_page') }}">＋ Criar comunidade / clã</a><a class="btn ghost" href="{{ url_for('next_level11_page') }}">Eventos e temporadas</a></div>
+  </section>
+  <div id="communityAlert" class="form-error hidden"></div>
+  <section id="profileCard" class="community-profile"></section>
+  <section class="community-grid four" id="stats"></section>
+  <section class="community-layout">
+    <main>
+      <div class="section-head"><div><h2>📰 Seu feed</h2><p>Publicações dos espaços dos quais você participa.</p></div><button class="btn ghost" id="refreshFeed">Atualizar</button></div>
+      <div id="feed" class="feed-list"></div>
+    </main>
+    <aside>
+      <section class="community-card"><div class="section-head"><h3>🌐 Minhas comunidades</h3><a href="{{ url_for('community_spaces_page') }}">Ver tudo</a></div><div id="communities"></div></section>
+      <section class="community-card"><div class="section-head"><h3>⚔️ Meus clãs</h3><a href="{{ url_for('community_spaces_page') }}">Gerenciar</a></div><div id="clans"></div></section>
+    </aside>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ static_v('js/community-space.js') }}"></script>{% endblock %}
